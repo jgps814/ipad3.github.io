@@ -2,13 +2,19 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>自訂搜尋結果頁</title>
+  <title>Google CSE 自訂搜尋頁</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- ✅ 這是你自己的 CSE ID -->
   <script async src="https://cse.google.com/cse.js?cx=75df8aba2a7874fd9"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
+      background-color: #f9f9f9;
+    }
+    h2 {
+      color: #333;
     }
     #cse_container {
       margin-top: 30px;
@@ -16,9 +22,9 @@
   </style>
 </head>
 <body>
-  <h2>🔍 搜尋結果</h2>
+  <h2>🔍 自訂搜尋引擎整合版</h2>
   <div id="cse_container">
-    <div class="gcse-searchresults-only"></div>
+    <div class="gcse-search"></div>
   </div>
 </body>
-</html
+</html>
