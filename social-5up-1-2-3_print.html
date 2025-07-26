@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>杜克骨牌視覺化模擬</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .domino-card {
+            width: 100%;
+            max-width: 300px; /* Adjust max-width for better visual on larger screens */
+            height: 200px; /* Fixed height for consistent look */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1rem;
+            border-radius: 0.75rem; /* rounded-lg */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-md */
+            text-align: center;
+            border: 2px solid;
+            transition: transform 0.2s ease-in-out;
+        }
+        .domino-card:hover {
+            transform: translateY(-5px);
+        }
+        .domino-icon {
+            font-size: 3rem;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        .domino-name {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 700; /* font-bold */
+            margin-bottom: 0.5rem;
+        }
+        .domino-desc {
+            font-size: 0.875rem; /* text-sm */
+            color: #4b5563; /* gray-700 */
+            flex-grow: 1; /* Allow description to take available space */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .beinan-bg { background-color: #E0F2F7; border-color: #00A0B0; }
+        .shisanhang-bg { background-color: #FDE8E1; border-color: #EB6841; }
+        .general-bg { background-color: #FFFBEB; border-color: #EDC951; }
+        .beinan-text { color: #00A0B0; }
+        .shisanhang-text { color: #EB6841; }
+        .general-text { color: #EDC951; }
+    </style>
+</head>
+<body class="p-8">
+
+    <header class="text-center mb-12">
+        <h1 class="text-4xl font-black text-gray-800 mb-4">杜克骨牌模擬展示</h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">以下是根據卑南文化、十三行文化及通用概念設計的骨牌樣式。每張骨牌都包含名稱、簡要說明和代表性圖示，並以顏色區分文化歸屬。</p>
+    </header>
+
+    <section class="mb-12">
+        <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">卑南文化骨牌 (新石器時代晚期)</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+            
+            <div class="domino-card beinan-bg">
+                <div class="domino-icon beinan-text">🏡</div>
+                <div class="domino-name beinan-text">大型聚落</div>
+                <div class="domino-desc">臺灣史上發現最大的史前聚落，顯示高度組織化的社會。</div>
+            </div>
+
+            <div class="domino-card beinan-bg">
+                <div class="domino-icon beinan-text">⚰️</div>
+                <div class="domino-name beinan-text">石板棺</div>
+                <div class="domino-desc">嚴謹的埋葬儀式，將逝者葬於石板構成的棺木中。</div>
+            </div>
+
+            <div class="domino-card beinan-bg">
+                <div class="domino-icon beinan-text">💎</div>
+                <div class="domino-name beinan-text">人獸形玉玦</div>
+                <div class="domino-desc">精湛玉器工藝的代表，為國立臺灣史前文化博物館館徽。</div>
+            </div>
+
+            <div class="domino-card beinan-bg">
+                <div class="domino-icon beinan-text">✨</div>
+                <div class="domino-name beinan-text">玉器工藝</div>
+                <div class="domino-desc">製作精美的玉製飾品與工具，可能已有專業玉匠。</div>
+            </div>
+
+            <div class="domino-card beinan-bg">
+                <div class="domino-icon beinan-text">🌾</div>
+                <div class="domino-name beinan-text">旱稻與小米</div>
+                <div class="domino-desc">主要農作物，以「山田燒墾」方式開闢田地。</div>
+            </div>
+
+            <div class="domino-card beinan-bg">
+                <div class="domino-icon beinan-text">🍚</div>
+                <div class="domino-name beinan-text">高架穀倉</div>
+                <div class="domino-desc">帶有防鼠板的儲糧設施，顯示農業儲存技術。</div>
+            </div>
+
+            <div class="domino-card beinan-bg">
+                <div class="domino-icon beinan-text">🏺</div>
+                <div class="domino-name beinan-text">橙色素面陶</div>
+                <div class="domino-desc">日常生活中普遍使用的手製陶器，火侯較低，少有紋飾。</div>
+            </div>
+
+            <div class="domino-card beinan-bg">
+                <div class="domino-icon beinan-text">🌐</div>
+                <div class="domino-name beinan-text">區域性玉器貿易</div>
+                <div class="domino-desc">玉器可能透過貿易網絡流通於環太平洋和東南亞地區。</div>
+            </div>
+
+            <div class="domino-card beinan-bg">
+                <div class="domino-icon beinan-text">⚔️</div>
+                <div class="domino-name beinan-text">獵頭習俗</div>
+                <div class="domino-desc">遺址中發現無頭遺骸，可能反映部落間戰爭。</div>
+            </div>
+
+            <div class="domino-card beinan-bg">
+                <div class="domino-icon beinan-text">🏘️</div>
+                <div class="domino-name beinan-text">定居生活</div>
+                <div class="domino-desc">聚落規模龐大且格局嚴謹，顯示長期定居。</div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="mb-12">
+        <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">十三行文化骨牌 (金屬器時代)</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+
+            <div class="domino-card shisanhang-bg">
+                <div class="domino-icon shisanhang-text">🔥</div>
+                <div class="domino-name shisanhang-text">煉鐵技術</div>
+                <div class="domino-desc">臺灣史前煉鐵技術的先驅，會製作鐵製生活用品。</div>
+            </div>
+
+            <div class="domino-card shisanhang-bg">
+                <div class="domino-icon shisanhang-text">💰</div>
+                <div class="domino-name shisanhang-text">漢人錢幣</div>
+                <div class="domino-desc">遺址中發現外來錢幣，證明與外界有頻繁貿易。</div>
+            </div>
+
+            <div class="domino-card shisanhang-bg">
+                <div class="domino-icon shisanhang-text">🐚</div>
+                <div class="domino-name shisanhang-text">貝塚</div>
+                <div class="domino-desc">大量食用河海貝類，堆積而成的遺址，顯示對海洋資源的依賴。</div>
+            </div>
+
+            <div class="domino-card shisanhang-bg">
+                <div class="domino-icon shisanhang-text">🏠</div>
+                <div class="domino-name shisanhang-text">干欄屋</div>
+                <div class="domino-desc">居住在木頭架高的房屋，以避免潮濕和野獸侵襲。</div>
+            </div>
+
+            <div class="domino-card shisanhang-bg">
+                <div class="domino-icon shisanhang-text">🧘</div>
+                <div class="domino-name shisanhang-text">側身屈肢葬</div>
+                <div class="domino-desc">主要的埋葬方式，逝者側身屈膝埋葬。</div>
+            </div>
+
+            <div class="domino-card shisanhang-bg">
+                <div class="domino-icon shisanhang-text">🎨</div>
+                <div class="domino-name shisanhang-text">雕花陶罐</div>
+                <div class="domino-desc">製作精美、帶有雕花紋飾的陶器。</div>
+            </div>
+
+            <div class="domino-card shisanhang-bg">
+                <div class="domino-icon shisanhang-text">🚢</div>
+                <div class="domino-name shisanhang-text">廣泛對外貿易</div>
+                <div class="domino-desc">與臺灣島內、大陸東南沿海及南洋地區有密切往來。</div>
+            </div>
+
+            <div class="domino-card shisanhang-bg">
+                <div class="domino-icon shisanhang-text">🌿</div>
+                <div class="domino-name shisanhang-text">檳榔與煙草</div>
+                <div class="domino-desc">人骨研究顯示可能常嚼食檳榔和煙草。</div>
+            </div>
+
+            <div class="domino-card shisanhang-bg">
+                <div class="domino-icon shisanhang-text">🌊</div>
+                <div class="domino-name shisanhang-text">河口聚落</div>
+                <div class="domino-desc">位於淡水河口南岸，充分利用河海資源。</div>
+            </div>
+
+            <div class="domino-card shisanhang-bg">
+                <div class="domino-icon shisanhang-text">🤝</div>
+                <div class="domino-name shisanhang-text">與平埔族相關</div>
+                <div class="domino-desc">考古專家推斷，其人種可能與凱達格蘭族有關。</div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="mb-12">
+        <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">通用或過渡骨牌設計</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+
+            <div class="domino-card general-bg">
+                <div class="domino-icon general-text">⛏️</div>
+                <div class="domino-name general-text">新石器時代</div>
+                <div class="domino-desc">農業萌芽、定居生活、磨製石器與陶器出現的時期。</div>
+            </div>
+
+            <div class="domino-card general-bg">
+                <div class="domino-icon general-text">⚙️</div>
+                <div class="domino-name general-text">金屬器時代</div>
+                <div class="domino-desc">開始使用金屬工具、技術進步、對外交流增加的時期。</div>
+            </div>
+
+            <div class="domino-card general-bg">
+                <div class="domino-icon general-text">🌱</div>
+                <div class="domino-name general-text">農業發展</div>
+                <div class="domino-desc">從採集漁獵到種植作物，食物生產方式的轉變。</div>
+            </div>
+
+            <div class="domino-card general-bg">
+                <div class="domino-icon general-text">📈</div>
+                <div class="domino-name general-text">社會複雜化</div>
+                <div class="domino-desc">聚落規模擴大、社會分工出現、階級分化萌芽。</div>
+            </div>
+
+            <div class="domino-card general-bg">
+                <div class="domino-icon general-text">💡</div>
+                <div class="domino-name general-text">技術革新</div>
+                <div class="domino-desc">工具、工藝和生產方式的重大突破。</div>
+            </div>
+
+            <div class="domino-card general-bg">
+                <div class="domino-icon general-text">🌍</div>
+                <div class="domino-name general-text">文化交流</div>
+                <div class="domino-desc">不同族群間透過貿易、遷徙等方式進行互動。</div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="text-center p-6 text-gray-600 mt-12">
+        <p>此為「杜克骨牌」的視覺化模擬，所有圖示皆為Unicode字符。</p>
+    </footer>
+
+</body>
+</html>
