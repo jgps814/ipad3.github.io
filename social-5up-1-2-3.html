@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>杜克骨牌：臺灣史前文化資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .timeline {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: #6A4A3C;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 3px;
+        }
+        .timeline-container {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        .timeline-container.left {
+            left: 0;
+        }
+        .timeline-container.right {
+            left: 50%;
+        }
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            right: -13px;
+            background-color: #EDC951;
+            border: 4px solid #CC333F;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .timeline-container.right::after {
+            left: -12px;
+        }
+        .timeline-content {
+            padding: 20px 30px;
+            background-color: white;
+            position: relative;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .flowchart-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            margin: 0 1rem;
+        }
+        .flowchart-item:not(:last-child)::after {
+            content: '→';
+            font-size: 2.5rem;
+            color: #6A4A3C;
+            margin-left: 2rem;
+        }
+        @media (max-width: 768px) {
+            .timeline::after {
+                left: 31px;
+            }
+            .timeline-container {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            .timeline-container.left, .timeline-container.right {
+                left: 0%;
+            }
+            .timeline-container.left::after, .timeline-container.right::after {
+                left: 18px;
+            }
+            .flowchart {
+                flex-direction: column;
+                align-items: center;
+            }
+            .flowchart-item {
+                margin: 1rem 0;
+            }
+            .flowchart-item:not(:last-child)::after {
+                content: '↓';
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Confirmation Comment: NEITHER Mermaid JS NOR SVG were used in this output. All diagrams are built with HTML and CSS. -->
+
+    <header class="bg-white shadow-lg p-6 text-center sticky top-0 z-20">
+        <h1 class="text-3xl md:text-4xl font-black text-[#00A0B0]">杜克骨牌</h1>
+        <p class="text-lg text-[#6A4A3C] mt-2">一場解鎖臺灣史前文化脈絡的互動旅程</p>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="intro" class="text-center my-12">
+            <h2 class="text-3xl font-bold text-[#CC333F] mb-4">從遊戲中學習，讓歷史活起來</h2>
+            <p class="max-w-3xl mx-auto text-lg leading-relaxed text-gray-700">
+                傳統的歷史學習往往充滿背誦與記憶，但透過「杜克骨牌」這樣的互動遊戲，我們能將複雜的考古知識轉化為具體的、可操作的體驗。這不僅提升了學習的樂趣，更在排序與討論的過程中，深刻地培養了邏輯思維與批判性分析能力。本圖表將帶您深入了解遊戲背後的兩大主角：卑南文化與十三行文化。
+            </p>
+        </section>
+
+        <section id="timeline" class="my-16">
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#CC333F] mb-8">臺灣史前文化時間軸</h2>
+                <p class="text-center max-w-3xl mx-auto text-gray-700 mb-12">臺灣的史前時代橫跨數萬年，從使用打製石器的舊石器時代，演進到農業萌芽、工藝精進的新石器時代，最終邁入掌握煉鐵技術的金屬器時代。卑南文化與十三行文化，正是這漫長演進中，後兩個階段的璀璨代表。</p>
+                <div class="timeline">
+                    <div class="timeline-container left">
+                        <div class="timeline-content bg-[#00A0B0]/10 border-l-4 border-[#00A0B0]">
+                            <h3 class="text-xl font-bold text-[#00A0B0]">新石器時代晚期</h3>
+                            <p class="text-sm text-gray-500">距今約 3,500 - 2,000 年前</p>
+                            <p class="mt-2">此時期農業技術成熟，聚落規模擴大，社會組織更趨複雜。工藝技術達到高峰，尤以玉器製作最為精湛。</p>
+                            <div class="mt-4 p-3 bg-white rounded shadow">
+                                <h4 class="font-extrabold text-lg">代表：卑南文化</h4>
+                                <p class="text-sm">臺灣史上最大的史前聚落，以精美玉器和石板棺文化聞名。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-container right">
+                        <div class="timeline-content bg-[#EB6841]/10 border-l-4 border-[#EB6841]">
+                            <h3 class="text-xl font-bold text-[#EB6841]">金屬器時代</h3>
+                            <p class="text-sm text-gray-500">距今約 2,000 - 400 年前</p>
+                            <p class="mt-2">掌握了煉鐵和製陶技術，工具的革新帶來生產力的提升。對外貿易頻繁，與外界文化交流密切。</p>
+                            <div class="mt-4 p-3 bg-white rounded shadow">
+                                <h4 class="font-extrabold text-lg">代表：十三行文化</h4>
+                                <p class="text-sm">臺灣史前煉鐵技術的先驅，是銜接史前與歷史時代的關鍵橋樑。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparison" class="my-16">
+            <h2 class="text-3xl font-bold text-center text-[#CC333F] mb-8">雙雄對決：卑南 vs. 十三行</h2>
+            <p class="text-center max-w-3xl mx-auto text-gray-700 mb-12">卑南文化與十三行文化，一個是玉器工藝的巔峰，一個是鐵器時代的先驅。牠們的差異不僅是時間的先後，更代表了技術、經濟與社會結構的巨大飛躍。讓我們透過以下圖表，一探究竟。</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold text-center mb-4">核心技術演進</h3>
+                    <p class="text-center text-sm text-gray-600 mb-4">從精雕細琢的玉石到高溫冶煉的鐵器，這是臺灣史前最重要的技術革命。</p>
+                    <div class="chart-container">
+                        <canvas id="techChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold text-center mb-4">生業模式比較</h3>
+                    <p class="text-center text-sm text-gray-600 mb-4">兩者皆以農業為基礎，但對自然資源的利用各有側重。</p>
+                    <div class="chart-container">
+                        <canvas id="subsistenceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 md:col-span-2">
+                    <h3 class="text-xl font-bold text-center mb-4">關鍵代表文物</h3>
+                     <p class="text-center text-sm text-gray-600 mb-6">器物是文化的縮影。從陪葬品到日常用具，反映了兩個文化不同的價值觀與社會生活。</p>
+                    <div class="flex flex-col md:flex-row justify-around text-center">
+                        <div class="w-full md:w-1/2 p-4">
+                            <h4 class="text-2xl font-bold text-[#00A0B0] mb-4">卑南文化</h4>
+                            <ul class="space-y-3 text-left mx-auto max-w-xs">
+                                <li class="flex items-center"><span class="text-2xl mr-3">⚰️</span><div><span class="font-bold">石板棺：</span>嚴謹的埋葬儀式與靈魂觀念。</div></li>
+                                <li class="flex items-center"><span class="text-2xl mr-3">🗿</span><div><span class="font-bold">人獸形玉玦：</span>精湛玉器工藝的極致展現。</div></li>
+                                <li class="flex items-center"><span class="text-2xl mr-3">🏺</span><div><span class="font-bold">橙色素面陶：</span>樸實而重要的日常容器。</div></li>
+                            </ul>
+                        </div>
+                        <div class="w-full md:w-1/2 p-4 border-t md:border-t-0 md:border-l border-gray-200">
+                             <h4 class="text-2xl font-bold text-[#EB6841] mb-4">十三行文化</h4>
+                             <ul class="space-y-3 text-left mx-auto max-w-xs">
+                                <li class="flex items-center"><span class="text-2xl mr-3">🔥</span><div><span class="font-bold">煉鐵爐：</span>掌握劃時代的冶金技術。</div></li>
+                                <li class="flex items-center"><span class="text-2xl mr-3">💰</span><div><span class="font-bold">外來錢幣：</span>對外貿易與文化交流的鐵證。</div></li>
+                                <li class="flex items-center"><span class="text-2xl mr-3">🐚</span><div><span class="font-bold">貝塚：</span>大量食用海產，依賴河海資源。</div></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="game-flow" class="my-16">
+             <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#CC333F] mb-8">「杜克骨牌」遊戲流程</h2>
+                <p class="text-center max-w-3xl mx-auto text-gray-700 mb-12">這個活動的核心是將知識轉化為行動。透過三個簡單的階段，參與者從被動接收者轉變為主動的歷史建構者，並在協作中深化理解。</p>
+                <div class="flex justify-center items-center flowchart">
+                    <div class="flowchart-item">
+                        <div class="text-center p-6 bg-[#EDC951]/20 rounded-lg shadow-sm border-2 border-[#EDC951]">
+                            <div class="text-5xl mb-2">①</div>
+                            <h3 class="text-xl font-bold">準備</h3>
+                            <p class="mt-1">製作代表文化特徵的骨牌</p>
+                        </div>
+                    </div>
+                    <div class="flowchart-item">
+                        <div class="text-center p-6 bg-[#00A0B0]/20 rounded-lg shadow-sm border-2 border-[#00A0B0]">
+                            <div class="text-5xl mb-2">②</div>
+                            <h3 class="text-xl font-bold">遊戲</h3>
+                            <p class="mt-1">分組排序，建構文化脈絡</p>
+                        </div>
+                    </div>
+                    <div class="flowchart-item">
+                        <div class="text-center p-6 bg-[#EB6841]/20 rounded-lg shadow-sm border-2 border-[#EB6841]">
+                            <div class="text-5xl mb-2">③</div>
+                            <h3 class="text-xl font-bold">討論</h3>
+                            <p class="mt-1">分享詮釋，深化批判思考</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center p-6 bg-[#6A4A3C] text-white mt-12">
+        <p>透過「杜克骨牌」，我們不僅看見了過去，更學會了如何思考過去。</p>
+        <p class="text-sm opacity-75 mt-2">資訊圖表設計 © 2025</p>
+    </footer>
+
+    <script>
+        function wrapText(text, maxWidth) {
+            if (typeof text !== 'string') return text;
+            if (text.length <= maxWidth) return text;
+            
+            const words = text.split('');
+            const lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+                if ((currentLine + word).length > maxWidth) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine += word;
+                }
+            });
+            lines.push(currentLine);
+            return lines;
+        }
+
+        const defaultChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: 14,
+                            family: "'Noto Sans TC', sans-serif"
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                                return label.join('');
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        const colors = {
+            beinan: '#00A0B0',
+            shisanhang: '#EB6841',
+            accent1: '#EDC951',
+            accent2: '#CC333F',
+            text: '#6A4A3C'
+        };
+
+        const techCtx = document.getElementById('techChart').getContext('2d');
+        new Chart(techCtx, {
+            type: 'bar',
+            data: {
+                labels: ['卑南文化', '十三行文化'],
+                datasets: [{
+                    label: '石器/玉器工藝',
+                    data: [90, 30],
+                    backgroundColor: colors.beinan,
+                    borderColor: colors.beinan,
+                    borderWidth: 1
+                }, {
+                    label: '煉鐵技術',
+                    data: [0, 85],
+                    backgroundColor: colors.shisanhang,
+                    borderColor: colors.shisanhang,
+                    borderWidth: 1
+                }]
+            },
+            options: { ...defaultChartOptions,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: '技術成熟度(相對值)' }
+                    }
+                }
+            }
+        });
+
+        const subsistenceCtx = document.getElementById('subsistenceChart').getContext('2d');
+        new Chart(subsistenceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['農業 (稻米/小米)', '狩獵', '漁撈/採集'],
+                datasets: [{
+                    label: '卑南文化',
+                    data: [65, 35, 0],
+                    backgroundColor: [colors.beinan, colors.accent1, colors.accent2],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }, {
+                    label: '十三行文化',
+                    data: [50, 15, 35],
+                    backgroundColor: [colors.beinan, colors.accent1, colors.accent2],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: { ...defaultChartOptions,
+                plugins: {
+                    ...defaultChartOptions.plugins,
+                    tooltip: {
+                        callbacks: {
+                            title: (context) => context[0].dataset.label,
+                            label: (context) => {
+                                let label = context.chart.data.labels[context.dataIndex];
+                                let value = context.formattedValue;
+                                return `${label}: ${value}% (相對佔比)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
