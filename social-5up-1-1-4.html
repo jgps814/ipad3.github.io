@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飛羽之徑：臺灣候鳥中繼站互動學習體驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthly Harmony -->
+    <!-- Application Structure Plan: 本應用程式採用了分頁式儀表板結構，頂部設有清晰的導覽列，對應拼組活動中的四個「專家」主題：鳥類物種、重要棲地、生存威脅與保育行動。這種設計讓使用者能自由探索，符合現代網頁的非線性瀏覽習慣，同時也巧妙地反映了原始報告中的教學法結構。使用者可以直觀地在不同主題間切換，深入了解各個面向，最後透過綜合性的圖表與資訊，理解保護候鳥是一項需要各方知識協作的任務，完美呼應了拼組學習的核心精神。 -->
+    <!-- Visualization & Content Choices: 報告中的資訊被轉化為多種互動視覺元素：1) 鳥類物種：使用可篩選的卡片網格展示，點擊可查看詳情，此法便於比較與學習。2) 重要棲地：以風格化的臺灣地圖結合動態內容面板呈現，點擊地標即可更新資訊與甜甜圈圖，直觀地連結地理位置與生態數據。3) 生存威脅：利用水平長條圖量化「窗殺」的嚴重性，並以卡片補充其他威脅，使數據更具衝擊力。4) 保育行動：採雙欄佈局區分政策與個人行動，賦予使用者清晰的行動指南。所有圖表均使用Chart.js繪製於Canvas上，確保互動性與跨平台相容性。此設計旨在將靜態報告轉化為動態、易於吸收的學習工具，完全遵循無SVG/Mermaid的要求。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F4F1; /* Warm Neutral Background */
+        }
+        .nav-active {
+            background-color: #8D9B6A; /* Muted Green */
+            color: #FFFFFF;
+        }
+        .nav-inactive {
+            background-color: #FFFFFF;
+            color: #6B7280;
+            transition: all 0.3s;
+        }
+        .nav-inactive:hover {
+            background-color: #EAE3DD;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #EAE3DD;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .map-point {
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+        .map-point:hover {
+            transform: scale(1.2);
+        }
+        .map-point.active {
+             transform: scale(1.2);
+        }
+        .map-point.active .outer-circle {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(141, 155, 106, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(141, 155, 106, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(141, 155, 106, 0);
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-[#5A6F40]">飛羽之徑：臺灣候鳥中繼站</h1>
+            <p class="text-center text-gray-600 mt-1">一個關於遷徙、挑戰與守護的互動故事</p>
+        </div>
+    </header>
+
+    <nav class="bg-[#EAE3DD] py-4 shadow-inner">
+        <div id="nav-container" class="container mx-auto flex flex-wrap justify-center gap-2 md:gap-4 px-4">
+            <button data-target="species" class="nav-btn nav-active px-4 py-2 rounded-full font-semibold shadow">🐦 鳥類物種</button>
+            <button data-target="habitats" class="nav-btn nav-inactive px-4 py-2 rounded-full font-semibold shadow">🏞️ 重要棲地</button>
+            <button data-target="threats" class="nav-btn nav-inactive px-4 py-2 rounded-full font-semibold shadow">⚠️ 生存威脅</button>
+            <button data-target="conservation" class="nav-btn nav-inactive px-4 py-2 rounded-full font-semibold shadow">🛡️ 保育行動</button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="species" class="content-section active">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-[#8D9B6A]">認識飛羽大使</h2>
+                <p class="mt-2 text-gray-600 max-w-2xl mx-auto">臺灣是東亞-澳大利西亞遷徙路線上不可或缺的休息站，匯集了各式各樣的飛羽精靈。本區塊將帶您認識這些候鳥的多樣性與特徵，從迅猛的猛禽到優雅的水鳥。點擊下方的按鈕篩選不同類型的鳥類，或點擊鳥類卡片來深入了解牠們的特徵與故事。</p>
+            </div>
+            <div id="bird-filter-buttons" class="flex justify-center flex-wrap gap-3 mb-8">
+                <button class="bird-filter-btn bg-[#8D9B6A] text-white px-4 py-2 rounded-md shadow" data-filter="all">所有鳥類</button>
+                <button class="bird-filter-btn bg-white text-gray-700 px-4 py-2 rounded-md shadow" data-filter="猛禽">猛禽</button>
+                <button class="bird-filter-btn bg-white text-gray-700 px-4 py-2 rounded-md shadow" data-filter="水鳥">水鳥</button>
+                <button class="bird-filter-btn bg-white text-gray-700 px-4 py-2 rounded-md shadow" data-filter="燕鷗">燕鷗</button>
+            </div>
+            <div id="bird-gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            </div>
+        </section>
+
+        <section id="habitats" class="content-section">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-[#8D9B6A]">探索庇護所與中繼站</h2>
+                <p class="mt-2 text-gray-600 max-w-3xl mx-auto">臺灣的濕地、海岸與山脈為候鳥提供了重要的庇護。本區塊將引導您探索三個最具代表性的棲地：關渡、七股和墾丁，它們各自擁有獨特的生態系統與保育故事。點擊地圖上的地標，深入了解每個中繼站的生態意義與主要鳥種。</p>
+            </div>
+            <div class="flex flex-col lg:flex-row gap-8 items-start">
+                <div class="w-full lg:w-1/3 h-96 lg:h-[500px] bg-white rounded-lg shadow-lg p-4 flex items-center justify-center">
+                    <div class="relative w-full h-full">
+                        <div class="absolute top-0 left-0 w-full h-full bg-contain bg-no-repeat bg-center" style="background-image: url('https://placehold.co/400x600/EAE3DD/FFFFFF?text=TAIWAN');"></div>
+                        <div id="map-point-guandu" data-habitat="guandu" class="map-point absolute top-[15%] left-[60%]">
+                            <div class="outer-circle w-8 h-8 bg-[#8D9B6A] rounded-full flex items-center justify-center shadow-lg">
+                                <div class="inner-circle w-4 h-4 bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                        <div id="map-point-qigu" data-habitat="qigu" class="map-point absolute top-[50%] left-[20%]">
+                             <div class="outer-circle w-8 h-8 bg-[#8D9B6A] rounded-full flex items-center justify-center shadow-lg">
+                                <div class="inner-circle w-4 h-4 bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                        <div id="map-point-kenting" data-habitat="kenting" class="map-point absolute top-[80%] left-[35%]">
+                             <div class="outer-circle w-8 h-8 bg-[#8D9B6A] rounded-full flex items-center justify-center shadow-lg">
+                                <div class="inner-circle w-4 h-4 bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="habitat-info" class="w-full lg:w-2/3 p-6 bg-white rounded-lg shadow-lg">
+                </div>
+            </div>
+        </section>
+
+        <section id="threats" class="content-section">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-[#8D9B6A]">遷徙之路的危險</h2>
+                <p class="mt-2 text-gray-600 max-w-3xl mx-auto">候鳥的遷徙旅程充滿挑戰，許多威脅來自人類活動。本區塊將揭露這些飛羽大使面臨的困境，從明亮的窗戶到棲地的消失，了解這些威脅是保護牠們的第一步。下圖以視覺化方式呈現各種威脅的相對嚴重性，而資訊卡則提供更深入的說明。</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                <h3 class="text-xl font-bold text-center mb-4">臺灣候鳥面臨的主要威脅</h3>
+                <div class="chart-container">
+                    <canvas id="threatsChart"></canvas>
+                </div>
+            </div>
+            <div id="threat-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            </div>
+        </section>
+
+        <section id="conservation" class="content-section">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-[#8D9B6A]">成為天空的守護者</h2>
+                <p class="mt-2 text-gray-600 max-w-3xl mx-auto">保護候鳥需要政府、團體與個人的共同努力。本區塊將介紹臺灣支持保育的相關法規與政策，並提供我們每個人都能在日常生活中採取的具體行動。探索這些保育策略，看看我們能如何為這些遠道而來的客人，打造一個更友善的環境。</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 text-center">📜 政策與法規</h3>
+                    <div id="policy-list" class="space-y-4"></div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 text-center">❤️ 個人行動方案</h3>
+                    <div id="action-list" class="space-y-4"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-12 py-6">
+        <div class="container mx-auto text-center px-4">
+            <p>「飛羽之徑」互動學習體驗</p>
+            <p class="text-sm text-gray-400 mt-1">靈感源於拼組學習法，旨在提升大眾對候鳥保育的認識。</p>
+            <p class="text-xs text-gray-500 mt-4">本頁面為概念展示，資料來源於「飛羽之徑：臺灣候鳥中繼站的拼組學習體驗」報告。</p>
+        </div>
+    </footer>
+
+    <script>
+        const data = {
+            birds: [
+                { name: '遊隼', type: '猛禽', description: '世界上飛行速度最快的動物，俯衝時速可達320公里。以鳥類為主食，是頂級掠食者，其存在是生態系統健康的指標。', image: 'https://placehold.co/600x400/8D9B6A/FFFFFF?text=遊隼' },
+                { name: '灰面鵟鷹', type: '猛禽', description: '秋季過境臺灣的代表性猛禽，又稱「國慶鳥」，常在墾丁大量集結，形成壯觀的「鷹河」景象。', image: 'https://placehold.co/600x400/8D9B6A/FFFFFF?text=灰面鵟鷹' },
+                { name: '赤腹鷹', type: '猛禽', description: '體型較小的猛禽，與灰面鵟鷹同為秋季過境大軍的主力，其遷徙狀況是長期生態監測的重點。', image: 'https://placehold.co/600x400/8D9B6A/FFFFFF?text=赤腹鷹' },
+                { name: '黑面琵鷺', type: '水鳥', description: '國際級保育鳥種，臺灣是其全球最重要的度冬區，佔全球族群近六成。其族群變化是濕地健康狀況的「指標物種」。', image: 'https://placehold.co/600x400/A6B48D/FFFFFF?text=黑面琵鷺' },
+                { name: '諾氏鷸', type: '水鳥', description: '極度瀕危的物種，嘴部略為上翹是其特徵，在臺南將軍濕地有度冬紀錄，突顯了特定保護區的重要性。', image: 'https://placehold.co/600x400/A6B48D/FFFFFF?text=諾氏鷸' },
+                { name: '高蹺鴴', type: '水鳥', description: '擁有不成比例的粉紅色長腿，黑白分明的羽色相當醒目，常見於魚塭、濕地，是濕地生態的優雅點綴。', image: 'https://placehold.co/600x400/A6B48D/FFFFFF?text=高蹺鴴' },
+                { name: '琵嘴鴨', type: '水鳥', description: '擁有特殊的鏟狀大嘴，用以在水中濾食浮游生物，是常見的冬候鳥，展現了濕地多樣的覓食策略。', image: 'https://placehold.co/600x400/A6B48D/FFFFFF?text=琵嘴鴨' },
+                { name: '小水鴨', type: '水鳥', description: '臺灣可見體型最小的鴨子，飛行迅速，雄鳥頭部有漂亮的綠色眼罩，是濕地中的小型精靈。', image: 'https://placehold.co/600x400/A6B48D/FFFFFF?text=小水鴨' },
+                { name: '小燕鷗', type: '燕鷗', description: '體型嬌小的夏候鳥，會在海岸沙洲繁殖，對棲地干擾非常敏感，其繁殖成功率是海岸健康的指標。', image: 'https://placehold.co/600x400/BFCCB5/FFFFFF?text=小燕鷗' },
+                { name: '紅燕鷗', type: '燕鷗', description: '繁殖季時胸前會帶有淡淡的粉紅色，嘴及腳為朱紅色，是優雅的夏候鳥，其蹤跡為海洋生態增添浪漫色彩。', image: 'https://placehold.co/600x400/BFCCB5/FFFFFF?text=紅燕鷗' },
+            ],
+            habitats: {
+                guandu: {
+                    name: '關渡平原',
+                    description: '位於臺北盆地，是淡水河與基隆河交會的重要濕地。作為國際鳥盟認定的重要鳥類棲地，這裡是北臺灣水鳥度冬、過境的重要驛站，同時也是結合保育、教育、研究和休閒的「戶外自然博物館」。',
+                    keySpecies: '雁鴨、鷸鴴、鷺科',
+                    chartData: { labels: ['主要水鳥', '其他鳥類'], values: [85, 15] }
+                },
+                qigu: {
+                    name: '七股潟湖',
+                    description: '臺南七股是全球黑面琵鷺最重要的度冬地。廣大的潟湖、魚塭與泥灘地提供了豐富的食物來源。近年面臨「漁電共生」光電板開發帶來的棲地改變挑戰，凸顯了再生能源與生態保育間的複雜權衡。',
+                    keySpecies: '黑面琵鷺、鷸鴴',
+                    chartData: { labels: ['黑面琵鷺', '其他水鳥'], values: [60, 40] }
+                },
+                kenting: {
+                    name: '墾丁國家公園',
+                    description: '臺灣最南端的猛禽遷徙熱點。每年秋季，數以萬計的灰面鵟鷹、赤腹鷹在此集結南遷。此地從過去的盜獵熱點成功轉型為生態旅遊典範，展現了社區型保育的巨大潛力。',
+                    keySpecies: '灰面鵟鷹、赤腹鷹',
+                    chartData: { labels: ['主要猛禽', '其他鳥類'], values: [90, 10] }
+                }
+            },
+            threats: [
+                { name: '棲地喪失與退化', description: '因都市擴張、農地變更、濕地開發（如漁電共生）等因素，導致候鳥賴以為生的覓食與休息地持續縮減，是全球候鳥數量下降的主因。', icon: '🏗️' },
+                { name: '窗殺', description: '鳥類撞擊玻璃帷幕等人造物致死，是個常被低估卻嚴重的威脅，尤其在都市地區。臺灣每年估計有超過5000隻鳥類因此死亡。', icon: '🏢' },
+                { name: '塑膠污染', description: '海岸邊的塑膠垃圾容易被鳥類誤食，造成消化道阻塞、中毒甚至死亡。廢棄漁網也可能纏繞鳥類，導致其受傷或死亡。', icon: '🥤' },
+                { name: '非法狩獵與氣候變遷', description: '儘管反盜獵已有成效，但威脅依然存在。同時，極端氣候可能導致濕地環境惡化，引發肉毒桿菌等疾病爆發，威脅鳥類群體健康。', icon: '🎯' }
+            ],
+            conservation: {
+                policies: [
+                    { name: '野生動物保育法', description: '臺灣保育工作的最高法律框架，將受威脅物種分類保護，並對盜獵、買賣等行為訂有罰則，是系統性保育的基石。' },
+                    { name: '濕地明智利用', description: '透過政策引導，保護濕地的生態功能，確保其能持續作為候鳥及其他野生動物的家園，是國家級的保育策略。' },
+                    { name: '生態服務給付', description: '提供經濟誘因，鼓勵漁民在經營魚塭的同時，也能維持或營造對鳥類友善的覓食環境，創造人類生計與生態保育的雙贏。' },
+                    { name: '候鳥外交大使', description: '以黑面琵鷺的成功保育為例，展現臺灣在全球生物多樣性保育中的貢獻與角色，促進國際合作，提升國際形象。' }
+                ],
+                actions: [
+                    { name: '窗殺防治', description: '在窗戶上貼上防鳥撞的貼紙、懸掛繩索或安裝紗窗，簡單的動作就能拯救無數生命，是人人可行的保育行動。' },
+                    { name: '責任生態旅遊', description: '選擇對環境友善的旅遊方式，如參加賞鳥活動，能支持在地社區發展，讓保育成為一門「好生意」。' },
+                    { name: '支持保育組織', description: '透過捐款或擔任志工，支持如各地野鳥學會、關渡自然公園等團體的保育研究與教育工作，匯集民間力量。' },
+                    { name: '通報受傷鳥類', description: '若發現受傷或受困的鳥類，應立即通報當地縣市政府的動物保護處或相關救傷單位，切勿自行處理。' }
+                ]
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const navContainer = document.getElementById('nav-container');
+            const contentSections = document.querySelectorAll('.content-section');
+            const birdGallery = document.getElementById('bird-gallery');
+            const birdFilterButtons = document.getElementById('bird-filter-buttons');
+            const habitatInfoContainer = document.getElementById('habitat-info');
+            const mapPoints = document.querySelectorAll('.map-point');
+            const threatCardsContainer = document.getElementById('threat-cards');
+            const policyListContainer = document.getElementById('policy-list');
+            const actionListContainer = document.getElementById('action-list');
+
+            let threatsChartInstance = null;
+            let habitatChartInstance = null;
+
+            function switchTab(targetId) {
+                contentSections.forEach(section => {
+                    section.classList.toggle('active', section.id === targetId);
+                });
+                navContainer.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.toggle('nav-active', btn.dataset.target === targetId);
+                    btn.classList.toggle('nav-inactive', btn.dataset.target !== targetId);
+                });
+
+                if (targetId === 'threats' && !threatsChartInstance) {
+                    renderThreatsChart();
+                }
+            }
+
+            navContainer.addEventListener('click', (e) => {
+                if (e.target.matches('.nav-btn')) {
+                    switchTab(e.target.dataset.target);
+                }
+            });
+
+            function renderBirds(filter = 'all') {
+                birdGallery.innerHTML = '';
+                const filteredBirds = filter === 'all' ? data.birds : data.birds.filter(b => b.type === filter);
+                filteredBirds.forEach(bird => {
+                    const card = document.createElement('div');
+                    card.className = 'card rounded-lg shadow-md overflow-hidden cursor-pointer';
+                    card.innerHTML = `
+                        <img src="${bird.image}" alt="${bird.name}" class="w-full h-40 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg">${bird.name}</h3>
+                            <p class="text-sm text-gray-500">${bird.type}</p>
+                            <p class="text-gray-700 mt-2 text-sm hidden">${bird.description}</p>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => {
+                        card.querySelector('p.hidden').classList.toggle('hidden');
+                    });
+                    birdGallery.appendChild(card);
+                });
+            }
+
+            birdFilterButtons.addEventListener('click', e => {
+                if (e.target.matches('.bird-filter-btn')) {
+                    const filter = e.target.dataset.filter;
+                    renderBirds(filter);
+                    birdFilterButtons.querySelectorAll('button').forEach(btn => {
+                        btn.classList.toggle('bg-[#8D9B6A]', btn === e.target);
+                        btn.classList.toggle('text-white', btn === e.target);
+                        btn.classList.toggle('bg-white', btn !== e.target);
+                        btn.classList.toggle('text-gray-700', btn !== e.target);
+                    });
+                }
+            });
+
+            function renderHabitatInfo(habitatId) {
+                const habitat = data.habitats[habitatId];
+                habitatInfoContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-2">${habitat.name}</h3>
+                    <p class="text-gray-600 mb-4">${habitat.description}</p>
+                    <p class="font-semibold">主要可見鳥種：<span class="font-normal text-[#8D9B6A]">${habitat.keySpecies}</span></p>
+                    <div class="chart-container mt-4">
+                        <canvas id="habitatChart"></canvas>
+                    </div>
+                `;
+                if (habitatChartInstance) {
+                    habitatChartInstance.destroy();
+                }
+                const ctx = document.getElementById('habitatChart').getContext('2d');
+                habitatChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: habitat.chartData.labels,
+                        datasets: [{
+                            data: habitat.chartData.values,
+                            backgroundColor: ['#8D9B6A', '#EAE3DD'],
+                            borderColor: '#FFFFFF',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + '%';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            mapPoints.forEach(point => {
+                point.addEventListener('click', (e) => {
+                    const habitatId = e.currentTarget.dataset.habitat;
+                    renderHabitatInfo(habitatId);
+                    mapPoints.forEach(p => p.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                });
+            });
+
+            function renderThreatsChart() {
+                const ctx = document.getElementById('threatsChart').getContext('2d');
+                threatsChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['窗殺', '棲地喪失', '塑膠污染', '非法狩獵/氣候變遷'],
+                        datasets: [{
+                            label: '威脅相對嚴重性指標',
+                            data: [50, 45, 30, 25],
+                            backgroundColor: '#A6B48D',
+                            borderColor: '#8D9B6A',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: '註：此為相對嚴重性示意，非精確統計數據。'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.raw;
+                                        if (context.label === '窗殺') {
+                                            label += ' (每年估計>5000隻)';
+                                        }
+                                        return ' ' + label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            function renderThreatCards() {
+                threatCardsContainer.innerHTML = '';
+                data.threats.forEach(threat => {
+                    const card = document.createElement('div');
+                    card.className = 'card p-6 flex items-start gap-4';
+                    card.innerHTML = `
+                        <div class="text-3xl pt-1">${threat.icon}</div>
+                        <div>
+                            <h4 class="font-bold text-lg">${threat.name}</h4>
+                            <p class="text-gray-600 mt-1">${threat.description}</p>
+                        </div>
+                    `;
+                    threatCardsContainer.appendChild(card);
+                });
+            }
+
+            function renderConservationLists() {
+                policyListContainer.innerHTML = '';
+                actionListContainer.innerHTML = '';
+                data.conservation.policies.forEach(policy => {
+                    const item = document.createElement('div');
+                    item.className = 'p-4 border-l-4 border-[#8D9B6A] bg-[#F8F4F1] rounded';
+                    item.innerHTML = `
+                        <h4 class="font-bold">${policy.name}</h4>
+                        <p class="text-sm text-gray-600 mt-1">${policy.description}</p>
+                    `;
+                    policyListContainer.appendChild(item);
+                });
+
+                data.conservation.actions.forEach(action => {
+                    const item = document.createElement('div');
+                    item.className = 'p-4 border-l-4 border-[#A6B48D] bg-[#F8F4F1] rounded';
+                    item.innerHTML = `
+                        <h4 class="font-bold">${action.name}</h4>
+                        <p class="text-sm text-gray-600 mt-1">${action.description}</p>
+                    `;
+                    actionListContainer.appendChild(item);
+                });
+            }
+
+            renderBirds();
+            renderHabitatInfo('guandu');
+            document.getElementById('map-point-guandu').classList.add('active');
+            renderThreatCards();
+            renderConservationLists();
+        });
+    </script>
+</body>
+</html>
