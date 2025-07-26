@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊戲板：臺灣遷徙路線圖</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthly Harmony -->
+    <!-- Application Structure Plan: 此HTML文件旨在視覺化呈現「飛羽之徑」桌遊的遊戲板。它採用單頁結構，透過Tailwind CSS進行響應式佈局，將臺灣地圖作為核心視覺元素，並在其上疊加遷徙路線、重要棲地（關渡、七股、墾丁）和挑戰空間的標記。底部則設有圖例，解釋各標記的意義。這種設計直觀地將遊戲規則與地理資訊結合，便於使用者理解遊戲的空間概念。 -->
+    <!-- Visualization & Content Choices: 遊戲板以一張簡潔的臺灣地圖佔據中心位置，地圖本身使用佔位符圖片。地圖上的關鍵點（棲地）和路徑（遷徙路線）則透過HTML元素和Tailwind CSS進行定位和樣式設定，以避免使用SVG。點擊或互動功能在此靜態展示中不作實現，專注於清晰的視覺呈現。圖例則以文字和符號解釋板上元素。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F4F1; /* Warm Neutral Background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .game-board-container {
+            background-color: #FFFFFF;
+            border: 2px solid #EAE3DD;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .map-area {
+            position: relative;
+            width: 100%;
+            /* Maintain aspect ratio for the map, adjust height as needed */
+            padding-bottom: 120%; /* Adjust this value based on your map image aspect ratio (e.g., 600/400 = 150%) */
+            background-image: url('https://placehold.co/400x600/EAE3DD/FFFFFF?text=TAIWAN+MAP'); /* Placeholder for Taiwan map */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .map-point, .challenge-point {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            z-index: 10;
+            cursor: default;
+        }
+        .map-point {
+            background-color: #8D9B6A; /* Muted Green */
+            border: 2px solid #5A6F40;
+        }
+        .challenge-point {
+            background-color: #BFCCB5; /* Lighter Green */
+            border: 2px solid #8D9B6A;
+            color: #333;
+        }
+        .path {
+            position: absolute;
+            background-color: #A6B48D; /* Medium Green */
+            opacity: 0.6;
+            z-index: 5;
+            border-radius: 9999px; /* For rounded path ends */
+        }
+        /* Specific path styling - simplified for visual representation */
+        .path-1 { top: 18%; left: 55%; width: 5px; height: 30%; transform: rotate(15deg); transform-origin: top left; }
+        .path-2 { top: 40%; left: 30%; width: 5px; height: 30%; transform: rotate(-20deg); transform-origin: top right; }
+        .path-3 { top: 65%; left: 40%; width: 5px; height: 25%; transform: rotate(5deg); transform-origin: top left; }
+
+        @media (min-width: 768px) {
+            .map-area {
+                padding-bottom: 75%; /* Adjust for wider screens if map image changes */
+            }
+        }
+    </style>
+</head>
+<body class="selection:bg-[#A6B48D] selection:text-white">
+
+    <div class="game-board-container">
+        <h2 class="text-3xl font-bold text-[#5A6F40] mb-4">遊戲板：臺灣遷徙路線圖</h2>
+        <p class="text-gray-600 text-center mb-6 max-w-xl">此遊戲板將引導您的「保育幹部」棋子，穿越臺灣的候鳥遷徙路徑。您將在此地圖上應對挑戰並探索重要棲地。</p>
+
+        <div class="map-area">
+            <!-- 遷徙路徑 (簡化為線條) -->
+            <div class="path path-1" style="top: 15%; left: 60%; width: 5px; height: 30%; transform: rotate(15deg);"></div>
+            <div class="path path-2" style="top: 40%; left: 30%; width: 5px; height: 30%; transform: rotate(-20deg);"></div>
+            <div class="path path-3" style="top: 65%; left: 40%; width: 5px; height: 25%; transform: rotate(5deg);"></div>
+
+            <!-- 棲地空間 -->
+            <div class="map-point" style="top: 15%; left: 60%;">關渡</div>
+            <div class="map-point" style="top: 50%; left: 20%;">七股</div>
+            <div class="map-point" style="top: 80%; left: 35%;">墾丁</div>
+
+            <!-- 挑戰空間 (沿著虛擬路徑放置) -->
+            <div class="challenge-point" style="top: 25%; left: 65%;">⚠️</div>
+            <div class="challenge-point" style="top: 35%; left: 50%;">⚠️</div>
+            <div class="challenge-point" style="top: 45%; left: 35%;">⚠️</div>
+            <div class="challenge-point" style="top: 55%; left: 25%;">⚠️</div>
+            <div class="challenge-point" style="top: 65%; left: 30%;">⚠️</div>
+            <div class="challenge-point" style="top: 75%; left: 45%;">⚠️</div>
+        </div>
+
+        <div class="w-full mt-6 p-4 bg-[#F0EBE6] rounded-lg shadow-inner">
+            <h3 class="text-xl font-bold text-[#5A6F40] mb-3">圖例</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-[#8D9B6A] border-2 border-[#5A6F40] flex items-center justify-center text-white text-xs font-bold">棲</span>
+                    <span>棲地空間 (如關渡、七股、墾丁)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-[#BFCCB5] border-2 border-[#8D9B6A] flex items-center justify-center text-gray-800 text-xs font-bold">⚠️</span>
+                    <span>挑戰空間 (抽取威脅事件卡片)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-3 rounded-full bg-[#A6B48D] opacity-60"></span>
+                    <span>遷徙路徑</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center text-white text-xs font-bold">棋</span>
+                    <span>保育幹部棋子 (玩家棋子)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
