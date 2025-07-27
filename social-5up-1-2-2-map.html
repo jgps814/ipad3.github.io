@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>長濱文化：互動式生存挑戰模擬器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthy Harmony -->
+    <!-- Application Structure Plan: The application is designed as a three-part interactive journey. It starts with a foundational section ('Meet the Changbin People') to provide context. The core is the 'Survival Challenge Simulator,' which allows users to toggle hypothetical constraints ('No Fire,' 'No Sharp Tools') and instantly see the consequences via dynamically updated text and a radar chart visualizing survival metrics. This directly addresses the report's "If..., why?" concept. The final section ('Board Game Concept') deconstructs the proposed game, making the abstract rules tangible. This structure was chosen to guide the user from learning, to interactive exploration, to practical application, creating a more engaging and memorable educational flow than a linear report. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Historical context. Goal: Inform. Viz: HTML/CSS cards with icons. Interaction: Hover. Justification: Scannable and visually organized. Library: Tailwind.
+        - Report Info: "If...why?" scenarios. Goal: Compare/Relate. Viz: JS-powered toggles, dynamic text blocks, and a Chart.js radar chart. Interaction: Clicking toggles updates all related content. Justification: The radar chart provides an immediate, powerful visualization of how losing a technology impacts multiple facets of survival, making the connection between cause and effect clear. Library: Chart.js.
+        - Report Info: Board game mechanics. Goal: Organize. Viz: Tailwind grid with styled cards for roles, resources, and challenges. Interaction: Hover. Justification: Translates dense tables into a modern, dashboard-like layout that is easy to digest. Library: Tailwind.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+            color: #292524; /* stone-800 */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #7c2d12; /* amber-800 */
+            border-bottom-color: #7c2d12;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .toggle-btn {
+            transition: all 0.3s ease;
+            border: 2px solid #d6d3d1; /* stone-300 */
+        }
+        .toggle-btn.active {
+            background-color: #134e4a; /* teal-800 */
+            color: white;
+            border-color: #134e4a; /* teal-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-stone-100">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-amber-800">長濱文化思辨之旅</h1>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#intro" class="nav-link text-lg font-medium text-stone-600 pb-1 active">基礎認識</a>
+                    <a href="#simulator" class="nav-link text-lg font-medium text-stone-600 pb-1">生存模擬器</a>
+                    <a href="#game" class="nav-link text-lg font-medium text-stone-600 pb-1">桌遊概念</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-white border border-stone-300 rounded-md p-2 text-stone-700">
+                        <option value="intro">基礎認識</option>
+                        <option value="simulator">生存模擬器</option>
+                        <option value="game">桌遊概念</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <section id="intro" class="content-section active">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-4">探索史前臺灣的智慧</h2>
+                <p class="max-w-3xl mx-auto text-lg text-stone-600">
+                    歡迎來到長濱文化互動探索之旅。本頁面將帶您回到數萬年前的臺灣，認識已知最早的居民。您將透過互動模擬，體驗他們在嚴峻環境下的生存挑戰，並一窺如何將這些歷史思辨轉化為有趣的合作桌遊。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md card-hover">
+                    <h3 class="text-xl font-bold text-amber-800 mb-2 flex items-center">
+                        <span class="text-2xl mr-3">👤</span> 是誰？
+                    </h3>
+                    <p class="text-stone-700">一群生活在舊石器時代晚期的狩獵採集者，以數十人的小群體為單位，過著游牧生活。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md card-hover">
+                    <h3 class="text-xl font-bold text-amber-800 mb-2 flex items-center">
+                        <span class="text-2xl mr-3">🌍</span> 在哪？
+                    </h3>
+                    <p class="text-stone-700">主要活動於臺灣東海岸，以臺東長濱鄉的八仙洞海蝕洞為代表性遺址，面朝太平洋。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md card-hover">
+                    <h3 class="text-xl font-bold text-amber-800 mb-2 flex items-center">
+                        <span class="text-2xl mr-3">⏳</span> 何時？
+                    </h3>
+                    <p class="text-stone-700">距今約三萬年至五千年前。他們見證了冰河時期海平面的升降與環境的劇烈變遷。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md card-hover">
+                    <h3 class="text-xl font-bold text-amber-800 mb-2 flex items-center">
+                        <span class="text-2xl mr-3">🛠️</span> 如何生活？
+                    </h3>
+                    <p class="text-stone-700">使用敲擊製成的打製石器（石片器）與骨角器。他們狩獵、捕魚、採集維生，尚未發展農業。</p>
+                </div>
+            </div>
+             <div class="mt-8 bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 rounded-r-lg" role="alert">
+                <p class="font-bold">教學提示：關於「火」的歷史事實</p>
+                <p>考古證據（如八仙洞遺址的灰燼遺跡）顯示，長濱人已知用火。接下來模擬器中的「無火」情境，是一個為了探索火的重要性而設計的「思辨實驗」，而非歷史事實。</p>
+            </div>
+        </section>
+
+        <section id="simulator" class="content-section">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-4">生存挑戰模擬器</h2>
+                <p class="max-w-3xl mx-auto text-lg text-stone-600">
+                    「如果...，為什麼？」選擇一個挑戰情境，看看長濱人的生存會受到什麼影響，以及他們可能如何運用智慧來適應。
+                </p>
+            </div>
+            
+            <div class="flex justify-center items-center space-x-4 mb-8">
+                <button id="btn-base" class="toggle-btn px-4 py-2 rounded-full font-semibold active">基礎模式</button>
+                <button id="btn-noFire" class="toggle-btn px-4 py-2 rounded-full font-semibold">🔥 無火挑戰</button>
+                <button id="btn-noTools" class="toggle-btn px-4 py-2 rounded-full font-semibold">⛏️ 無利器挑戰</button>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 id="scenario-title" class="text-2xl font-bold text-amber-800 mb-4">基礎生存模式</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold text-stone-800 mb-2">🔴 主要挑戰</h4>
+                                <ul id="challenges-list" class="list-disc list-inside space-y-2 text-stone-700">
+                                    <li>應對多變的氣候</li>
+                                    <li>確保穩定的食物來源</li>
+                                    <li>防禦掠食性動物</li>
+                                    <li>製作有效的工具</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-stone-800 mb-2">🟢 適應策略</h4>
+                                <ul id="solutions-list" class="list-disc list-inside space-y-2 text-stone-700">
+                                    <li>利用天然洞穴庇護</li>
+                                    <li>發展狩獵與採集技巧</li>
+                                    <li>群體合作與溝通</li>
+                                    <li>利用火源取暖與烹飪</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-center text-stone-800 mb-2">生存能力綜合評估</h4>
+                        <div class="chart-container">
+                            <canvas id="survivalChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="game" class="content-section">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-4">桌遊概念：「長濱生存挑戰」</h2>
+                <p class="max-w-3xl mx-auto text-lg text-stone-600">
+                    這是一款合作遊戲，玩家們將扮演長濱人，共同面對史前的種種考驗。唯有團結合作、善用資源與智慧，才能帶領部落度過難關，成功存續。
+                </p>
+            </div>
+
+            <div class="space-y-10">
+                <div>
+                    <h3 class="text-2xl font-bold text-amber-800 mb-4 border-b-2 border-amber-200 pb-2">玩家角色：發揮你的專長</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-md card-hover">
+                            <h4 class="text-xl font-bold text-stone-800">🏹 獵人</h4>
+                            <p class="text-stone-600 mt-2">擅長追蹤與狩獵，能更有效地獲取肉類資源，並在對抗掠食者時提供戰力。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md card-hover">
+                            <h4 class="text-xl font-bold text-stone-800">� 採集者</h4>
+                            <p class="text-stone-600 mt-2">熟悉各種植物，能高效地採集果實、根莖與藥草，是部落食物的重要來源。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md card-hover">
+                            <h4 class="text-xl font-bold text-stone-800">🔨 工匠</h4>
+                            <p class="text-stone-600 mt-2">精通製作工具，能將石頭與獸骨轉化為有用的器具，提升部落的整體效率。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md card-hover">
+                            <h4 class="text-xl font-bold text-stone-800">🤝 領袖</h4>
+                            <p class="text-stone-600 mt-2">善於溝通與協調，能提升部落的士氣，並在關鍵時刻做出有利於群體的決策。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-bold text-amber-800 mb-4 border-b-2 border-amber-200 pb-2">核心機制：生存的抉擇</h3>
+                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h4 class="text-xl font-bold text-stone-800 mb-2">資源管理</h4>
+                            <p class="text-stone-600">玩家需共同收集並管理食物、水、木材、石頭等資源。每個行動都有機會成本，謹慎規劃至關重要。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h4 class="text-xl font-bold text-stone-800 mb-2">挑戰事件</h4>
+                            <p class="text-stone-600">每回合都可能觸發「寒流來襲」、「掠食者出現」、「資源枯竭」等事件卡，考驗團隊的應變能力。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h4 class="text-xl font-bold text-stone-800 mb-2">合作共贏/輸</h4>
+                            <p class="text-stone-600">所有玩家是一個命運共同體。若部落的「士氣」或「能量」歸零，則所有玩家共同失敗；若能撐過指定回合數，則共同迎來勝利。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="text-center p-4 mt-8 text-stone-500 text-sm">
+        <p>此互動頁面根據社會科教學活動「如果...，為什麼？」思辨概念設計。</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNav = document.getElementById('mobile-nav');
+    const sections = document.querySelectorAll('.content-section');
+    const survivalChartElement = document.getElementById('survivalChart');
+    const scenarioTitle = document.getElementById('scenario-title');
+    const challengesList = document.getElementById('challenges-list');
+    const solutionsList = document.getElementById('solutions-list');
+    
+    const scenarioData = {
+        base: {
+            title: '基礎生存模式',
+            challenges: ['應對多變的氣候', '確保穩定的食物來源', '防禦掠食性動物', '製作有效的工具'],
+            solutions: ['利用天然洞穴庇護', '發展狩獵與採集技巧', '群體合作與溝通', '利用火源取暖與烹飪'],
+            chartScores: [8, 8, 7, 8, 9] // 食物, 溫暖, 防禦, 工具, 社交
+        },
+        noFire: {
+            title: '🔥 無火挑戰',
+            challenges: ['無法烹煮食物，營養吸收率低', '夜晚寒冷，有失溫風險', '失去抵禦大型掠食者的重要屏障', '無法對工具進行熱處理強化', '夜間活動受限，社交時間縮短'],
+            solutions: ['依賴易消化的生食或發酵', '利用獸皮與群體依偎取暖', '加強守夜與集體防禦', '尋找天然堅硬的材料', '依賴日光作息，強化日間合作'],
+            chartScores: [4, 3, 3, 6, 5]
+        },
+        noTools: {
+            title: '⛏️ 無利器挑戰',
+            challenges: ['難以狩獵與分割大型動物', '無法挖掘堅硬土地下的根莖', '處理食物（去皮、切塊）效率極低', '缺乏有效的防禦武器', '製作衣物、庇護所的材料處理困難'],
+            solutions: ['依賴拾荒、陷阱與集體圍捕', '採集地表容易獲取的漿果與嫩葉', '使用鈍石敲擊、砸開食物', '投擲石塊或使用木棍進行防禦', '利用未加工的天然材料'],
+            chartScores: [3, 7, 4, 2, 6]
+        }
+    };
+
+    let survivalChart;
+
+    function navigateTo(hash) {
+        const targetId = hash.substring(1);
+        
+        sections.forEach(section => {
+            if (section.id === targetId) {
+                section.classList.add('active');
+            } else {
+                section.classList.remove('active');
+            }
+        });
+
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === hash) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+        
+        if(mobileNav.value !== targetId) {
+            mobileNav.value = targetId;
+        }
+    }
+
+    function updateScenario(scenarioKey) {
+        const data = scenarioData[scenarioKey];
+        
+        scenarioTitle.textContent = data.title;
+        
+        challengesList.innerHTML = data.challenges.map(item => `<li>${item}</li>`).join('');
+        solutionsList.innerHTML = data.solutions.map(item => `<li>${item}</li>`).join('');
+
+        survivalChart.data.datasets[0].data = data.chartScores;
+        survivalChart.update();
+
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(`btn-${scenarioKey}`).classList.add('active');
+    }
+
+    function createChart() {
+        if (survivalChart) {
+            survivalChart.destroy();
+        }
+        const ctx = survivalChartElement.getContext('2d');
+        survivalChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['食物保障', '溫暖庇護', '安全防禦', '工具效能', '社群連結'],
+                datasets: [{
+                    label: '生存能力評估',
+                    data: scenarioData.base.chartScores,
+                    backgroundColor: 'rgba(124, 45, 18, 0.2)', // amber-800
+                    borderColor: 'rgba(124, 45, 18, 1)',
+                    pointBackgroundColor: 'rgba(124, 45, 18, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(124, 45, 18, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: {
+                            color: '#d6d3d1' // stone-300
+                        },
+                        grid: {
+                            color: '#e7e5e4' // stone-200
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 14,
+                                family: "'Noto Sans TC', sans-serif"
+                            },
+                            color: '#44403c' // stone-700
+                        },
+                        ticks: {
+                            backdropColor: 'rgba(245, 245, 244, 0.7)', // stone-100 with opacity
+                            color: '#57534e', // stone-600
+                            stepSize: 2,
+                            font: {
+                                size: 10
+                            }
+                        },
+                        min: 0,
+                        max: 10
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.r !== null) {
+                                    label += context.parsed.r;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetHash = e.currentTarget.getAttribute('href');
+            navigateTo(targetHash);
+        });
+    });
+    
+    mobileNav.addEventListener('change', (e) => {
+        navigateTo('#' + e.target.value);
+    });
+
+    document.getElementById('btn-base').addEventListener('click', () => updateScenario('base'));
+    document.getElementById('btn-noFire').addEventListener('click', () => updateScenario('noFire'));
+    document.getElementById('btn-noTools').addEventListener('click', () => updateScenario('noTools'));
+
+    createChart();
+    navigateTo('#intro');
+});
+</script>
+
+</body>
+</html>
+�
