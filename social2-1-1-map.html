@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>臺灣大航海：互動遊戲設計探索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Parchment & Sea -->
+    <!-- Application Structure Plan: 我採用了分頁式的儀表板佈局，將報告的冗長內容分解為幾個邏輯區塊（教學理念、T圖分析、遊戲概念、設計藍圖）。這種結構避免了使用者一次面對大量文字而感到不知所措，並允許他們根據興趣自由探索。核心的「遊戲概念」部分設計為互動式卡片，讓使用者可以點擊不同陣營來查看詳細資訊，這比靜態列表更具吸引力，也更能模擬遊戲中的選擇感。 -->
+    <!-- Visualization & Content Choices: 報告中的核心是將T圖分析轉化為遊戲機制。為了視覺化這個轉化過程，我選擇了雷達圖（Chart.js）。使用者可以點擊不同陣營的按鈕，動態更新雷達圖，直觀地比較各陣營在「目的」、「活動」、「影響」等面向的特點，這比靜態的表格（表格1）更能揭示各陣營的策略差異。對於其他內容，如玩家陣營和遊戲機制，我使用了互動式卡片和資訊面板（HTML/CSS/JS），讓使用者透過點擊主動探索，而非被動閱讀。這支持了應用的核心目標：將靜態報告轉化為互動體驗。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .tab-active {
+            border-color: #0d9488; /* teal-600 */
+            color: #0d9488;
+            background-color: #f0fdfa; /* teal-50 */
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #52525b; /* zinc-600 */
+        }
+        .content-section {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .hidden-section {
+            opacity: 0;
+            transform: translateY(20px);
+            position: absolute;
+            pointer-events: none;
+        }
+        .visible-section {
+            opacity: 1;
+            transform: translateY(0);
+            position: static;
+        }
+        .faction-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .faction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-5xl font-bold text-teal-800 mb-2">臺灣大航海</h1>
+            <p class="text-lg md:text-xl text-slate-600">從T字圖到桌上遊戲的互動設計探索</p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center border-b-2 border-slate-200 mb-8">
+            <button data-tab="philosophy" class="tab-btn px-4 py-3 md:px-6 font-medium border-b-4 transition-colors duration-300">教學理念</button>
+            <button data-tab="t-chart" class="tab-btn px-4 py-3 md:px-6 font-medium border-b-4 transition-colors duration-300">T圖分析法</button>
+            <button data-tab="game-concept" class="tab-btn px-4 py-3 md:px-6 font-medium border-b-4 transition-colors duration-300">遊戲核心概念</button>
+            <button data-tab="blueprint" class="tab-btn px-4 py-3 md:px-6 font-medium border-b-4 transition-colors duration-300">設計藍圖</button>
+            <button data-tab="next-steps" class="tab-btn px-4 py-3 md:px-6 font-medium border-b-4 transition-colors duration-300">下一步</button>
+        </nav>
+
+        <main id="main-content" class="relative">
+            
+            <section id="philosophy" class="content-section space-y-6">
+                <h2 class="text-2xl font-bold text-teal-700">擁抱互動式歷史學習</h2>
+                <p class="text-slate-700 leading-relaxed">將遊戲化學習引入歷史教育具有巨大的潛力。桌上遊戲作為一種教育工具，能將學習從被動接收資訊，轉變為對歷史進程的主動參與和體驗。學生得以親身感受歷史人物所面臨的挑戰、做出的決策以及隨之而來的後果，這使得學習過程變得深刻而難忘，將抽象概念轉化為具體的行動和結果。</p>
+                <div class="grid md:grid-cols-2 gap-6 pt-4">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-teal-500">
+                        <h3 class="font-bold text-lg mb-2">提升批判性思維</h3>
+                        <p class="text-sm text-slate-600">遊戲要求玩家分析情境、制定策略、預測結果並適應變化，直接鍛鍊批判性思維和問題解決能力。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-amber-500">
+                        <h3 class="font-bold text-lg mb-2">促進社交互動</h3>
+                        <p class="text-sm text-slate-600">多人遊戲需要玩家間的談判、溝通與合作，與「分組合作學習」的目標完全契合。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="t-chart" class="content-section space-y-6">
+                <h2 class="text-2xl font-bold text-teal-700">優化分組學習與T圖分析</h2>
+                <p class="text-slate-700 leading-relaxed">T字圖是一種出色的視覺化組織工具，有助於學生對資訊進行分類和比較。為引導學生進行更深入的分析，而不僅是表面提取資訊，我們需要預先教授「影響」的多元概念，並提供引導性問句，促使學生進行更深層次的思考。</p>
+                <div class="bg-white p-6 rounded-lg shadow-md mt-4">
+                    <h3 class="font-bold text-lg mb-4 text-center">T圖分析範例</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                        <div class="bg-teal-50 p-4 rounded-lg">
+                            <h4 class="font-semibold">左側分析項目</h4>
+                            <ul class="list-disc list-inside text-left mt-2 text-slate-600">
+                                <li>族群（荷蘭人、西班牙人等）</li>
+                                <li>來臺目的</li>
+                                <li>主要活動</li>
+                            </ul>
+                        </div>
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <h4 class="font-semibold">右側內容特色</h4>
+                            <ul class="list-disc list-inside text-left mt-2 text-slate-600">
+                                <li>留下的文化足跡</li>
+                                <li>對臺灣的影響</li>
+                                <li>策略考量</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-4 text-center">這個結構為後續的比較分析與遊戲設計提供了堅實的基礎。</p>
+                </div>
+            </section>
+
+            <section id="game-concept" class="content-section space-y-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-teal-700 text-center">島嶼交會：臺灣大航海時代</h2>
+                    <p class="text-slate-600 text-center mt-2 max-w-2xl mx-auto">遊戲設定在17世紀的臺灣，一個大航海時代的關鍵十字路口。每位玩家將扮演一個主要的來臺勢力，擁有與其歷史目標相關的獨特勝利條件。</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-center">點擊卡片以探索各方勢力</h3>
+                    <div id="faction-selector" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    </div>
+                </div>
+                <div id="faction-details" class="bg-white p-6 rounded-lg shadow-lg min-h-[200px] transition-all duration-500">
+                </div>
+            </section>
+
+            <section id="blueprint" class="content-section space-y-8">
+                <h2 class="text-2xl font-bold text-teal-700 text-center">遊戲設計藍圖</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-2 text-center">T圖類別與遊戲機制對應</h3>
+                    <p class="text-center text-slate-600 mb-4">點擊下方按鈕，查看各勢力在雷達圖上的特點分佈。</p>
+                    <div class="chart-container">
+                        <canvas id="mechanicsChart"></canvas>
+                    </div>
+                    <div id="chart-controls" class="flex justify-center flex-wrap gap-2 mt-4">
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 text-center">潛在遊戲組件</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 text-center">
+                        <div class="bg-slate-100 p-3 rounded-lg"><span class="text-2xl">🗺️</span><p class="text-sm font-medium mt-1">遊戲版圖</p></div>
+                        <div class="bg-slate-100 p-3 rounded-lg"><span class="text-2xl">⛵</span><p class="text-sm font-medium mt-1">玩家棋子</p></div>
+                        <div class="bg-slate-100 p-3 rounded-lg"><span class="text-2xl">💰</span><p class="text-sm font-medium mt-1">資源代幣</p></div>
+                        <div class="bg-slate-100 p-3 rounded-lg"><span class="text-2xl">🏛️</span><p class="text-sm font-medium mt-1">影響力標記</p></div>
+                        <div class="bg-slate-100 p-3 rounded-lg"><span class="text-2xl">📜</span><p class="text-sm font-medium mt-1">事件卡</p></div>
+                        <div class="bg-slate-100 p-3 rounded-lg"><span class="text-2xl">🃏</span><p class="text-sm font-medium mt-1">勢力專屬卡</p></div>
+                        <div class="bg-slate-100 p-3 rounded-lg"><span class="text-2xl">📋</span><p class="text-sm font-medium mt-1">玩家輔助板</p></div>
+                        <div class="bg-slate-100 p-3 rounded-lg"><span class="text-2xl">📖</span><p class="text-sm font-medium mt-1">規則手冊</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="next-steps" class="content-section space-y-6">
+                <h2 class="text-2xl font-bold text-teal-700">結論與下一步建議</h2>
+                <p class="text-slate-700 leading-relaxed">將結構化的T字圖分析與互動式桌上遊戲相結合，提供了一個全面且高效的教學策略。遊戲將被動學習轉變為主動、體驗式的旅程，讓學生能夠「設身處地」地扮演歷史人物。</p>
+                <div class="flex flex-col md:flex-row gap-4 pt-4">
+                    <div class="flex-1 bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="font-bold text-lg mb-2">1. 概念設計與原型</h3>
+                        <p class="text-sm text-slate-600">從詳細的規則撰寫開始，並製作一個簡單的紙上原型，以測試核心機制和流程。</p>
+                    </div>
+                    <div class="flex-1 bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="font-bold text-lg mb-2">2. 課堂試玩與回饋</h3>
+                        <p class="text-sm text-slate-600">與目標學生進行試玩測試，收集關於清晰度、平衡性和參與度的回饋。</p>
+                    </div>
+                    <div class="flex-1 bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="font-bold text-lg mb-2">3. 迭代與完善</h3>
+                        <p class="text-sm text-slate-600">根據試玩回饋，完善規則、組件和平衡性，以優化學習體驗。</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const sections = document.querySelectorAll('.content-section');
+            const mainContent = document.getElementById('main-content');
+
+            const factionsData = {
+                dutch: {
+                    name: '荷蘭人',
+                    icon: '�🇱',
+                    color: 'amber',
+                    title: '貿易巨頭與殖民者',
+                    description: '專注於貿易、資源開採（如鹿皮）和建立商業據點。以經濟利益為主要驅動，擅長建立高效的貿易網絡。',
+                    goal: '勝利條件：累積最多的財富並控制關鍵貿易港口。',
+                    chartData: [8, 7, 3, 6, 5]
+                },
+                spanish: {
+                    name: '西班牙人',
+                    icon: '🇪🇸',
+                    color: 'red',
+                    title: '宗教傳播與領土擴張',
+                    description: '專注於宗教傳播、建立傳教據點和控制北部貿易航線。以傳播天主教信仰和鞏固王權為核心目標。',
+                    goal: '勝利條件：建立最多教堂並將影響力擴散至最多區域。',
+                    chartData: [4, 8, 7, 5, 6]
+                },
+                chinese: {
+                    name: '中國海商',
+                    icon: '🇨🇳',
+                    color: 'yellow',
+                    title: '農業拓墾與貿易網絡',
+                    description: '專注於農業發展、建立貿易網絡和逐步定居。他們是島嶼上重要的經濟與社會力量，帶來了新的作物與技術。',
+                    goal: '勝利條件：建立最多定居點並發展最高的農業產值。',
+                    chartData: [7, 3, 5, 8, 7]
+                },
+                japanese: {
+                    name: '日本人',
+                    icon: '🇯🇵',
+                    color: 'gray',
+                    title: '機會主義的貿易者',
+                    description: '專注於機會性貿易、海盜活動和維持戰略性的沿海存在。行動靈活，擅長在各勢力間尋找獲利機會。',
+                    goal: '勝利條件：透過貿易與掠奪累積財富，並在衝突中獲勝。',
+                    chartData: [6, 4, 6, 4, 4]
+                }
+            };
+
+            const factionSelector = document.getElementById('faction-selector');
+            const factionDetails = document.getElementById('faction-details');
+
+            function updateFactionDetails(factionKey) {
+                const data = factionsData[factionKey];
+                factionDetails.innerHTML = `
+                    <div class="flex items-center mb-3">
+                        <span class="text-4xl mr-4">${data.icon}</span>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">${data.name}</h3>
+                            <p class="text-md font-semibold text-${data.color}-600">${data.title}</p>
+                        </div>
+                    </div>
+                    <p class="text-slate-700 mb-3">${data.description}</p>
+                    <p class="text-sm font-medium bg-${data.color}-100 text-${data.color}-800 p-3 rounded-lg">${data.goal}</p>
+                `;
+            }
+
+            Object.keys(factionsData).forEach(key => {
+                const data = factionsData[key];
+                const card = document.createElement('div');
+                card.className = `faction-card cursor-pointer bg-white p-4 rounded-lg shadow-md border-b-4 border-${data.color}-500`;
+                card.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="text-3xl mr-3">${data.icon}</span>
+                        <span class="font-bold text-lg">${data.name}</span>
+                    </div>
+                `;
+                card.addEventListener('click', () => updateFactionDetails(key));
+                factionSelector.appendChild(card);
+            });
+            
+            updateFactionDetails('dutch');
+
+            function switchTab(tabId) {
+                tabs.forEach(tab => {
+                    if (tab.dataset.tab === tabId) {
+                        tab.classList.add('tab-active');
+                        tab.classList.remove('tab-inactive');
+                    } else {
+                        tab.classList.remove('tab-active');
+                        tab.classList.add('tab-inactive');
+                    }
+                });
+
+                let maxHeight = 0;
+                sections.forEach(section => {
+                    if (section.id === tabId) {
+                        section.classList.remove('hidden-section');
+                        section.classList.add('visible-section');
+                        maxHeight = Math.max(maxHeight, section.scrollHeight);
+                    } else {
+                        section.classList.add('hidden-section');
+                        section.classList.remove('visible-section');
+                    }
+                });
+                mainContent.style.minHeight = `${maxHeight}px`;
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+
+            switchTab('philosophy');
+
+            const ctx = document.getElementById('mechanicsChart').getContext('2d');
+            const mechanicsChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['貿易', '宗教', '軍事', '農業/定居', '文化影響'],
+                    datasets: [{
+                        label: '勢力特點',
+                        data: factionsData.dutch.chartData,
+                        backgroundColor: 'rgba(13, 148, 136, 0.2)',
+                        borderColor: 'rgba(13, 148, 136, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(13, 148, 136, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(13, 148, 136, 1)'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 14,
+                                    family: "'Inter', 'Noto Sans TC', sans-serif"
+                                },
+                                color: '#334155'
+                            },
+                            ticks: {
+                                backdropColor: 'rgba(255, 255, 255, 0.75)',
+                                stepSize: 2,
+                                font: {
+                                    size: 10
+                                }
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            const chartControls = document.getElementById('chart-controls');
+            Object.keys(factionsData).forEach(key => {
+                const data = factionsData[key];
+                const button = document.createElement('button');
+                button.className = `px-4 py-2 text-sm font-medium rounded-full transition-colors bg-${data.color}-100 text-${data.color}-800 hover:bg-${data.color}-200`;
+                button.textContent = data.name;
+                button.addEventListener('click', () => {
+                    mechanicsChart.data.datasets[0].data = data.chartData;
+                    mechanicsChart.update();
+                });
+                chartControls.appendChild(button);
+            });
+        });
+    </script>
+</body>
+</html>
+�
