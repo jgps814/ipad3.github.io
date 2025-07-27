@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>臺灣大航海：遊戲組件總覽</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earth Tones (Stone, Slate, Amber, Teal, Red, Green, Blue, Purple, Yellow) -->
+    <!-- Application Structure Plan: 採用分區塊的垂直佈局，將人物卡、事件卡、行動卡和臺灣版圖依序呈現在一個單一網頁中。每個區塊都使用網格佈局來展示多個卡牌或地圖區域，確保內容清晰且易於瀏覽。這種整合式佈局讓使用者能夠快速檢視所有遊戲組件的設計風格和內容，便於整體評估。 -->
+    <!-- Visualization & Content Choices: 為了展示所有遊戲組件，我使用了純粹的 HTML 和 Tailwind CSS。人物肖像使用佔位符圖片，圖標則統一使用 Unicode 字元，以符合不使用 SVG 的要求。所有卡牌和地圖區域的文字內容都直接來自先前提供的設計資訊。這種方法提供了一個全面且一致的視覺示範，無需複雜的互動，因為主要目標是組件的視覺呈現。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .card-container {
+            width: 250px; /* Approximate TCG size for display */
+            height: auto; /* Adjust height based on content */
+            aspect-ratio: 63 / 88; /* Maintain aspect ratio for card-like feel */
+            min-height: 350px; /* Ensure minimum height for content */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .character-portrait {
+            width: 100%;
+            height: 150px; /* Fixed height for portraits */
+            object-fit: cover;
+            object-position: center;
+        }
+        .card-effect-icon {
+            font-size: 1.1em;
+            margin-right: 4px;
+        }
+
+        /* Map specific styles */
+        .map-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 4 / 5; /* Approximate aspect ratio for Taiwan map */
+            background-color: #a7f3d0; /* light green for land */
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 0 auto;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border: 4px solid #34d399; /* emerald-400 */
+        }
+        .map-region {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e293b; /* slate-800 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .region-label {
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #065f46; /* emerald-800 */
+        }
+        .resource-icon {
+            font-size: 1.2rem;
+            margin-top: 4px;
+        }
+        .location-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ef4444; /* red-500 */
+            border-radius: 50%;
+            border: 2px solid #b91c1c; /* red-700 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        .location-label {
+            position: absolute;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569; /* slate-600 */
+            white-space: nowrap;
+            transform: translateX(-50%);
+            left: 50%; /* Adjust in JS or manually for specific markers */
+            top: 25px; /* Adjust for specific markers */
+        }
+
+        /* Specific region positioning (relative to map-container) */
+        .north-region { top: 5%; left: 30%; width: 40%; height: 20%; }
+        .central-region { top: 25%; left: 25%; width: 50%; height: 25%; }
+        .south-region { top: 50%; left: 20%; width: 55%; height: 25%; }
+        .east-region { top: 15%; left: 70%; width: 25%; height: 70%; background-color: rgba(255, 255, 255, 0.3); border: 1px solid rgba(0, 0, 0, 0.08); }
+        .mountain-range { top: 10%; left: 45%; width: 30%; height: 80%; background-color: rgba(101, 163, 13, 0.3); border: 1px solid rgba(0, 0, 0, 0.05); border-radius: 50% / 100%; transform: rotate(20deg); z-index: 5; }
+        .penghu-region { bottom: 5%; left: 5%; width: 15%; height: 10%; font-size: 0.7rem; }
+
+        /* Specific location markers (relative to map-container) */
+        .marker-zeelandia { top: 65%; left: 35%; }
+        .marker-san-salvador { top: 15%; left: 45%; }
+        .marker-keelung { top: 10%; left: 55%; }
+        .marker-tamsui { top: 18%; left: 38%; }
+        .marker-taitung { top: 60%; left: 80%; }
+        .marker-hualien { top: 35%; left: 85%; }
+    </style>
+</head>
+<body class="bg-stone-100 text-slate-800 p-8">
+
+    <div class="container mx-auto max-w-6xl">
+        <h1 class="text-4xl font-bold text-center text-teal-800 mb-10">《臺灣大航海》遊戲組件總覽</h1>
+
+        <!-- 人物卡區塊 -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">一、人物卡（領袖/代表人物）</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
+
+                <!-- 荷蘭人人物卡 -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-orange-600">
+                    <div class="p-4 bg-orange-100">
+                        <h3 class="text-lg font-bold text-orange-800">揆一 (Frederick Coyett)</h3>
+                    </div>
+                    <img src="https://placehold.co/250x150/f0f9ff/0f172a?text=Frederick+Coyett" alt="Frederick Coyett Portrait" class="character-portrait">
+                    <div class="p-4 flex-grow">
+                        <p class="text-xs text-slate-600 mb-2">荷蘭東印度公司在臺灣的末代長官，面臨鄭成功圍攻。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-orange-700">堅守堡壘：</span>遊戲開始時，熱蘭遮城額外1點防禦力。</p>
+                            <p><span class="font-semibold text-orange-700">末代貿易：</span>遊戲最後兩回合，所有貿易行動額外1點財富。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 西班牙人人物卡 -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-red-600">
+                    <div class="p-4 bg-red-100">
+                        <h3 class="text-lg font-bold text-red-800">達尼爾·德·拉·維加 (Daniel de la Vega)</h3>
+                    </div>
+                    <img src="https://placehold.co/250x150/fef2f2/0f172a?text=Daniel+de+la+Vega" alt="Daniel de la Vega Portrait" class="character-portrait">
+                    <div class="p-4 flex-grow">
+                        <p class="text-xs text-slate-600 mb-2">西班牙在臺灣的早期總督，致力於鞏固基隆據點。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-red-700">築城堅守：</span>基隆區域建立據點所需資源減少1點。</p>
+                            <p><span class="font-semibold text-red-700">北部先驅：</span>北部區域探索行動額外獲得1點影響力。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 中國海商人物卡 -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-amber-600">
+                    <div class="p-4 bg-amber-100">
+                        <h3 class="text-lg font-bold text-amber-800">顏思齊 (Yan Siqi)</h3>
+                    </div>
+                    <img src="https://placehold.co/250x150/fffbeb/0f172a?text=Yan+Siqi" alt="Yan Siqi Portrait" class="character-portrait">
+                    <div class="p-4 flex-grow">
+                        <p class="text-xs text-slate-600 mb-2">早期來臺開墾的中國海商領袖，被譽為「開臺王」。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-amber-700">拓墾先鋒：</span>首次新肥沃土地建立定居點，立即獲得2點糧食。</p>
+                            <p><span class="font-semibold text-amber-700">聚眾開墾：</span>每回合可額外執行一次「拓墾」行動。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 日本人人物卡 -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-gray-600">
+                    <div class="p-4 bg-gray-100">
+                        <h3 class="text-lg font-bold text-gray-800">濱田彌兵衛 (Hamada Yahei)</h3>
+                    </div>
+                    <img src="https://placehold.co/250x150/f9fafb/0f172a?text=Hamada+Yahei" alt="Hamada Yahei Portrait" class="character-portrait">
+                    <div class="p-4 flex-grow">
+                        <p class="text-xs text-slate-600 mb-2">活躍於臺灣的日本海商，曾與荷蘭人發生衝突。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-gray-700">強硬談判：</span>進行貿易時，可迫使對方接受一次有利交易。</p>
+                            <p><span class="font-semibold text-gray-700">突襲貿易：</span>非港口區域貿易，有機會額外獲得1點財富。</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 事件卡區塊 -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">二、事件卡</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
+
+                <!-- 颱風來襲事件卡 -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-slate-500">
+                    <div class="p-4 bg-slate-200 text-center">
+                        <h3 class="text-lg font-bold text-slate-800">颱風來襲！</h3>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center p-4">
+                        <span class="text-8xl">🌀</span> <!-- 颱風圖案 -->
+                    </div>
+                    <div class="p-4 bg-slate-50">
+                        <p class="text-xs text-slate-600 mb-2">季節性颱風侵襲臺灣，破壞了沿海設施與農作物。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-slate-700">效果：</span>所有玩家失去1點糧食資源。若有沿海建築，擲骰判定是否受損。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 新航線開通事件卡 -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-green-500">
+                    <div class="p-4 bg-green-200 text-center">
+                        <h3 class="text-lg font-bold text-green-800">新航線開通</h3>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center p-4">
+                        <span class="text-8xl">🧭</span> <!-- 羅盤與船隻圖案 -->
+                    </div>
+                    <div class="p-4 bg-green-50">
+                        <p class="text-xs text-slate-600 mb-2">探險家發現新的貿易航線，帶來更多商機。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-green-700">效果：</span>所有玩家在下回合的貿易行動中，額外獲得1點財富。</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 行動卡區塊 -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">三、行動卡</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
+
+                <!-- 移動行動卡 -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-blue-500">
+                    <div class="p-4 bg-blue-100 text-center">
+                        <h3 class="text-lg font-bold text-blue-800">移動</h3>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center p-4">
+                        <span class="text-8xl">🚶</span> <!-- 行走人物圖案 -->
+                    </div>
+                    <div class="p-4 bg-blue-50">
+                        <p class="text-xs text-slate-600 mb-2">將您的玩家棋子從一個區域移動到相鄰區域。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-blue-700">費用：</span>可能消耗1點糧食。</p>
+                            <p><span class="font-semibold text-blue-700">效果：</span>進入新區域，可觸發該區域效果。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 收集資源行動卡 -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-emerald-500">
+                    <div class="p-4 bg-emerald-100 text-center">
+                        <h3 class="text-lg font-bold text-emerald-800">收集資源</h3>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center p-4">
+                        <span class="text-8xl">🧺</span> <!-- 籃子或收集圖案 -->
+                    </div>
+                    <div class="p-4 bg-emerald-50">
+                        <p class="text-xs text-slate-600 mb-2">如果您的棋子位於一個資源點上，您可以收集該資源點上的代幣。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-emerald-700">費用：</span>無。</p>
+                            <p><span class="font-semibold text-emerald-700">效果：</span>獲得該區域的資源代幣。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 建立據點行動卡 -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-purple-500">
+                    <div class="p-4 bg-purple-100 text-center">
+                        <h3 class="text-lg font-bold text-purple-800">建立據點</h3>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center p-4">
+                        <span class="text-8xl">🏗️</span> <!-- 建築或城堡圖案 -->
+                    </div>
+                    <div class="p-4 bg-purple-50">
+                        <p class="text-xs text-slate-600 mb-2">消耗資源並放置一個您的影響力標記或建築板塊。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-purple-700">費用：</span>消耗指定資源（依據據點類型）。</p>
+                            <p><span class="font-semibold text-purple-700">效果：</span>增加對區域的控制或文化足跡。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 貿易行動卡 (已存在) -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-yellow-500">
+                    <div class="p-4 bg-yellow-100 text-center">
+                        <h3 class="text-lg font-bold text-yellow-800">貿易</h3>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center p-4">
+                        <span class="text-8xl">💰</span> <!-- 錢袋或交易圖案 -->
+                    </div>
+                    <div class="p-4 bg-yellow-50">
+                        <p class="text-xs text-slate-600 mb-2">在特定港口或貿易點，您可以消耗特定資源來換取財富代幣。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-yellow-700">費用：</span>消耗指定資源。</p>
+                            <p><span class="font-semibold text-yellow-700">效果：</span>獲得財富代幣或與其他玩家交易。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 傳教行動卡 (新增) -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-indigo-500">
+                    <div class="p-4 bg-indigo-100 text-center">
+                        <h3 class="text-lg font-bold text-indigo-800">傳教</h3>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center p-4">
+                        <span class="text-8xl">✝️</span> <!-- 十字架或祈禱圖案 -->
+                    </div>
+                    <div class="p-4 bg-indigo-50">
+                        <p class="text-xs text-slate-600 mb-2">在原住民村落區域執行傳教行動，以擴大宗教影響力。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-indigo-700">費用：</span>可能消耗1點財富或特定資源。</p>
+                            <p><span class="font-semibold text-indigo-700">效果：</span>增加宗教影響力，可能獲得原住民支持。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 拓墾行動卡 (新增) -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-lime-500">
+                    <div class="p-4 bg-lime-100 text-center">
+                        <h3 class="text-lg font-bold text-lime-800">拓墾</h3>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center p-4">
+                        <span class="text-8xl">🚜</span> <!-- 耕地或農具圖案 -->
+                    </div>
+                    <div class="p-4 bg-lime-50">
+                        <p class="text-xs text-slate-600 mb-2">在肥沃土地區域執行拓墾行動，以增加農業產值。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-lime-700">費用：</span>可能消耗1點糧食或勞動力。</p>
+                            <p><span class="font-semibold text-lime-700">效果：</span>增加糧食產出，建立定居點。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 掠奪行動卡 (新增) -->
+                <div class="card-container bg-white rounded-lg shadow-xl overflow-hidden border-b-4 border-rose-500">
+                    <div class="p-4 bg-rose-100 text-center">
+                        <h3 class="text-lg font-bold text-rose-800">掠奪</h3>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center p-4">
+                        <span class="text-8xl">⚔️</span> <!-- 劍或海盜旗圖案 -->
+                    </div>
+                    <div class="p-4 bg-rose-50">
+                        <p class="text-xs text-slate-600 mb-2">在特定區域或對抗其他勢力進行掠奪行動，以獲取資源。</p>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="font-semibold text-rose-700">費用：</span>可能消耗1點軍事資源。</p>
+                            <p><span class="font-semibold text-rose-700">效果：</span>從目標處獲取資源，可能引發衝突。</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 臺灣版圖區塊 -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">四、臺灣版圖</h2>
+            <p class="text-lg text-center text-slate-600 mb-8">此版圖展示了17世紀臺灣島的主要地理區域、關鍵港口與資源點，作為遊戲進行的舞台。</p>
+
+            <div class="map-container relative">
+                <!-- Central Mountain Range - Background visual -->
+                <div class="map-region mountain-range flex items-center justify-center">
+                    <span class="region-label text-xs text-green-900">中央山脈</span>
+                </div>
+
+                <!-- Regions -->
+                <div class="map-region north-region">
+                    <span class="region-label">北部</span>
+                    <div class="flex flex-wrap justify-center gap-1">
+                        <span class="resource-icon" title="硫磺">🌋</span>
+                        <span class="resource-icon" title="原住民部落">🛖</span>
+                    </div>
+                </div>
+                <div class="map-region central-region">
+                    <span class="region-label">中部</span>
+                    <div class="flex flex-wrap justify-center gap-1">
+                        <span class="resource-icon" title="肥沃土地">🌾</span>
+                        <span class="resource-icon" title="鹿群">🦌</span>
+                    </div>
+                </div>
+                <div class="map-region south-region">
+                    <span class="region-label">南部</span>
+                    <div class="flex flex-wrap justify-center gap-1">
+                        <span class="resource-icon" title="肥沃土地">🌾</span>
+                        <span class="resource-icon" title="鹿群">🦌</span>
+                        <span class="resource-icon" title="原住民部落">🛖</span>
+                    </div>
+                </div>
+                <div class="map-region east-region">
+                    <span class="region-label">東部</span>
+                    <div class="flex flex-wrap justify-center gap-1">
+                        <span class="resource-icon" title="原住民部落">🛖</span>
+                    </div>
+                </div>
+                <div class="map-region penghu-region">
+                    <span class="region-label">澎湖</span>
+                    <div class="flex flex-wrap justify-center gap-1">
+                        <span class="resource-icon" title="漁業">🎣</span>
+                    </div>
+                </div>
+
+                <!-- Key Locations / Ports -->
+                <div class="location-marker marker-zeelandia">
+                    <span class="text-xs">堡</span>
+                    <span class="location-label">熱蘭遮城 (安平)</span>
+                </div>
+                <div class="location-marker marker-san-salvador">
+                    <span class="text-xs">堡</span>
+                    <span class="location-label">聖薩爾瓦多城 (基隆)</span>
+                </div>
+                <div class="location-marker marker-keelung">
+                    <span class="text-xs">港</span>
+                    <span class="location-label">雞籠港</span>
+                </div>
+                <div class="location-marker marker-tamsui">
+                    <span class="text-xs">港</span>
+                    <span class="location-label">淡水港</span>
+                </div>
+                <div class="location-marker marker-taitung">
+                    <span class="text-xs">港</span>
+                    <span class="location-label">臺東港</span>
+                </div>
+                <div class="location-marker marker-hualien">
+                    <span class="text-xs">港</span>
+                    <span class="location-label">花蓮港</span>
+                </div>
+
+                <!-- Ocean background (implied by map-container background) -->
+                <div class="absolute inset-0 -z-10 bg-blue-200 opacity-50"></div>
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>
