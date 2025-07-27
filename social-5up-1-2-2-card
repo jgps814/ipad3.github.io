@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>長濱生存挑戰：事件與角色圖卡範本</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthy Harmony -->
+    <!-- Application Structure Plan: This document provides visual templates for "Changbin Survival Challenge" event and role cards. It's organized into two main sections: Challenge Event Cards and Player Role Cards. Each section uses a responsive grid layout to display multiple card examples. This structure allows for easy comparison and understanding of the card designs, directly translating the textual game components into a visual, interactive format. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Event and Role details. Goal: Visualize/Inform. Viz: HTML/CSS styled divs acting as cards, using Unicode icons for visual cues. Interaction: Subtle hover effects. Justification: Provides clear, self-contained visual representations of game components, adhering to the "no SVG" rule and leveraging Tailwind for consistent styling. Library: Tailwind CSS.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+            color: #292524; /* stone-800 */
+        }
+        .card-base {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-lg */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-md */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card-base:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+        .card-icon {
+            font-size: 3rem; /* text-5xl */
+            line-height: 1;
+        }
+        .card-title {
+            font-size: 1.75rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+            color: #7c2d12; /* amber-800 */
+        }
+        .card-description {
+            font-size: 0.95rem;
+            color: #57534e; /* stone-600 */
+            margin-bottom: 1rem;
+        }
+        .card-section-title {
+            font-weight: 600; /* font-semibold */
+            color: #44403c; /* stone-700 */
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #e7e5e4; /* stone-200 */
+            padding-bottom: 0.25rem;
+        }
+        .card-list {
+            list-style: disc;
+            list-style-position: inside;
+            font-size: 0.875rem; /* text-sm */
+            color: #57534e; /* stone-600 */
+            margin-left: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .card-footer-note {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: #78716c; /* stone-500 */
+            margin-top: auto; /* Pushes to bottom */
+            padding-top: 0.5rem;
+            border-top: 1px dashed #e7e5e4;
+        }
+        .challenge-card {
+            border: 2px solid #b91c1c; /* red-700 */
+            background-color: #fef2f2; /* red-50 */
+            color: #991b1b; /* red-800 */
+        }
+        .challenge-card .card-title, .challenge-card .card-icon {
+            color: #b91c1c; /* red-700 */
+        }
+        .challenge-card .card-section-title {
+            color: #991b1b; /* red-800 */
+        }
+        .challenge-card .card-list {
+            color: #7f1d1d; /* red-900 */
+        }
+        .role-card {
+            border: 2px solid #0f766e; /* teal-700 */
+            background-color: #f0fdfa; /* teal-50 */
+            color: #134e4a; /* teal-900 */
+        }
+        .role-card .card-title, .role-card .card-icon {
+            color: #0f766e; /* teal-700 */
+        }
+        .role-card .card-section-title {
+            color: #134e4a; /* teal-900 */
+        }
+        .role-card .card-list {
+            color: #0f766e; /* teal-700 */
+        }
+    </style>
+</head>
+<body class="bg-stone-100 p-8">
+
+    <header class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-amber-800 mb-4">「長濱生存挑戰」：事件與角色圖卡範本</h1>
+        <p class="text-lg text-stone-600 max-w-3xl mx-auto">
+            這些圖卡範本將遊戲中的挑戰事件和玩家角色視覺化。它們旨在提供設計靈感，可根據實際印刷或數位需求進行調整。
+        </p>
+    </header>
+
+    <main class="container mx-auto space-y-16">
+
+        <!-- 挑戰事件卡範本 -->
+        <section>
+            <h2 class="text-3xl font-bold text-stone-900 mb-8 pb-3 border-b-2 border-stone-300">⚠️ 挑戰事件卡</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- 寒流來襲！ -->
+                <div class="card-base challenge-card p-6">
+                    <div>
+                        <div class="card-header">
+                            <h3 class="card-title">寒流來襲！</h3>
+                            <span class="card-icon">❄️</span>
+                        </div>
+                        <p class="card-description">一股突如其來的寒流席捲而來，部落的溫暖急速流失。</p>
+                        
+                        <h4 class="card-section-title">效果</h4>
+                        <ul class="card-list">
+                            <li>部落「溫暖」點數立即減少 2 點。</li>
+                            <li>本回合所有玩家在野外行動，額外消耗 1 點「能量」。</li>
+                        </ul>
+
+                        <h4 class="card-section-title">「無火」情境</h4>
+                        <ul class="card-list">
+                            <li>額外減少 1 點「溫暖」。</li>
+                        </ul>
+                    </div>
+                    <p class="card-footer-note">氣候與環境類</p>
+                </div>
+
+                <!-- 掠食者出現 -->
+                <div class="card-base challenge-card p-6">
+                    <div>
+                        <div class="card-header">
+                            <h3 class="card-title">掠食者出現</h3>
+                            <span class="card-icon">🐅</span>
+                        </div>
+                        <p class="card-description">一隻大型掠食者在附近徘徊，威脅部落安全。</p>
+                        
+                        <h4 class="card-section-title">效果</h4>
+                        <ul class="card-list">
+                            <li>部落「安全」點數立即減少 1 點。</li>
+                            <li>玩家在有掠食者的板塊進行「採集」或「狩獵」行動時，有 25% 機率觸發「遭遇戰」。</li>
+                        </ul>
+
+                        <h4 class="card-section-title">「無利器」情境</h4>
+                        <ul class="card-list">
+                            <li>「遭遇戰」風險增加至 50%，且戰鬥難度提高。</li>
+                        </ul>
+                    </div>
+                    <p class="card-footer-note">生物與威脅類</p>
+                </div>
+
+                <!-- 疾病蔓延 -->
+                <div class="card-base challenge-card p-6">
+                    <div>
+                        <div class="card-header">
+                            <h3 class="card-title">疾病蔓延</h3>
+                            <span class="card-icon">😷</span>
+                        </div>
+                        <p class="card-description">部落中有人生病，可能傳染給其他人。</p>
+                        
+                        <h4 class="card-section-title">效果</h4>
+                        <ul class="card-list">
+                            <li>隨機一名玩家「生病」（行動點數減少）。</li>
+                            <li>若不治療，可能傳染給其他玩家或導致「能量」持續流失。</li>
+                        </ul>
+
+                        <h4 class="card-section-title">「無火」情境</h4>
+                        <ul class="card-list">
+                            <li>煮沸水的能力缺失，治療難度增加，疾病傳播速度加快。</li>
+                        </ul>
+                    </div>
+                    <p class="card-footer-note">內部與社會類</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 玩家角色卡範本 -->
+        <section>
+            <h2 class="text-3xl font-bold text-stone-900 mb-8 pb-3 border-b-2 border-stone-300">👤 玩家角色卡</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- 獵人 -->
+                <div class="card-base role-card p-6">
+                    <div>
+                        <div class="card-header">
+                            <h3 class="card-title">🏹 獵人</h3>
+                            <span class="card-icon">👤</span>
+                        </div>
+                        <p class="card-description">擅長追蹤與狩獵，是部落肉類食物的主要來源，並在對抗掠食者時提供戰力。</p>
+                        
+                        <h4 class="card-section-title">起始資源</h4>
+                        <ul class="card-list">
+                            <li>肉類代幣 x2</li>
+                            <li>鈍器 x1</li>
+                        </ul>
+
+                        <h4 class="card-section-title">特殊能力</h4>
+                        <ul class="card-list">
+                            <li>**精準狩獵：** 進行「狩獵」行動時，可額外擲一枚骰子並選擇較好的結果。</li>
+                            <li>**威懾：** 在有掠食者的板塊，其他玩家的「安全」點數損失減少 1 點。</li>
+                        </ul>
+
+                        <h4 class="card-section-title">「無利器」情境下的適應</h4>
+                        <ul class="card-list">
+                            <li>仍能進行狩獵，但成功率較低，更依賴群體合作和陷阱。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 採集者 -->
+                <div class="card-base role-card p-6">
+                    <div>
+                        <div class="card-header">
+                            <h3 class="card-title">🌿 採集者</h3>
+                            <span class="card-icon">👤</span>
+                        </div>
+                        <p class="card-description">熟悉各種植物，能高效地採集果實、根莖與藥草，是部落食物的重要來源。</p>
+                        
+                        <h4 class="card-section-title">起始資源</h4>
+                        <ul class="card-list">
+                            <li>漿果代幣 x3</li>
+                            <li>藥草 x1</li>
+                        </ul>
+
+                        <h4 class="card-section-title">特殊能力</h4>
+                        <ul class="card-list">
+                            <li>**豐收：** 進行「採集」植物性食物行動時，額外獲得 1 份資源。</li>
+                            <li>**辨識：** 在「森林」或「河流」板塊，有機會發現稀有植物（例如：治療疾病的藥草）。</li>
+                        </ul>
+
+                        <h4 class="card-section-title">「無火」情境下的適應</h4>
+                        <ul class="card-list">
+                            <li>更擅長尋找可生食或發酵的植物，以彌補烹飪的不足。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 工匠 -->
+                <div class="card-base role-card p-6">
+                    <div>
+                        <div class="card-header">
+                            <h3 class="card-title">🔨 工匠</h3>
+                            <span class="card-icon">👤</span>
+                        </div>
+                        <p class="card-description">精通製作工具，能將石頭與獸骨轉化為有用的器具，提升部落的整體效率。</p>
+                        
+                        <h4 class="card-section-title">起始資源</h4>
+                        <ul class="card-list">
+                            <li>石頭代幣 x3</li>
+                            <li>骨頭代幣 x1</li>
+                        </ul>
+
+                        <h4 class="card-section-title">特殊能力</h4>
+                        <ul class="card-list">
+                            <li>**快速製作：** 製作或修復工具時，所需行動點數減少 1 點。</li>
+                            <li>**創新：** 可嘗試製作一些基礎模式下無法製作的特殊工具（例如：更堅固的繩索、簡易陷阱）。</li>
+                        </ul>
+
+                        <h4 class="card-section-title">「無利器」情境下的適應</h4>
+                        <ul class="card-list">
+                            <li>即使沒有利器，也能更有效地製作鈍器、骨針或利用天然材料改造成工具。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 領袖 -->
+                <div class="card-base role-card p-6">
+                    <div>
+                        <div class="card-header">
+                            <h3 class="card-title">🤝 領袖</h3>
+                            <span class="card-icon">👤</span>
+                        </div>
+                        <p class="card-description">善於溝通與協調，能提升部落的士氣，並在關鍵時刻做出有利於群體的決策。</p>
+                        
+                        <h4 class="card-section-title">起始資源</h4>
+                        <ul class="card-list">
+                            <li>行動點數上限 +1</li>
+                            <li>士氣代幣 x1</li>
+                        </ul>
+
+                        <h4 class="card-section-title">特殊能力</h4>
+                        <ul class="card-list">
+                            <li>**鼓舞士氣：** 每回合可花費 1 點行動點數，使部落「士氣」點數增加 1 點。</li>
+                            <li>**協調者：** 在其他玩家執行「協助他人」行動時，可額外提供 1 點支援。</li>
+                        </ul>
+
+                        <h4 class="card-section-title">「無火」或「無利器」情境下的適應</h4>
+                        <ul class="card-list">
+                            <li>在逆境中維持部落凝聚力至關重要，其能力有助於克服因資源匱乏或困難挑戰導致的士氣低落。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 探索者 -->
+                <div class="card-base role-card p-6">
+                    <div>
+                        <div class="card-header">
+                            <h3 class="card-title">🧭 探索者</h3>
+                            <span class="card-icon">👤</span>
+                        </div>
+                        <p class="card-description">勇於探索未知，擅長在複雜地形中尋找新的資源點和安全路線。</p>
+                        
+                        <h4 class="card-section-title">起始資源</h4>
+                        <ul class="card-list">
+                            <li>地圖碎片 x1</li>
+                            <li>水代幣 x1</li>
+                        </ul>
+
+                        <h4 class="card-section-title">特殊能力</h4>
+                        <ul class="card-list">
+                            <li>**快速移動：** 移動到相鄰板塊時，消耗的行動點數減少 0.5 點（向下取整）。</li>
+                            <li>**發現：** 進入新的「未知」板塊時，有機會額外發現 1 份資源或揭示一個隱藏的庇護所。</li>
+                        </ul>
+
+                        <h4 class="card-section-title">所有情境下的適應</h4>
+                        <ul class="card-list">
+                            <li>其探索能力在任何資源受限或需要尋找替代方案的情境下都非常重要。</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center p-4 mt-12 text-stone-500 text-sm">
+        <p>此圖卡範本旨在提供設計靈感，可根據實際需求進行調整。</p>
+    </footer>
+
+</body>
+</html>
