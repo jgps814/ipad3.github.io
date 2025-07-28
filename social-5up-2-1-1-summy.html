@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式臺灣大航海時代探索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Subtle Accents -->
+    <!-- Application Structure Plan: A single-page application with a fixed top navigation bar allowing users to jump between thematic sections: 1. Introduction (The World Island concept), 2. The Actors (Interactive cards for each group), 3. The Impact (Tabbed view for Political, Economic, Social changes with a chart), 4. The Legacy (Interactive table comparing policies across eras), 5. Place Name Detective (Interactive map). This structure transforms the linear report into an exploratory experience, allowing users to compare and connect ideas non-linearly, which is more engaging for learning and understanding complex historical relationships. -->
+    <!-- Visualization & Content Choices: 1. Actors: Report info on motivations -> Goal: Organize/Inform -> Viz: Interactive HTML cards -> Interaction: Click to reveal details -> Justification: Breaks down dense text into digestible, comparable chunks. 2. Economic Impact: Report info on trade goods -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Hover for details -> Justification: Quantifies and visualizes the scale of trade better than text. 3. Legacy: Report info on policy continuity -> Goal: Show Change -> Viz: Interactive Table (HTML/JS) -> Interaction: Click buttons to filter content by policy -> Justification: Dynamically shows the "layering" of history, a core report theme. 4. Geography: Report info on historical sites -> Goal: Organize/Relate -> Viz: Interactive Map (HTML/JS) -> Interaction: Click hotspots to open modals -> Justification: Provides crucial spatial context. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #F5F5F4; /* Stone 100 */
+            color: #374151; /* Gray 700 */
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+            border-bottom-width: 2px;
+            border-color: transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #0D9488; /* Teal 600 */
+            border-color: #0D9488;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .modal-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-teal-700">臺灣：世界之島</h1>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#intro" class="nav-link text-gray-600 font-medium pb-1">導論</a>
+                    <a href="#actors" class="nav-link text-gray-600 font-medium pb-1">誰來了？</a>
+                    <a href="#impact" class="nav-link text-gray-600 font-medium pb-1">臺灣的轉變</a>
+                    <a href="#legacy" class="nav-link text-gray-600 font-medium pb-1">歷史的迴響</a>
+                    <a href="#places" class="nav-link text-gray-600 font-medium pb-1">地名偵探</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                        <option value="#intro">導論</option>
+                        <option value="#actors">誰來了？</option>
+                        <option value="#impact">臺灣的轉變</option>
+                        <option value="#legacy">歷史的迴響</option>
+                        <option value="#places">地名偵探</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="intro" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">從孤懸之島到世界舞台</h2>
+                <p class="mt-6 max-w-3xl mx-auto text-lg leading-8 text-gray-600">
+                    十六至十七世紀，臺灣從一個相對孤立的島嶼，躍升為全球貿易與地緣政治的樞紐。這段「大航海時代」的歷史，不僅是多方勢力交會的起點，更深刻地塑造了臺灣的人口、經濟與文化，其影響至今依然清晰可見。本頁面將帶您一同探索這段複雜而迷人的歷史，理解臺灣如何成為一座真正的「世界島」。
+                </p>
+            </div>
+        </section>
+
+        <section id="actors" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900">誰來了？為什麼？</h2>
+                    <p class="mt-4 text-lg text-gray-600">
+                        大航海時代的臺灣，是各方勢力競逐的舞台。從歐洲的殖民強權到東亞的海商集團，他們為何而來？又在臺灣從事哪些活動？點擊下方的卡片，了解各個角色的動機與故事。
+                    </p>
+                </div>
+                <div id="actors-grid" class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900">一座被改變的島嶼</h2>
+                    <p class="mt-4 text-lg text-gray-600">
+                        外來勢力的到來，為臺灣社會帶來了劇烈的變革。無論是政治結構、經濟模式還是文化樣貌，都產生了深遠的影響。此區將從不同面向，探討這些影響如何重塑臺灣。
+                    </p>
+                </div>
+                <div class="mt-12">
+                    <div class="border-b border-gray-200">
+                        <nav id="impact-tabs" class="-mb-px flex justify-center space-x-4 md:space-x-8" aria-label="Tabs">
+                        </nav>
+                    </div>
+                    <div id="impact-content" class="mt-8">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="legacy" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900">歷史的迴響：跨時代的延續與變革</h2>
+                    <p class="mt-4 text-lg text-gray-600">
+                        大航海時代的影響並未隨著政權更迭而消失。許多制度、政策與文化實踐，被後來的鄭氏、清朝甚至日治時期所繼承或調整。點擊下方按鈕，觀察特定政策如何跨越時代，展現歷史的延續性。
+                    </p>
+                </div>
+                <div class="mt-12 max-w-5xl mx-auto">
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <div id="legacy-buttons"></div>
+                    </div>
+                    <div id="legacy-content" class="mt-8 bg-white p-6 rounded-lg shadow-md min-h-[200px]">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="places" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900">地名偵探：歷史就在我們腳下</h2>
+                    <p class="mt-4 text-lg text-gray-600">
+                        許多臺灣現今的地名，都承載著大航海時代的記憶。點擊地圖上的標記，探索這些地點的歷史故事。同時，也思考為何有些地方成為歷史中心，而有些地方則否？
+                    </p>
+                </div>
+                <div class="mt-12 max-w-3xl mx-auto">
+                    <div class="relative w-full aspect-[3/4] md:aspect-[4/3] bg-teal-50 rounded-lg overflow-hidden">
+                        <div class="absolute inset-0 bg-contain bg-no-repeat bg-center" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e3/Taiwan_outline_map.png'); opacity: 0.4;"></div>
+                        <button data-place="tamsui" class="absolute flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition" style="top: 15%; left: 30%;">1</button>
+                        <button data-place="keelung" class="absolute flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition" style="top: 14%; left: 45%;">2</button>
+                        <button data-place="anping" class="absolute flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition" style="top: 55%; left: 15%;">3</button>
+                        <button data-place="sanxia" class="absolute flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gray-400 text-white rounded-full shadow-lg hover:bg-gray-500 transition" style="top: 22%; left: 35%;">?</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
+            <p>此頁面根據「深化與延伸：臺灣大航海時代課程活動報告」內容生成。</p>
+            <p class="text-sm mt-2">一個為歷史學習而設計的互動式體驗。</p>
+        </div>
+    </footer>
+
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 modal-backdrop opacity-0 pointer-events-none">
+        <div id="modal-content" class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6 transform scale-95">
+            <div class="flex justify-between items-start">
+                <h3 id="modal-title" class="text-2xl font-bold text-gray-900"></h3>
+                <button id="modal-close" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="modal-body" class="mt-4 text-gray-600"></div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const data = {
+        actors: [
+            { 
+                name: '歐洲強權 (荷/西)', 
+                icon: '🌍',
+                summary: '為貿易、戰略與宗教而來，建立殖民地，將臺灣捲入世界體系。',
+                details: '<strong>動機：</strong><br>• <strong>經濟：</strong> 荷蘭東印度公司(VOC)尋求東亞貿易據點，出口鹿皮、蔗糖，轉運絲綢、香料。<br>• <strong>地緣政治：</strong> 控制連接中國、日本、東南亞的關鍵航道，與西班牙在臺形成南北對峙。<br>• <strong>宗教：</strong> 荷蘭人傳播新教，西班牙人傳播天主教。<br><strong>關鍵活動：</strong><br>• 荷蘭於1624年建熱蘭遮城(今安平)，西班牙於1626年佔領雞籠(今基隆)。'
+            },
+            { 
+                name: '中國海商/海盜', 
+                icon: '⛵',
+                summary: '活躍於各勢力間，亦商亦盜，以臺灣為貿易網絡的戰略基地。',
+                details: '<strong>代表人物：</strong>李旦、顏思齊、鄭芝龍。<br><strong>動機：</strong><br>• <strong>商業利益：</strong> 利用臺灣作為廣泛貿易網絡的基地，與歐洲、日本及原住民交易。<br>• <strong>戰略模糊：</strong> 在商業與海盜活動間游移，利用明朝對臺治權的真空地帶發展勢力。<br><strong>關鍵活動：</strong><br>• 建立海上艦隊，控制臺灣海峽，與荷蘭人既合作又競爭。'
+            },
+            { 
+                name: '日本商人', 
+                icon: '🏯',
+                summary: '早期懷有貿易野心，稱臺灣為「高砂」，後因鎖國政策而退出。',
+                details: '<strong>動機：</strong><br>• <strong>貿易獨佔：</strong> 德川幕府曾懷有獨佔臺灣貿易的野心，並嘗試過軍事遠征。<br><strong>關鍵活動：</strong><br>• 活躍於臺灣進行貿易，但隨著1639年幕府實施鎖國政策，日本對臺的官方興趣顯著減退。'
+            },
+            { 
+                name: '臺灣原住民', 
+                icon: '🏹',
+                summary: '並非被動的受害者，而是積極的參與者，與外來者貿易、結盟或對抗。',
+                details: '<strong>角色：</strong><br>• <strong>積極參與者：</strong> 參與貿易，與外來勢力建立或對抗戰略聯盟，發動反抗行動。<br>• <strong>多元社群：</strong> 各社群(如西拉雅族、凱達格蘭族)有不同的應對策略。<br><strong>關鍵互動：</strong><br>• 與歐洲人合作以獲取武器對抗敵對部落。<br>• 傳統生活方式(狩獵、游耕)因外來經濟模式而受到巨大衝擊。'
+            }
+        ],
+        impacts: {
+            political: {
+                title: '政治結構',
+                icon: '🏛️',
+                content: `
+                    <p class="mb-4">荷蘭人建立了集中的殖民行政體系，深刻改變了臺灣的政治地景。他們透過武力與條約，將原住民部落納入其統治。</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>殖民行政：</strong>於大員(安平)建立行政中心，系統性地征服原住民部落。</li>
+                        <li><strong>地方會議：</strong>建立「地方會議」制度，要求部落長老宣誓效忠，其權力需經荷蘭人認可。</li>
+                        <li><strong>南北對峙：</strong>西班牙人則在北部(雞籠、淡水)建立據點，但控制力較不穩定，最終被荷蘭人驅逐。</li>
+                    </ul>
+                `
+            },
+            economic: {
+                title: '經濟轉型',
+                icon: '💹',
+                content: `
+                    <p class="mb-4">臺灣被納入全球貿易網絡，經濟模式發生劇變。新作物與新制度的引進，帶來了機遇，也帶來了剝削。</p>
+                    <div class="chart-container my-6">
+                        <canvas id="tradeChart"></canvas>
+                    </div>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>全球貿易：</strong>成為轉運站，出口鹿皮、蔗糖，進口絲綢、瓷器。</li>
+                        <li><strong>農業變革：</strong>引進耕牛與新作物(玉米、番薯等)，並鼓勵漢人移民擴大種植。</li>
+                        <li><strong>資源枯竭：</strong>鹿皮的過度貿易導致梅花鹿數量銳減。</li>
+                        <li><strong>贌社制度：</strong>一種壟斷性的包稅貿易制度，常導致漢人承包商對原住民的剝削。</li>
+                    </ul>
+                `
+            },
+            cultural: {
+                title: '社會文化變遷',
+                icon: '📜',
+                content: `
+                    <p class="mb-4">大規模漢人移民、新宗教的傳入、新文字的發明，都從根本上改變了臺灣的社會與文化面貌。</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>漢化開端：</strong>荷蘭統治時期標誌著大規模漢人移民的開始。</li>
+                        <li><strong>宗教傳播：</strong>荷蘭傳教士傳播新教，西班牙傳教士傳播天主教。</li>
+                        <li><strong>新港文書：</strong>荷蘭人使用羅馬拼音轉寫西拉雅語，創造了《新港文書》，成為平埔族群使用了150多年的契約文字。</li>
+                        <li><strong>建築與生活：</strong>引入歐洲堡壘建築(如熱蘭遮城)與壁鎖技術，飲食文化也因新作物而改變。</li>
+                    </ul>
+                `
+            }
+        },
+        legacy: {
+            '土地開墾': {
+                '大航海時代': '荷蘭鼓勵漢人移民發展農業(稻米、蔗糖)。',
+                '鄭氏政權': '透過軍屯制度持續並加強大規模土地開墾。',
+                '清朝': '繼續推動漢人移民與土地開發，擴大農業邊界。',
+                '日治時期': '現代化土地測量與農業實踐，推動商業化。'
+            },
+            '貿易/稅收': {
+                '大航海時代': '荷蘭實施贌社制度，壟斷與原住民的貿易。',
+                '鄭氏政權': '繼承並延續贌社制度，並進行廣泛海上貿易。',
+                '清朝': '贌社制度逐漸消失，轉為其他形式的包稅制。',
+                '日治時期': '建立對糖、樟腦等關鍵資源的國家專賣制度。'
+            },
+            '原住民治理': {
+                '大航海時代': '荷蘭建立地方會議，利用原住民為輔助軍力與勞役。',
+                '鄭氏政權': '繼承利用原住民勞役和輔助軍力的制度。',
+                '清朝': '實施「番界」、「屯番」制度，納入行政軍事體系。',
+                '日治時期': '實施全面的「理蕃政策」，集中管理與控制。'
+            },
+            '文化/語言': {
+                '大航海時代': '荷蘭引入基督教與羅馬拼音(新港文書)。',
+                '鄭氏政權': '引入儒家文化，設立漢式學校，推動漢化。',
+                '清朝': '進一步推廣漢文化、語言和社會結構。',
+                '日治時期': '系統性推廣日語和神道教，羅馬拼音使用基本消失。'
+            }
+        },
+        places: {
+            anping: {
+                title: '臺南安平 (大員)',
+                content: `
+                    <p><strong>歷史名稱：</strong>大員、熱蘭遮城、王城</p>
+                    <p><strong>相關勢力：</strong>荷蘭、鄭氏政權</p>
+                    <p class="mt-2"><strong>歷史意義：</strong>1624年荷蘭人在此建造熱蘭遮城，成為其在臺的行政與貿易中心。這裡是臺灣與世界接軌的起點，也是荷蘭殖民時代最重要的據點。鄭成功驅逐荷蘭人後，此地亦成為其主要基地。</p>
+                    <p class="mt-2"><strong>現況：</strong>現為安平古堡(國定古蹟)，仍可見部分荷蘭時期城牆遺跡，是見證臺灣歷史的熱門景點。</p>
+                `
+            },
+            keelung: {
+                title: '基隆 (和平島)',
+                content: `
+                    <p><strong>歷史名稱：</strong>雞籠、聖薩爾瓦多城</p>
+                    <p><strong>相關勢力：</strong>西班牙</p>
+                    <p class="mt-2"><strong>歷史意義：</strong>1626年，西班牙人為對抗南部的荷蘭人並確保貿易路線，在此建立聖薩爾瓦多城，形成「北雞籠，南大員」的對峙局面。這裡是西班牙在臺的主要據點。</p>
+                    <p class="mt-2"><strong>現況：</strong>持續的考古工作正逐步揭開聖薩爾瓦多城與諸聖教堂的神秘面紗，為西班牙時期的歷史提供關鍵證據。</p>
+                `
+            },
+            tamsui: {
+                title: '淡水 (滬尾)',
+                content: `
+                    <p><strong>歷史名稱：</strong>聖多明哥城、安東尼堡、紅毛城</p>
+                    <p><strong>相關勢力：</strong>西班牙、荷蘭</p>
+                    <p class="mt-2"><strong>歷史意義：</strong>西班牙人於1628年在此建聖多明哥城，後被摧毀。1644年荷蘭人於原址附近重建更堅固的安東尼堡，即「紅毛城」前身。這裡是控制臺灣北部與硫磺貿易的戰略要地。</p>
+                    <p class="mt-2"><strong>現況：</strong>紅毛城是臺灣現存最古老的建築之一，為國定古蹟，見證了臺灣北部的政權更迭。</p>
+                `
+            },
+            sanxia: {
+                title: '三峽 (歷史空白的啟示)',
+                content: `
+                    <p><strong>歷史意義：</strong>現有資料顯示，三峽的地名與大航海時代的歐洲、中國或日本海商活動沒有直接關聯。這不是研究的失敗，而是一個重要的歷史發現。</p>
+                    <p class="mt-2"><strong>思考點：</strong>為什麼有些地區成為中心，有些則處於邊緣？這引導我們思考地理位置(沿海 vs 內陸)、資源分佈(鹿、硫磺)與戰略價值等因素，如何決定了殖民勢力的興趣範圍。這種「不存在」的歷史，同樣富有啟發性，讓我們理解大航海時代的影響在臺灣並非均勻分佈。</p>
+                `
+            }
+        }
+    };
+
+    const actorsGrid = document.getElementById('actors-grid');
+    data.actors.forEach(actor => {
+        const card = document.createElement('div');
+        card.className = 'card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer';
+        card.innerHTML = `
+            <div class="p-6">
+                <div class="flex items-center">
+                    <span class="text-4xl mr-4">${actor.icon}</span>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">${actor.name}</h3>
+                        <p class="text-gray-600 mt-1">${actor.summary}</p>
+                    </div>
+                </div>
+                <div class="actor-details hidden mt-4 pt-4 border-t border-gray-200 text-gray-600">
+                    ${actor.details}
+                </div>
+            </div>
+        `;
+        actorsGrid.appendChild(card);
+        card.addEventListener('click', () => {
+            card.querySelector('.actor-details').classList.toggle('hidden');
+        });
+    });
+
+    const impactTabs = document.getElementById('impact-tabs');
+    const impactContent = document.getElementById('impact-content');
+    let tradeChartInstance = null;
+    
+    Object.keys(data.impacts).forEach((key, index) => {
+        const impact = data.impacts[key];
+        const tab = document.createElement('button');
+        tab.className = 'impact-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
+        tab.dataset.target = key;
+        tab.innerHTML = `${impact.icon} ${impact.title}`;
+        if (index === 0) {
+            tab.classList.add('border-teal-500', 'text-teal-600');
+        } else {
+            tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        }
+        impactTabs.appendChild(tab);
+    });
+
+    function renderImpactContent(key) {
+        const impact = data.impacts[key];
+        impactContent.innerHTML = impact.content;
+        if (key === 'economic') {
+            const ctx = document.getElementById('tradeChart').getContext('2d');
+            if (tradeChartInstance) {
+                tradeChartInstance.destroy();
+            }
+            tradeChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['鹿皮', '蔗糖', '絲綢(轉口)', '瓷器(轉口)'],
+                    datasets: [{
+                        label: '主要貿易商品相對重要性',
+                        data: [90, 75, 85, 60],
+                        backgroundColor: [
+                            'rgba(217, 119, 6, 0.6)',
+                            'rgba(22, 163, 74, 0.6)',
+                            'rgba(220, 38, 38, 0.6)',
+                            'rgba(37, 99, 235, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(217, 119, 6, 1)',
+                            'rgba(22, 163, 74, 1)',
+                            'rgba(220, 38, 38, 1)',
+                            'rgba(37, 99, 235, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '相對重要性指數' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    impactTabs.addEventListener('click', (e) => {
+        const targetButton = e.target.closest('.impact-tab');
+        if (targetButton) {
+            document.querySelectorAll('.impact-tab').forEach(tab => {
+                tab.classList.remove('border-teal-500', 'text-teal-600');
+                tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            });
+            targetButton.classList.add('border-teal-500', 'text-teal-600');
+            targetButton.classList.remove('border-transparent', 'text-gray-500');
+            renderImpactContent(targetButton.dataset.target);
+        }
+    });
+
+    renderImpactContent('political');
+
+    const legacyButtonsContainer = document.getElementById('legacy-buttons');
+    const legacyContent = document.getElementById('legacy-content');
+    Object.keys(data.legacy).forEach((key, index) => {
+        const button = document.createElement('button');
+        button.className = 'legacy-button px-4 py-2 text-sm font-medium rounded-full transition';
+        button.dataset.target = key;
+        button.textContent = key;
+        if (index === 0) {
+            button.classList.add('bg-teal-600', 'text-white');
+        } else {
+            button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+        }
+        legacyButtonsContainer.appendChild(button);
+    });
+
+    function renderLegacyContent(key) {
+        const item = data.legacy[key];
+        let html = `<h3 class="text-xl font-bold text-gray-800 mb-4">${key}的演變</h3>`;
+        html += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">';
+        Object.keys(item).forEach(era => {
+            html += `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-bold text-teal-700">${era}</h4>
+                    <p class="mt-2 text-sm">${item[era]}</p>
+                </div>
+            `;
+        });
+        html += '</div>';
+        legacyContent.innerHTML = html;
+    }
+
+    legacyButtonsContainer.addEventListener('click', (e) => {
+        const targetButton = e.target.closest('.legacy-button');
+        if (targetButton) {
+            document.querySelectorAll('.legacy-button').forEach(btn => {
+                btn.classList.remove('bg-teal-600', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            });
+            targetButton.classList.add('bg-teal-600', 'text-white');
+            targetButton.classList.remove('bg-gray-200');
+            renderLegacyContent(targetButton.dataset.target);
+        }
+    });
+
+    renderLegacyContent('土地開墾');
+
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modal-content');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalClose = document.getElementById('modal-close');
+
+    function openModal(placeKey) {
+        const place = data.places[placeKey];
+        modalTitle.textContent = place.title;
+        modalBody.innerHTML = place.content;
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modalContent.classList.remove('scale-95');
+    }
+
+    function closeModal() {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modalContent.classList.add('scale-95');
+    }
+
+    document.querySelectorAll('[data-place]').forEach(button => {
+        button.addEventListener('click', () => {
+            openModal(button.dataset.place);
+        });
+    });
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                });
+                mobileNav.value = `#${entry.target.id}`;
+            }
+        });
+    }, { rootMargin: '-50% 0px -50% 0px' });
+
+    sections.forEach(section => observer.observe(section));
+    
+    mobileNav.addEventListener('change', (e) => {
+        window.location.href = e.target.value;
+    });
+});
+</script>
+
+</body>
+</html>
