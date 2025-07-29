@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>荷蘭時期臺灣：互動式歷史探索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Amber & Teal -->
+    <!-- Application Structure Plan: The application is structured into two main thematic sections: "The Dutch Decision" and "The Unfolding Impact". This is more user-friendly than a linear report structure. The "Decision" section uses an interactive dashboard model with a radar chart and clickable cards to let users explore the *reasons* for colonization. The "Impact" section uses a perspective-switching interface to directly compare the consequences for the Dutch, Han, and Indigenous peoples, fostering critical analysis of the historical event's multi-faceted nature. This design promotes active exploration and comparison over passive reading. -->
+    <!-- Visualization & Content Choices: 1. Dutch Decision Factors: Report Info -> Table of reasons for choosing Taiwan. Goal -> Inform/Compare. Viz -> Radar Chart (Chart.js) for high-level summary & clickable HTML cards for details. Interaction -> Hover on chart, click on cards. Justification -> Breaks down complex decision-making into digestible, explorable parts. 2. Multi-perspective Impact: Report Info -> Analysis of impact on different groups. Goal -> Compare/Show Relationships. Viz -> Dynamic Bar Chart (Chart.js) showing conceptual impact scores + dynamic text blocks. Interaction -> User clicks perspective buttons (Dutch, Han, Indigenous) to update both the chart and text simultaneously. Justification -> Forces direct comparison of viewpoints, which is the core of the learning objective. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #fdfbf7;
+            color: #44403c;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+                max-height: 50vh;
+            }
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button:hover {
+            background-color: #f59e0b;
+            color: #ffffff;
+        }
+        .factor-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .factor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .perspective-btn.active {
+            background-color: #0d9488;
+            color: white;
+            font-weight: 700;
+        }
+        .content-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-teal-800">荷蘭時期臺灣史探索</h1>
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <button onclick="scrollToSection('decision')" class="nav-button px-3 py-2 rounded-md text-sm font-medium text-stone-700">荷蘭的抉擇</button>
+                    <button onclick="scrollToSection('impact')" class="nav-button px-3 py-2 rounded-md text-sm font-medium text-stone-700">多方衝擊</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <!-- Section 1: The Dutch Decision -->
+        <section id="decision" class="mb-16 md:mb-24 scroll-mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-teal-900 mb-4">荷蘭的抉擇</h2>
+                <p class="max-w-3xl mx-auto text-lg text-stone-600">荷蘭東印度公司(VOC)為何選擇臺灣南部作為統治根據地？這是一個綜合了地理、經濟、政治與資源等多重因素的戰略決策。本區將帶您深入探索這些關鍵考量。</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div class="w-full">
+                    <h3 class="text-xl font-bold text-center mb-4 text-stone-700">決策因素重要性評估</h3>
+                    <div class="chart-container">
+                        <canvas id="decisionChart"></canvas>
+                    </div>
+                </div>
+                <div class="w-full">
+                    <h3 class="text-xl font-bold text-center mb-4 text-stone-700">點擊探索關鍵因素</h3>
+                    <div id="decision-details" class="bg-white p-6 rounded-lg shadow-md min-h-[350px] md:min-h-[400px] flex flex-col justify-center content-fade-in">
+                        <p class="text-stone-500 text-center">請點擊下方的卡片，查看各項因素的詳細說明。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+                <div onclick="showDetail('geopolitics')" class="factor-card bg-amber-100 p-4 rounded-lg text-center">
+                    <p class="text-2xl mb-2">🌏</p>
+                    <h4 class="font-bold text-amber-900">地緣政治</h4>
+                </div>
+                <div onclick="showDetail('economy')" class="factor-card bg-teal-100 p-4 rounded-lg text-center">
+                    <p class="text-2xl mb-2">💰</p>
+                    <h4 class="font-bold text-teal-900">經濟貿易</h4>
+                </div>
+                <div onclick="showDetail('resources')" class="factor-card bg-green-100 p-4 rounded-lg text-center">
+                    <p class="text-2xl mb-2">🦌</p>
+                    <h4 class="font-bold text-green-900">資源勞力</h4>
+                </div>
+                <div onclick="showDetail('strategy')" class="factor-card bg-sky-100 p-4 rounded-lg text-center">
+                    <p class="text-2xl mb-2">🎯</p>
+                    <h4 class="font-bold text-sky-900">戰略地位</h4>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Unfolding Impact -->
+        <section id="impact" class="scroll-mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-teal-900 mb-4">失衡的世界：多方視角的衝擊</h2>
+                <p class="max-w-3xl mx-auto text-lg text-stone-600">荷蘭人招募漢人來臺開墾，深刻地改變了臺灣的社會、經濟與生態。這是一段充滿衝突、剝削與文化交融的歷史。請切換不同族群的視角，理解他們各自的經歷與感受。</p>
+            </div>
+            
+            <div class="flex justify-center mb-8">
+                <div class="flex space-x-1 bg-stone-200 p-1 rounded-lg">
+                    <button id="btn-dutch" onclick="switchPerspective('dutch')" class="perspective-btn px-4 py-2 text-sm md:text-base rounded-md transition-colors duration-300">荷蘭人視角</button>
+                    <button id="btn-han" onclick="switchPerspective('han')" class="perspective-btn px-4 py-2 text-sm md:text-base rounded-md transition-colors duration-300">漢人視角</button>
+                    <button id="btn-indigenous" onclick="switchPerspective('indigenous')" class="perspective-btn px-4 py-2 text-sm md:text-base rounded-md transition-colors duration-300">原住民族視角</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12">
+                <div class="lg:col-span-3">
+                    <div id="impact-content" class="space-y-6">
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h4 class="text-xl font-bold text-teal-800 mb-3">土地權益的變遷</h4>
+                            <p id="impact-land" class="text-stone-700 content-fade-in"></p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h4 class="text-xl font-bold text-teal-800 mb-3">經濟生活的轉變</h4>
+                            <p id="impact-economy" class="text-stone-700 content-fade-in"></p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h4 class="text-xl font-bold text-teal-800 mb-3">社會文化的衝擊</h4>
+                            <p id="impact-culture" class="text-stone-700 content-fade-in"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <div class="bg-white p-6 rounded-lg shadow-md sticky top-24">
+                        <h3 class="text-xl font-bold text-center mb-4 text-stone-700">各方衝擊概念圖</h3>
+                        <div class="chart-container">
+                            <canvas id="impactChart"></canvas>
+                        </div>
+                         <p class="text-xs text-stone-400 text-center mt-2">此圖表為概念示意，旨在呈現不同群體在各面向的利弊得失感受，並非精確量化數據。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-stone-800 text-stone-300 mt-16">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
+            <p>本互動頁面旨在提供歷史學習的多元視角，促進批判性思考與討論。</p>
+            <p class="text-sm mt-2 text-stone-400">內容根據教學資料編製，僅供教育用途。</p>
+        </div>
+    </footer>
+
+    <script>
+        const decisionDetailsData = {
+            geopolitics: {
+                title: '🌏 地緣政治優勢',
+                content: '臺灣位於東亞貿易航線的樞紐，是連結中國、日本與東南亞的完美中繼站。更重要的是，17世紀的臺灣被視為「無國家地帶」，荷蘭人在此建立據點可避免與明朝或日本幕府等強權直接衝突，大幅降低了殖民的政治成本與風險。'
+            },
+            economy: {
+                title: '💰 經濟貿易驅動',
+                content: 'VOC來亞洲的核心目標是貿易獲利。他們急需日本的白銀來購買亞洲商品，而中國的絲綢在日本市場利潤極高。臺灣成為了中日轉口貿易的理想倉儲與轉運中心。後期，當轉口貿易受阻，臺灣本土的鹿皮與蔗糖貿易更成為重要的收入來源。'
+            },
+            resources: {
+                title: '🦌 資源與勞動力',
+                content: '為了發展蔗糖與稻米等農業，荷蘭人需要大量勞動力，因此積極從中國招募漢人來臺開墾。同時，臺灣西部平原豐富的梅花鹿是重要的商品資源，鹿皮是銷往日本的高利潤商品。荷蘭人透過「贌社制」等制度壟斷這些資源貿易。'
+            },
+            strategy: {
+                title: '🎯 戰略地位考量',
+                content: '建立一個穩定的貿易據點，是為了解決VOC在亞洲的財務壓力，並鞏固其在東亞貿易網絡中的核心地位。臺灣不僅是一個貿易點，更是荷蘭用以挑戰西班牙、葡萄牙等歐洲對手在亞洲勢力的前進基地，戰略意義重大。'
+            }
+        };
+
+        const impactData = {
+            dutch: {
+                land: '透過與原住民的協約或武力征服，我們取得了開墾所需的大量土地，為公司創造了穩定的農業基地，這是拓展臺灣經濟價值的基礎。土地是公司重要的資產。',
+                economy: '招募漢人開墾，發展蔗糖與稻米，並透過「贌社制」壟斷鹿皮貿易，為公司帶來了巨大利潤。臺灣從一個轉口港，轉變為具有生產價值的殖民地，成功緩解了公司的財務壓力。',
+                culture: '我們推行基督教信仰與西式教育，是為了「教化」原住民，使其成為文明的子民，這有助於建立穩定的社會秩序，方便我們的統治。新港文書的發明是我們教化成功的證明。',
+                scores: [8, 9, 7] 
+            },
+            han: {
+                land: '荷蘭人提供土地與獎勵，讓我們這些在家鄉難以維生的人有了新的機會。雖然開墾辛苦，但能擁有自己耕作的土地，是我們夢寐以求的。我們憑藉努力，將荒地變成了良田。',
+                economy: '除了務農，我們也透過「贌社」制度，承包與原住民的交易權，從中獲取利潤。雖然要繳稅給荷蘭人，但比起在家鄉，這裡的經濟機會多太多了，生活得到了極大改善。',
+                culture: '我們帶來了原鄉的信仰、語言和生活習慣。雖然在荷蘭人統治下生活，但我們仍努力維持著自己的文化傳統，並在此落地生根，建立新的家園。',
+                scores: [7, 8, 6]
+            },
+            indigenous: {
+                land: '我們的獵場變成了甘蔗田，傳統的生活空間被嚴重壓縮。荷蘭人與漢人用我們不懂的「契約」拿走了土地，我們的子孫失去了賴以維生的根基，被迫遷徙或在狹小的土地上掙扎。',
+                economy: '鹿隻從食物變成了商品，過度捕獵讓鹿群迅速消失。我們被捲入不公平的「贌社制」交易中，傳統的自給自足經濟被破壞，生活變得更加貧困，還要負擔沉重的賦稅。',
+                culture: '我們的信仰（尪姨）被打壓，祖靈的祭典被禁止。雖然荷蘭人帶來了文字（新港文書），但我們的傳統文化正在快速流失，被迫學習陌生的宗教與生活方式，失去了自己的根。',
+                scores: [1, 2, 2]
+            }
+        };
+        
+        let decisionChart, impactChart;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDecisionChart();
+            renderImpactChart();
+            showDetail('geopolitics');
+            switchPerspective('dutch');
+        });
+
+        function renderDecisionChart() {
+            const ctx = document.getElementById('decisionChart').getContext('2d');
+            decisionChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['地緣政治', '經濟貿易', '資源勞力', '戰略地位'],
+                    datasets: [{
+                        label: '重要性評估',
+                        data: [9, 10, 8, 9],
+                        backgroundColor: 'rgba(13, 148, 136, 0.2)',
+                        borderColor: 'rgba(13, 148, 136, 1)',
+                        pointBackgroundColor: 'rgba(13, 148, 136, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(13, 148, 136, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { font: { size: 14 }, color: '#44403c' },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                stepSize: 2,
+                                max: 10,
+                                min: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderImpactChart() {
+            const ctx = document.getElementById('impactChart').getContext('2d');
+            impactChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['土地權益', '經濟生活', '文化保存'],
+                    datasets: [{
+                        label: '衝擊指數',
+                        data: [],
+                        backgroundColor: [
+                            'rgba(251, 146, 60, 0.6)',
+                            'rgba(20, 184, 166, 0.6)',
+                            'rgba(59, 130, 246, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(251, 146, 60, 1)',
+                            'rgba(20, 184, 166, 1)',
+                            'rgba(59, 130, 246, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        let score = context.parsed.x;
+                                        if (score <= 3) label += '嚴重負面衝擊';
+                                        else if (score <= 5) label += '輕微負面影響';
+                                        else if (score <= 7) label += '正面影響';
+                                        else label += '重大利益';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function showDetail(factor) {
+            const detailBox = document.getElementById('decision-details');
+            const data = decisionDetailsData[factor];
+            detailBox.innerHTML = `
+                <h4 class="text-2xl font-bold text-teal-800 mb-4">${data.title}</h4>
+                <p class="text-stone-700 leading-relaxed">${data.content}</p>
+            `;
+            detailBox.classList.remove('content-fade-in');
+            void detailBox.offsetWidth;
+            detailBox.classList.add('content-fade-in');
+        }
+
+        function switchPerspective(perspective) {
+            const data = impactData[perspective];
+            
+            document.getElementById('impact-land').textContent = data.land;
+            document.getElementById('impact-economy').textContent = data.economy;
+            document.getElementById('impact-culture').textContent = data.culture;
+            
+            ['land', 'economy', 'culture'].forEach(id => {
+                const el = document.getElementById(`impact-${id}`);
+                el.classList.remove('content-fade-in');
+                void el.offsetWidth;
+                el.classList.add('content-fade-in');
+            });
+
+            document.querySelectorAll('.perspective-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`btn-${perspective}`).classList.add('active');
+            
+            impactChart.data.datasets[0].data = data.scores;
+            impactChart.update();
+        }
+        
+        function scrollToSection(id) {
+            const section = document.getElementById(id);
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+    </script>
+</body>
+</html>
