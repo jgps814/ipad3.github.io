@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式教學網頁：17世紀臺灣的荷西競爭</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Subtle Accents -->
+    <!-- Application Structure Plan: The application is structured as a single-page exploratory journey, moving from macro to micro. It starts with a global context (Section 1: The Stage), moves to the core interactive comparison (Section 2: The Rivalry), and finishes with deeper, activity-based learning (Section 3: Deep Dive). This non-linear, section-based structure, accessible via a sticky navigation bar, allows students to explore topics based on interest rather than following a rigid lesson plan. The goal is to transform passive reading into active discovery, making the complex historical relationships more digestible and engaging. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Dutch vs. Spanish colonial efforts. Goal: Compare. Viz/Method: Interactive two-column layout with buttons to dynamically update content, replacing the static T-Chart. Interaction: Clicking category buttons. Justification: Encourages active comparison over passive reading. Library: Vanilla JS for DOM manipulation.
+        - Report Info: Economic outcomes. Goal: Compare. Viz/Method: Bar Chart. Interaction: Hover for tooltips. Justification: Provides an immediate, powerful visual summary of the economic disparity. Library: Chart.js.
+        - Report Info: Geographical locations. Goal: Organize & Relate. Viz/Method: An image map with interactive hotspots. Interaction: Hovering over key locations. Justification: Connects abstract place names to concrete geographical and strategic importance. Library: HTML/CSS/JS.
+        - Report Info: Different stakeholder perspectives. Goal: Inform & Empathize. Viz/Method: Tabbed interface. Interaction: Clicking on roles. Justification: Simulates the role-playing activity by allowing students to easily switch between different viewpoints, fostering historical empathy. Library: Vanilla JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-active {
+            color: #D97706; /* Amber-600 */
+            font-weight: 700;
+            border-bottom: 2px solid #D97706;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover {
+            color: #D97706;
+            border-bottom: 2px solid #FBBF24; /* Amber-400 */
+        }
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #F3F4F6; /* Gray-100 */
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+        }
+        .comparison-btn {
+            background-color: #F9FAFB; /* Gray-50 */
+            border: 1px solid #E5E7EB; /* Gray-200 */
+            transition: all 0.3s ease;
+        }
+        .comparison-btn:hover {
+            background-color: #FEF3C7; /* Amber-100 */
+            border-color: #FBBF24; /* Amber-400 */
+        }
+        .comparison-btn.active {
+            background-color: #D97706; /* Amber-600 */
+            color: white;
+            border-color: #D97706;
+        }
+        .content-box {
+            background-color: #F9FAFB;
+            border-left: 4px solid;
+            min-height: 200px;
+        }
+        .dutch-border { border-color: #EA580C; /* Orange-600 */ }
+        .spanish-border { border-color: #2563EB; /* Blue-600 */ }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .map-point {
+            position: absolute;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .map-point:hover {
+            transform: scale(1.5);
+        }
+        .map-tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .map-point:hover .map-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">17世紀臺灣的荷西競爭</h1>
+                <div class="hidden sm:flex sm:space-x-6">
+                    <a href="#stage" class="nav-link px-3 py-2 text-sm font-medium text-gray-600">時代背景</a>
+                    <a href="#rivalry" class="nav-link px-3 py-2 text-sm font-medium text-gray-600">互動比較</a>
+                    <a href="#deep-dive" class="nav-link px-3 py-2 text-sm font-medium text-gray-600">深度探索</a>
+                    <a href="#conclusion" class="nav-link px-3 py-2 text-sm font-medium text-gray-600">歷史總結</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="stage" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4">風起雲湧：大航海時代的東亞</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                本節將帶您回到17世紀，一個全球貿易與權力競逐的時代。歐洲的重商主義思潮驅使著各國航向東方，尋找香料、絲綢與財富。在這股浪潮中，臺灣，這個位於東亞航路要衝的島嶼，意外地被推上了世界舞台的中心。
+            </p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-3 text-orange-600">荷蘭：商業帝國的野心</h3>
+                    <p class="text-gray-600">荷蘭東印度公司（VOC）是當時世界上最強大的商業組織。他們的目標非常明確：建立一個壟斷性的東亞貿易網絡。在尋求與中國通商的過程中，他們屢遭挫敗，最終於1624年將目光投向臺灣，佔領大員（今臺南安平），希望以此為基地，撬開東亞貿易的大門。</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-600">西班牙：守成與擴張的權衡</h3>
+                    <p class="text-gray-600">西班牙早已在菲律賓馬尼拉建立穩固的殖民地。他們對臺灣的興趣，起初更多是出於戰略防禦。荷蘭人佔領南臺灣，直接威脅到西班牙的貿易航線與呂宋的安全。為了制衡荷蘭並分一杯羹，西班牙於1626年北上，在雞籠（今基隆）築城，開啟了短暫的南北對峙時期。</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-200">
+
+        <section id="rivalry" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4">雙雄對決：互動式T表比較</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                荷蘭與西班牙在臺灣的經營模式截然不同，這也決定了他們最終的命運。點擊下方按鈕，從不同面向深入比較兩者在臺灣的策略與影響。這個互動工具將取代傳統的靜態表格，讓您更清晰地看見歷史的細節。
+            </p>
+            <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8" id="comparison-controls">
+                <button data-topic="motivation" class="comparison-btn px-4 py-2 rounded-full text-sm font-medium active">動機</button>
+                <button data-topic="base" class="comparison-btn px-4 py-2 rounded-full text-sm font-medium">主要據點</button>
+                <button data-topic="strategy" class="comparison-btn px-4 py-2 rounded-full text-sm font-medium">貿易策略</button>
+                <button data-topic="goods" class="comparison-btn px-4 py-2 rounded-full text-sm font-medium">主要商品</button>
+                <button data-topic="impact" class="comparison-btn px-4 py-2 rounded-full text-sm font-medium">經濟影響</button>
+                <button data-topic="governance" class="comparison-btn px-4 py-2 rounded-full text-sm font-medium">統治特色</button>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4 text-center text-orange-600">荷蘭人 (The Dutch)</h3>
+                    <div id="dutch-content" class="content-box dutch-border p-6 rounded-lg"></div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-4 text-center text-blue-600">西班牙人 (The Spanish)</h3>
+                    <div id="spanish-content" class="content-box spanish-border p-6 rounded-lg"></div>
+                </div>
+            </div>
+            <div class="mt-12">
+                <h3 class="text-2xl font-bold text-center mb-4">經濟成效視覺化</h3>
+                <p class="max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                    最直觀的對比莫過於經濟成果。下方的圖表清晰地展示了荷蘭東印度公司在臺灣的商業經營如何創造巨大利潤，而西班牙的殖民活動卻始終處於虧損狀態，最終難以為繼。
+                </p>
+                <div class="chart-container card p-4">
+                    <canvas id="economicChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-200">
+
+        <section id="deep-dive" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4">深度探索：地圖與視角</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                歷史不僅僅是文字和數據。透過地圖分析和角色扮演，我們可以更立體地理解這段過去。本區提供兩種互動模式，讓您從不同維度探索荷西時期，感受地理位置的重要性與歷史人物的抉擇。
+            </p>
+            <div class="grid lg:grid-cols-2 gap-12">
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center">地理的戰場：互動地圖分析</h3>
+                    <p class="text-center text-gray-600 mb-4">將滑鼠懸停在地圖上的標示點，探索關鍵地理位置的戰略意義。</p>
+                    <div class="relative w-full max-w-lg mx-auto">
+                        <img src="https://placehold.co/600x450/F3F4F6/4A4A4A?text=17世紀臺灣及周邊地圖" alt="17世紀臺灣及周邊地圖" class="rounded-lg w-full h-auto">
+                        <div class="map-point bg-orange-500" style="top: 60%; left: 20%;">
+                            <div class="map-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-2 px-3 text-center">
+                                <strong class="font-bold block">大員 (荷蘭)</strong>
+                                臺灣西南部，港闊水深，易守難攻，是與中國、日本貿易的絕佳樞紐。
+                            </div>
+                        </div>
+                        <div class="map-point bg-blue-500" style="top: 25%; left: 30%;">
+                            <div class="map-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-2 px-3 text-center">
+                                <strong class="font-bold block">雞籠 (西班牙)</strong>
+                                臺灣東北角，雖可停泊船隻，但易受季風影響，補給困難，戰略價值受限。
+                            </div>
+                        </div>
+                         <div class="map-point bg-gray-500" style="top: 55%; left: 5%;">
+                            <div class="map-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-2 px-3 text-center">
+                                <strong class="font-bold block">福建沿海</strong>
+                                華商網絡的來源地，是絲綢、瓷器等商品的供應源頭。
+                            </div>
+                        </div>
+                        <div class="map-point bg-gray-500" style="top: 10%; left: 80%;">
+                            <div class="map-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-gray-800 text-white text-xs rounded py-2 px-3 text-center">
+                                <strong class="font-bold block">日本</strong>
+                                當時全球主要的白銀生產國，是荷蘭三角貿易中的關鍵一環。
+                            </div>
+                        </div>
+                        <div class="map-point bg-gray-500" style="top: 85%; left: 75%;">
+                            <div class="map-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-gray-800 text-white text-xs rounded py-2 px-3 text-center">
+                                <strong class="font-bold block">馬尼拉</strong>
+                                西班牙在亞洲的統治中心，也是其補給臺灣的生命線。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center">誰的賽局？切換歷史視角</h3>
+                    <p class="text-center text-gray-600 mb-4">點擊不同角色，理解他們在這場貿易競逐中的目標與困境。</p>
+                    <div id="role-play-container">
+                        <div class="flex border-b border-gray-200">
+                            <button class="role-tab flex-1 py-2 text-center font-medium text-sm active" data-role="dutch">荷蘭東印度公司</button>
+                            <button class="role-tab flex-1 py-2 text-center font-medium text-sm" data-role="spanish">西班牙總督府</button>
+                            <button class="role-tab flex-1 py-2 text-center font-medium text-sm" data-role="chinese">中國海商</button>
+                            <button class="role-tab flex-1 py-2 text-center font-medium text-sm" data-role="indigenous">臺灣原住民</button>
+                        </div>
+                        <div id="role-content" class="p-4 mt-4 bg-gray-50 rounded-lg min-h-[150px]">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-200">
+
+        <section id="conclusion" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4">歷史的迴響</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                荷蘭與西班牙在臺灣的競爭，雖然短暫，卻對臺灣產生了深遠的影響。這不僅是兩大歐洲海權的對決，更是臺灣被捲入全球化浪潮的開端。
+            </p>
+            <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+                <p class="text-lg text-gray-700 leading-relaxed">
+                    最終，荷蘭憑藉其<strong class="text-orange-600">高度組織化的商業模式</strong>、<strong class="text-orange-600">充足的資源投入</strong>以及<strong class="text-orange-600">明確的盈利目標</strong>，在臺灣建立起一個成功的貿易轉運站和商品化農業基地，將臺灣成功納入其全球貿易網絡。
+                    <br><br>
+                    而西班牙則因其<strong class="text-blue-600">鬆散的管理</strong>、<strong class="text-blue-600">資金的匱乏</strong>以及<strong class="text-blue-600">戰略目標的搖擺不定</strong>，使其在臺灣的經營始終無法獲利，最終在1642年被荷蘭人逐出，結束了這場為期16年的競爭。
+                    <br><br>
+                    這段歷史不僅塑造了臺灣早期的經濟樣貌，引入了商品化農業的概念，也開啟了大規模漢人移民的序幕，深刻地影響了臺灣的族群結構與文化發展，使其成為一個在世界舞台上無法被忽視的節點。
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p>&copy; 2025 互動歷史教學。此為根據教學文件創建的非商業性教育資源。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const comparisonData = {
+                motivation: {
+                    dutch: '<h3>建立東亞貿易網絡</h3><p>核心目標是打通與中國的通商管道，壟斷絲綢、香料等高利潤商品。佔領臺灣最初是偶然，但很快發現其巨大的戰略價值。</p>',
+                    spanish: '<h3>確保呂宋（馬尼拉）安全</h3><p>主要動機是防禦，擔心荷蘭或日本威脅其菲律賓的利益。貿易是次要目標，希望就近購買中國絲綢轉口獲利。</p>'
+                },
+                base: {
+                    dutch: '<h3>大員 (今臺南安平)</h3><p>位於臺灣西南部，地理位置優越，港口條件好，便於與中國、日本和東南亞進行三角貿易。</p>',
+                    spanish: '<h3>雞籠 (今基隆)</h3><p>位於臺灣東北角，主要為軍事防禦目的。地理位置不如大員，且易受季風影響，補給困難。</p>'
+                },
+                strategy: {
+                    dutch: '<h3>高度組織化的商業壟斷</h3><p>由荷蘭東印度公司（VOC）嚴格管理所有商業活動，帳目清晰。以臺灣為轉運站，並引進漢人發展商品化農業（甘蔗、稻米）以供出口。</p>',
+                    spanish: '<h3>鬆散的政府經營</h3><p>管理較為鬆散，未有效壟斷貿易，稅收執行不嚴。嚴重依賴馬尼拉的補給，因資金不足，貿易活動難以展開。</p>'
+                },
+                goods: {
+                    dutch: '<h3>多元化的國際貿易</h3><p>出口：臺灣本地的鹿皮、蔗糖。轉口：中國絲綢、瓷器到歐洲和日本；日本白銀、南洋香料到中國。</p>',
+                    spanish: '<h3>有限的本地貿易</h3><p>期望購買中國絲綢但多數失敗。實際出口少量藤條、硫磺、鹿皮，並需從外地進口米糧。</p>'
+                },
+                impact: {
+                    dutch: '<h3>盈利豐厚，改變臺灣經濟</h3><p>成功將臺灣納入世界貿易體系，建立起以出口為導向的商品化經濟，成為公司在亞洲的金雞母。</p>',
+                    spanish: '<h3>持續虧損，影響甚微</h3><p>商業活動長期虧損，無法自給自足，需馬尼拉持續補助。對臺灣整體經濟影響不大，僅在局部地區引入貨幣概念。</p>'
+                },
+                governance: {
+                    dutch: '<h3>嚴謹的殖民政府</h3><p>建立有效的行政體系，與在臺海商合作，並有系統地引進漢人移民從事開墾，深刻改變臺灣社會結構。</p>',
+                    spanish: '<h3>掙扎的軍事據點</h3><p>長期缺糧，導致與原住民關係緊張，時常發生衝突。傳教活動也因軍力衰退而受限，統治範圍有限。</p>'
+                }
+            };
+
+            const roleData = {
+                dutch: '<h4>目標：利潤最大化</h4><p>我的任務是為公司賺取最大利潤。臺灣是我們打入中國和日本市場的完美跳板。我們需要壟斷鹿皮和蔗糖出口，並確保絲綢-白銀貿易線的暢通。任何阻礙我們賺錢的人，都是我們的敵人。</p>',
+                spanish: '<h4>目標：捍衛帝國疆域</h4><p>荷蘭人就在我們馬尼拉航線的旁邊，這絕不能容忍！我們必須在北臺灣建立據點，保護我們的船隊，並嘗試開展我們自己的絲綢貿易。雖然國王給的資源不多，但這是上帝和國王的榮耀所在。</p>',
+                chinese: '<h4>目標：在夾縫中求生存與利潤</h4><p>哪裡有錢賺，我們就去哪裡。荷蘭人給的價格好，我們就跟他們做生意；西班牙人如果能拿出白銀，我們也不會拒絕。對我們來說，最重要的是貿易自由，誰都別想完全控制我們。</p>',
+                indigenous: '<h4>目標：保護我們的土地與族人</h4><p>這些紅毛仔和紅毛番仔來到我們的土地上，帶來了槍、十字架和奇怪的交易。他們有時會給我們好處，但更多時候是搶奪我們的獵場和糧食。我們必須小心應對，利用他們的矛盾，為我們的部落爭取最大的生存空間。</p>'
+            };
+
+            const dutchContent = document.getElementById('dutch-content');
+            const spanishContent = document.getElementById('spanish-content');
+            const comparisonControls = document.getElementById('comparison-controls');
+            
+            function updateContent(topic) {
+                dutchContent.innerHTML = comparisonData[topic].dutch;
+                spanishContent.innerHTML = comparisonData[topic].spanish;
+            }
+
+            comparisonControls.addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON') {
+                    const topic = e.target.dataset.topic;
+                    if (topic) {
+                        comparisonControls.querySelector('.active').classList.remove('active');
+                        e.target.classList.add('active');
+                        updateContent(topic);
+                    }
+                }
+            });
+
+            updateContent('motivation');
+
+            const economicCtx = document.getElementById('economicChart').getContext('2d');
+            new Chart(economicCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['荷蘭 (Dutch)', '西班牙 (Spanish)'],
+                    datasets: [{
+                        label: '經濟成效評估',
+                        data: [80, -20],
+                        backgroundColor: [
+                            'rgba(234, 88, 12, 0.6)',
+                            'rgba(37, 99, 235, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(234, 88, 12, 1)',
+                            'rgba(37, 99, 235, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value > 0 ? `盈利 ${value}%` : (value < 0 ? `虧損 ${-value}%` : '收支平衡');
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    const value = context.raw;
+                                    if (value > 0) {
+                                        label += `預估盈利 ${value}%`;
+                                    } else {
+                                        label += `預估虧損 ${-value}%`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const rolePlayContainer = document.getElementById('role-play-container');
+            const roleContent = document.getElementById('role-content');
+
+            function updateRoleContent(role) {
+                roleContent.innerHTML = roleData[role];
+            }
+
+            rolePlayContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('role-tab')) {
+                    const role = e.target.dataset.role;
+                    if (role) {
+                        rolePlayContainer.querySelector('.active').classList.remove('active');
+                        e.target.classList.add('active');
+                        updateRoleContent(role);
+                    }
+                }
+            });
+            
+            updateRoleContent('dutch');
+            rolePlayContainer.querySelector('[data-role="dutch"]').classList.add('active');
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('nav-active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('nav-active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
