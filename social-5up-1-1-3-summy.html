@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣建築智慧的古今對話</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive dashboard. It starts with the core questions from the report to frame the user's journey. The main section, "The Architect's Workbench," allows users to select different building types and see their characteristics and a comparative radar chart update in real-time. This comparative and interactive approach is more engaging than a linear report. Following this is a "Climate Challenge" simulation, a gamified element inspired by the report's board game concept, which demonstrates the practical consequences of architectural choices. Finally, a "Wisdom for the Future" section synthesizes the learnings and showcases modern examples. This structure guides the user from inquiry to exploration, simulation, and finally, synthesis, creating a comprehensive and user-friendly learning path. -->
+    <!-- Visualization & Content Choices: Report Info: Comparing traditional vs. modern buildings on various attributes. -> Goal: Compare & Inform. -> Viz/Presentation: Interactive Radar Chart (Chart.js) and dynamic info cards. -> Interaction: User clicks buttons to select a building, which updates both the chart and the visible info card. -> Justification: A radar chart is excellent for multi-attribute comparison, providing an immediate visual summary of a building's strengths and weaknesses. | Report Info: Performance of buildings under climate stress. -> Goal: Demonstrate consequences. -> Viz/Presentation: Text-based notification box. -> Interaction: User selects a building and clicks a button to trigger a random event. -> Justification: This simple gamification makes the abstract concepts of resilience and adaptation tangible and memorable. | Report Info: Modern green building examples. -> Goal: Synthesize & Showcase. -> Viz/Presentation: Card-based layout. -> Justification: Cards provide a clean, organized way to present case studies. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF5;
+            color: #3D405B;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-button:hover, .nav-button.active {
+            color: #8D5B4C;
+            border-bottom-color: #8D5B4C;
+        }
+        .building-selector-btn {
+            transition: all 0.3s ease;
+            border: 1px solid #D1C4E9;
+            background-color: #FFFFFF;
+        }
+        .building-selector-btn:hover {
+            background-color: #EAE3F3;
+            transform: translateY(-2px);
+        }
+        .building-selector-btn.active {
+            background-color: #8D5B4C;
+            color: #FFFFFF;
+            border-color: #8D5B4C;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .challenge-btn {
+            background-color: #E07A5F;
+            transition: background-color 0.3s ease;
+        }
+        .challenge-btn:hover {
+            background-color: #D46A4D;
+        }
+        #challenge-result {
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-[#3D405B]">台灣建築智慧的古今對話</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#intro" class="nav-button pb-1">核心提問</a>
+                <a href="#workbench" class="nav-button pb-1">建築師工作台</a>
+                <a href="#challenge" class="nav-button pb-1">氣候挑戰模擬</a>
+                <a href="#future" class="nav-button pb-1">未來的智慧</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-2xl">☰</button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 space-y-2">
+            <a href="#intro" class="block py-2 text-center nav-button">核心提問</a>
+            <a href="#workbench" class="block py-2 text-center nav-button">建築師工作台</a>
+            <a href="#challenge" class="block py-2 text-center nav-button">氣候挑戰模擬</a>
+            <a href="#future" class="block py-2 text-center nav-button">未來的智慧</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="intro" class="py-16 md:py-24 bg-stone-50">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">探索建築中的永恆智慧</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12">
+                    台灣獨特的氣候與地理，孕育了順應自然的建築巧思。本頁面將帶您深入探討，傳統智慧如何在現代永續建築中找到新的價值。
+                </p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="card p-8">
+                        <h3 class="text-xl font-bold mb-4">為什麼早期的房屋會這樣設計？</h3>
+                        <p class="text-gray-600">面對濕熱、颱風與地震，早期居民如何運用在地材料與被動式設計，打造舒適且具韌性的居所？</p>
+                    </div>
+                    <div class="card p-8">
+                        <h3 class="text-xl font-bold mb-4">現代的房子還需要考慮這些因素嗎？</h3>
+                        <p class="text-gray-600">當我們擁有先進的空調與建材時，是否忽略了建築與環境和諧共生的根本需求？這帶來了哪些代價？</p>
+                    </div>
+                    <div class="card p-8">
+                        <h3 class="text-xl font-bold mb-4">哪些傳統智慧在現代仍有價值？</h3>
+                        <p class="text-gray-600">從自然通風到在地材料，這些跨越時空的原則，如何啟發我們打造更健康、節能且低碳的未來建築？</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="workbench" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">建築師工作台</h2>
+                    <p class="max-w-2xl mx-auto mt-4 text-lg text-gray-600">選擇一種建築類型，觀察其特性與綜合性能評估。您會發現，每種選擇都隱含著對環境、安全與成本的權衡。</p>
+                </div>
+
+                <div class="mb-8 text-center">
+                    <div id="building-selector" class="inline-flex flex-wrap justify-center gap-2 md:gap-4 p-2 bg-gray-100 rounded-full">
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
+                    <div id="building-details-container">
+                    </div>
+                    <div class="chart-container card p-4 md:p-6">
+                        <canvas id="building-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenge" class="py-16 md:py-24 bg-stone-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">氣候挑戰模擬</h2>
+                    <p class="max-w-2xl mx-auto mt-4 text-lg text-gray-600">建築的真正考驗來自大自然。請先在上方「工作台」選擇一種您想測試的建築，然後點擊下方按鈕，看看它如何應對隨機的氣候挑戰。</p>
+                </div>
+                <div class="text-center mb-8">
+                     <p class="text-lg font-semibold mb-4">當前選擇的測試建築：<span id="selected-building-for-challenge" class="text-[#8D5B4C]">尚未選擇</span></p>
+                    <button id="run-challenge" class="challenge-btn text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                        啟動隨機挑戰！
+                    </button>
+                </div>
+                <div id="challenge-result" class="max-w-3xl mx-auto mt-8 opacity-0">
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">未來的智慧：傳統與創新的融合</h2>
+                    <p class="max-w-3xl mx-auto mt-4 text-lg text-gray-600">真正的永續，並非拋棄過去，而是將傳統智慧與現代科技相結合。被動式設計、在地材料、水資源管理等原則，正以新的形式體現在台灣的綠建築中，為我們指引一條更具韌性與環境友善的道路。</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl mb-2">成功大學綠色魔法學校</h3>
+                        <p class="text-gray-600">台灣首座零碳建築，整合太陽能、雨水回收、自然通風與採光，是傳統被動式設計與現代科技結合的典範。</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl mb-2">台積公司 F18P1 辦公棟</h3>
+                        <p class="text-gray-600">將自然元素融入辦公環境，透過先進水資源管理、生態園區與太陽能板，實現發電與遮陽的雙重效益。</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl mb-2">中鼎集團總部大樓</h3>
+                        <p class="text-gray-600">獲綠建築與智慧建築雙鑽石級認證，配備智慧環控系統，並結合水景設計以緩解都市熱島效應。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[#3D405B] text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>本頁面內容根據「台灣建築智慧的古今對話」報告生成。</p>
+            <p class="text-sm mt-2 opacity-75">互動式體驗設計，旨在促進對建築與環境關係的理解。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const buildingData = {
+                '土角厝': {
+                    title: '土角厝：會呼吸的房子',
+                    icon: '�',
+                    description: '以泥土、稻草等在地材料建成，擁有卓越的天然隔熱與濕度調節能力，實現「冬暖夏涼」。',
+                    features: [
+                        { name: '高熱質量', desc: '白天吸熱、夜間放熱，穩定室溫。' },
+                        { name: '濕度調節', desc: '多孔隙材料能吸收和釋放水氣。' },
+                        { name: '低蘊含碳', desc: '使用在地天然材料，碳足跡極低。' }
+                    ],
+                    stats: { '氣候適應': 9, '結構韌性': 3, '能源效率': 9, '永續性': 10, '建造成本': 9, '空間彈性': 3 },
+                    challenges: {
+                        '熱浪': '表現優異！厚實的土牆有效阻隔了熱氣，室內保持相對涼爽，幾乎不需額外能源。',
+                        '颱風': '面臨考驗。若無良好維護，屋頂與牆面可能因強風暴雨受損。結構強度是其弱點。',
+                        '強降雨': '表現尚可。牆體能調節濕氣，但需有良好屋簷保護，避免牆體直接被雨水沖刷。',
+                        '地震': '風險較高。傳統土角厝的抗震能力較弱，在強震中容易開裂或倒塌。'
+                    }
+                },
+                '竹管厝': {
+                    title: '竹管厝：輕量與彈性的化身',
+                    icon: '🎍',
+                    description: '利用快速再生的竹材建造，質地輕巧、韌性十足，特別適合應對地震，並具備優良的通風設計。',
+                    features: [
+                        { name: '輕量高韌性', desc: '竹材抗拉強度高，結構具彈性，抗震性佳。' },
+                        { name: '快速再生', desc: '竹子生長迅速，是極具永續性的建材。' },
+                        { name: '自然通風', desc: '常設計大面積開窗與深挑簷，促進通風與遮陽。' }
+                    ],
+                    stats: { '氣候適應': 8, '結構韌性': 7, '能源效率': 8, '永續性': 9, '建造成本': 7, '空間彈性': 6 },
+                    challenges: {
+                        '熱浪': '表現良好。良好的通風設計有助於散熱，保持室內空氣流通，減少悶熱感。',
+                        '颱風': '表現尚可。結構的韌性有助於抵禦強風，但輕質的屋頂材料可能需要加固。',
+                        '強降雨': '表現良好。抬高的樓板與斜屋頂設計能有效防潮與排水。',
+                        '地震': '表現優異！竹材的彈性與輕量化結構使其能有效吸收地震能量，不易倒塌。'
+                    }
+                },
+                '閩南古厝': {
+                    title: '閩南古厝：聚落的微氣候智慧',
+                    icon: '🏮',
+                    description: '不僅是單一建築，更透過庭院、冷巷與聚落佈局，創造出冬暖夏涼、通風防颱的整合式居住環境。',
+                    features: [
+                        { name: '聚落微氣候', desc: '利用「冷巷」產生穿堂風，庭院調節溫度。' },
+                        { name: '防颱結構', desc: '厚實的牆體與穩固的硬山頂屋頂設計，有效抵禦颱風。' },
+                        { name: '被動式設計', desc: '「光廳暗房」原則兼顧採光與通風，減少能源消耗。' }
+                    ],
+                    stats: { '氣候適應': 10, '結構韌性': 8, '能源效率': 8, '永續性': 7, '建造成本': 5, '空間彈性': 5 },
+                    challenges: {
+                        '熱浪': '表現優異！冷巷與庭院創造了涼爽的微氣候，厚牆隔絕熱氣，室內非常舒適。',
+                        '颱風': '表現優異！堅固的結構與屋頂設計專為抵禦颱風而生，提供極佳的保護。',
+                        '強降雨': '表現良好。完善的排水系統與防潮設計能有效應對暴雨。',
+                        '地震': '表現尚可。磚石結構的韌性不如竹、木，但厚實的牆體仍提供一定程度的穩定性。'
+                    }
+                },
+                '鋼筋混凝土 (RC)': {
+                    title: '鋼筋混凝土 (RC)：現代建築的中流砥柱',
+                    icon: '🏢',
+                    description: '以其優越的抗震性、防火性與相對較低的造價，成為台灣最普遍的建築結構。',
+                    features: [
+                        { name: '抗震穩定', desc: '高剛性結構能有效抵抗地震力，晃動感較小。' },
+                        { name: '防火隔音', desc: '混凝土材料本身不燃，且密度高，隔音效果好。' },
+                        { name: '成本效益', desc: '材料與施工技術成熟，初始建造成本相對較低。' }
+                    ],
+                    stats: { '氣候適應': 3, '結構韌性': 9, '能源效率': 2, '永續性': 3, '建造成本': 8, '空間彈性': 4 },
+                    challenges: {
+                        '熱浪': '表現不佳。混凝土的高熱質量使其在白天大量吸熱，夜晚緩慢釋放，室內如同蒸籠，極度依賴空調。',
+                        '颱風': '表現優異！高強度和重量使其在強風中非常穩定。',
+                        '強降雨': '表現優異！防水性能好，能有效抵禦暴雨侵襲。',
+                        '地震': '表現良好。是為抗震而生的主流結構，能有效保障安全，但強震下可能產生裂縫。'
+                    }
+                },
+                '鋼骨 (SC)': {
+                    title: '鋼骨 (SC)：超高層的輕盈選擇',
+                    icon: '🏙️',
+                    description: '質地輕、韌性高，施工快速，常用於超高層建築與大跨度空間，提供極大的設計彈性。',
+                    features: [
+                        { name: '輕量高韌性', desc: '結構輕，地震時能有效吸收能量，適合超高層。' },
+                        { name: '施工快速', desc: '構件工廠預製，現場組裝，縮短工期。' },
+                        { name: '空間彈性大', desc: '梁柱斷面小，可創造更開闊的室內空間。' }
+                    ],
+                    stats: { '氣候適應': 4, '結構韌性': 10, '能源效率': 3, '永續性': 4, '建造成本': 4, '空間彈性': 9 },
+                    challenges: {
+                        '熱浪': '表現不佳。如果沒有良好的外牆隔熱設計，金屬骨架導熱快，室內容易升溫，依賴空調。',
+                        '颱風': '表現良好。雖然結構輕、高樓層搖晃感可能較明顯，但整體結構韌性足以應對。',
+                        '強降雨': '表現良好。現代化的防水帷幕牆系統提供可靠的保護。',
+                        '地震': '表現優異！結構的韌性是其最大優勢，能「柔能克剛」，有效消散地震能量。'
+                    }
+                }
+            };
+
+            const selectorContainer = document.getElementById('building-selector');
+            const detailsContainer = document.getElementById('building-details-container');
+            const challengeResultContainer = document.getElementById('challenge-result');
+            const runChallengeBtn = document.getElementById('run-challenge');
+            const selectedBuildingForChallengeSpan = document.getElementById('selected-building-for-challenge');
+
+            let chart;
+            let currentBuilding = '土角厝';
+
+            function init() {
+                Object.keys(buildingData).forEach(name => {
+                    const btn = document.createElement('button');
+                    btn.className = 'building-selector-btn py-2 px-4 rounded-full text-sm md:text-base font-semibold';
+                    btn.textContent = name;
+                    btn.dataset.building = name;
+                    selectorContainer.appendChild(btn);
+
+                    const data = buildingData[name];
+                    const detailCard = document.createElement('div');
+                    detailCard.id = `detail-${name}`;
+                    detailCard.className = 'building-detail-card card p-6 md:p-8';
+                    detailCard.innerHTML = `
+                        <h3 class="text-2xl font-bold mb-4 flex items-center"><span class="text-3xl mr-3">${data.icon}</span>${data.title}</h3>
+                        <p class="text-gray-600 mb-6">${data.description}</p>
+                        <div class="space-y-4">
+                            ${data.features.map(f => `
+                                <div class="flex">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-[#EAE3F3] text-[#8D5B4C] rounded-full flex items-center justify-center mr-4">
+                                        <span class="font-bold">✓</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold">${f.name}</h4>
+                                        <p class="text-sm text-gray-500">${f.desc}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    detailsContainer.appendChild(detailCard);
+                });
+
+                selectorContainer.addEventListener('click', e => {
+                    if (e.target.tagName === 'BUTTON') {
+                        currentBuilding = e.target.dataset.building;
+                        update();
+                    }
+                });
+
+                runChallengeBtn.addEventListener('click', runChallenge);
+                
+                initChart();
+                update();
+            }
+
+            function update() {
+                document.querySelectorAll('.building-selector-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.building === currentBuilding);
+                });
+
+                document.querySelectorAll('.building-detail-card').forEach(card => {
+                    card.style.display = card.id === `detail-${currentBuilding}` ? 'block' : 'none';
+                });
+
+                selectedBuildingForChallengeSpan.textContent = currentBuilding;
+                updateChart();
+            }
+
+            function initChart() {
+                const ctx = document.getElementById('building-chart').getContext('2d');
+                const labels = Object.keys(buildingData['土角厝'].stats);
+                chart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '性能評估',
+                            data: [],
+                            backgroundColor: 'rgba(141, 91, 76, 0.2)',
+                            borderColor: 'rgba(141, 91, 76, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(141, 91, 76, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(141, 91, 76, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 10,
+                                pointLabels: {
+                                    font: {
+                                        size: 12
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                angleLines: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateChart() {
+                const stats = buildingData[currentBuilding].stats;
+                chart.data.datasets[0].data = Object.values(stats);
+                chart.data.datasets[0].label = currentBuilding;
+                chart.update();
+            }
+
+            function runChallenge() {
+                if (!currentBuilding) {
+                    alert('請先在「建築師工作台」選擇一棟建築！');
+                    return;
+                }
+                const challenges = Object.keys(buildingData[currentBuilding].challenges);
+                const randomChallenge = challenges[Math.floor(Math.random() * challenges.length)];
+                const resultText = buildingData[currentBuilding].challenges[randomChallenge];
+
+                const icons = { '熱浪': '☀️', '颱風': '🌀', '強降雨': '💧', '地震': '🌍' };
+                const colors = { '熱浪': 'bg-red-100 border-red-500', '颱風': 'bg-blue-100 border-blue-500', '強降雨': 'bg-indigo-100 border-indigo-500', '地震': 'bg-yellow-100 border-yellow-500' };
+
+                challengeResultContainer.innerHTML = `
+                    <div class="card p-6 border-l-4 ${colors[randomChallenge]}">
+                        <h4 class="text-xl font-bold mb-2 flex items-center"><span class="text-2xl mr-3">${icons[randomChallenge]}</span>挑戰來襲：${randomChallenge}！</h4>
+                        <p class="text-gray-700">您的「<span class="font-bold text-[#8D5B4C]">${currentBuilding}</span>」表現如下：</p>
+                        <p class="mt-2 text-gray-600">${resultText}</p>
+                    </div>
+                `;
+                challengeResultContainer.classList.remove('opacity-0');
+            }
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            init();
+        });
+    </script>
+</body>
+</html>
+�
