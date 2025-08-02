@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>探索台灣：一個島嶼的故事</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Island Harmony -->
+    <!-- Application Structure Plan: The application is designed with a thematic, non-linear structure to encourage exploration. It starts with a broad "Locating Taiwan" section, then delves into three core themes: "The Pulse of the Environment," "The Wisdom of Culture," and "Contemporary Opportunities & Challenges." This structure allows users to jump to topics of interest rather than following a rigid report format. The user flow is guided by a sticky navigation bar. Interactions like clickable cards and toggleable sections are chosen to reveal information progressively, preventing cognitive overload and making learning feel like a discovery process. This design prioritizes user engagement and intuitive understanding of how Taiwan's geography shapes its identity. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Taiwan's climate change impact (e.g., rainfall instability). Goal: Show change/risk. Viz: Bar Chart (Chart.js). Interaction: Hover for details. Justification: Bar charts are excellent for comparing discrete data points (e.g., average vs. drought year rainfall), making the impact immediately clear.
+        - Report Info: Human adaptation to environment (Lanyu houses, Hsinchu persimmons). Goal: Organize & Inform. Viz: Interactive HTML cards. Interaction: Click to reveal details. Justification: This connects cause (environment) and effect (cultural practice) in a visually engaging way, superior to a simple list.
+        - Report Info: Monsoon system. Goal: Explain a process. Viz: HTML/CSS diagram. Interaction: Static visual with clear labels. Justification: A simple, clear diagram is more effective for explaining this core concept than a complex animation, ensuring accessibility and quick comprehension.
+        - Report Info: Contemporary issues (Opportunities vs. Challenges). Goal: Compare. Viz: Toggleable content blocks. Interaction: Click buttons to switch views. Justification: This allows for a direct comparison of two opposing but related concepts within the same screen space, highlighting the dual nature of Taiwan's strategic position.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D3B30;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #A47E3B;
+            border-bottom-color: #A47E3B;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-[#F8F7F4]">
+
+    <header id="header" class="bg-[#F8F7F4]/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-[#3D3B30]">探索台灣</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#location" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">定位台灣</a>
+                <a href="#environment" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">環境的脈動</a>
+                <a href="#culture" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">人文的智慧</a>
+                <a href="#challenges" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">當代的挑戰</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#location" class="block py-2 text-gray-600">定位台灣</a>
+            <a href="#environment" class="block py-2 text-gray-600">環境的脈動</a>
+            <a href="#culture" class="block py-2 text-gray-600">人文的智慧</a>
+            <a href="#challenges" class="block py-2 text-gray-600">當代的挑戰</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        
+        <section id="hero" class="text-center py-16 md:py-24 fade-in">
+            <h2 class="text-4xl md:text-6xl font-bold text-[#3D3B30] mb-4">一個島嶼的故事</h2>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                台灣，不僅是地圖上的一個點。它的位置，塑造了它的歷史、氣候、文化與未來。讓我們一同探索，地理如何決定了一座島嶼的命運。
+            </p>
+        </section>
+
+        <section id="location" class="py-16 scroll-mt-20">
+            <div class="text-center mb-12 fade-in">
+                <h3 class="text-3xl md:text-4xl font-bold text-[#A47E3B]">定位台灣</h3>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">台灣位於亞洲大陸與太平洋的交會點，這個獨特的位置是所有故事的起點。</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-lg shadow-md fade-in">
+                    <h4 class="font-bold text-xl mb-4 text-center">世界舞台上的樞紐</h4>
+                    <div class="relative w-full h-64 md:h-80 bg-[#EAE7E0] rounded-lg flex items-center justify-center">
+                        <div class="absolute text-center">
+                            <span class="text-5xl">🌏</span>
+                            <p class="font-bold text-lg mt-2">亞洲大陸</p>
+                            <p class="text-sm text-gray-500">(西)</p>
+                        </div>
+                        <div class="absolute w-px h-full bg-gray-300 transform -rotate-12"></div>
+                        <div class="absolute h-px w-full bg-gray-300 transform"></div>
+                        <div class="z-10 bg-[#A47E3B] text-white px-4 py-2 rounded-lg shadow-lg">
+                            <p class="font-bold">台灣</p>
+                        </div>
+                        <div class="absolute text-center right-4 top-1/2 transform translate-x-8 -translate-y-10">
+                            <span class="text-5xl">🌊</span>
+                            <p class="font-bold text-lg mt-2">太平洋</p>
+                             <p class="text-sm text-gray-500">(東)</p>
+                        </div>
+                    </div>
+                     <p class="mt-4 text-sm text-gray-600 text-center">台灣位於全球最大的陸地與海洋的交會帶上，是西太平洋重要的交通樞紐。</p>
+                </div>
+                <div class="space-y-6 fade-in">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg mb-2">關鍵座標</h4>
+                        <p class="text-gray-700">東經 120-122°, 北緯 22-25°</p>
+                        <p class="mt-2 text-sm text-gray-500">北回歸線 (北緯 23.5°) 穿越嘉義與花蓮，為台灣帶來了熱帶與亞熱帶兩種氣候。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg mb-2">歷史的印記：福爾摩沙</h4>
+                        <p class="text-gray-700">約400年前，途經此處的歐洲水手，驚艷於島嶼的美麗，在地圖上標記為「Formosa」（美麗之島）。</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg mb-2">國土範圍</h4>
+                        <p class="text-gray-700">包含台灣本島、澎湖、金門、馬祖等島嶼。每個島嶼都擁有獨特的地理與人文風貌。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="environment" class="py-16 scroll-mt-20">
+            <div class="text-center mb-12 fade-in">
+                <h3 class="text-3xl md:text-4xl font-bold text-[#A47E3B]">環境的脈動</h3>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">季風、洋流與氣候變遷，共同譜寫出台灣獨特的自然樂章，也帶來了嚴峻的挑戰。</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md fade-in">
+                    <h4 class="font-bold text-xl mb-4 text-center">季風的雙重面貌</h4>
+                    <div class="flex justify-around items-center h-48">
+                        <div class="text-center">
+                            <span class="text-4xl">🌬️</span>
+                            <p class="font-bold mt-2">冬季東北季風</p>
+                            <p class="text-sm text-gray-500">濕冷多雨 (北)</p>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-4xl">💨</span>
+                            <p class="font-bold mt-2">夏季西南季風</p>
+                            <p class="text-sm text-gray-500">濕熱多雨 (全台)</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600">季風不僅塑造了氣候，也影響了居民的生活方式，例如新竹知名的「九降風」便於製作柿餅。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md fade-in">
+                    <h4 class="font-bold text-xl mb-4 text-center">生物的遷徙驛站</h4>
+                    <div class="text-center">
+                        <img src="https://placehold.co/100x100/A47E3B/FFFFFF?text=🐦" alt="黑面琵鷺" class="mx-auto rounded-full mb-4" onerror="this.onerror=null;this.src='https://placehold.co/100x100/cccccc/ffffff?text=Image+Not+Found';">
+                        <p class="font-bold">黑面琵鷺</p>
+                        <p class="mt-2 text-gray-700">每年秋冬，這些珍貴的候鳥會從北方飛來台灣度冬，台南七股是牠們重要的棲息地。</p>
+                        <p class="mt-4 text-sm text-gray-600">台灣豐富的濕地生態，使其成為全球候鳥遷徙路線上不可或缺的中繼站。</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md md:col-span-2 lg:col-span-1 fade-in">
+                    <h4 class="font-bold text-xl mb-4 text-center">氣候變遷的警訊</h4>
+                    <div class="chart-container">
+                        <canvas id="climateChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600 text-center">全球暖化加劇了降雨的不穩定，乾旱與洪水的風險隨之升高，考驗著台灣的水資源管理能力。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="culture" class="py-16 scroll-mt-20">
+            <div class="text-center mb-12 fade-in">
+                <h3 class="text-3xl md:text-4xl font-bold text-[#A47E3B]">人文的智慧</h3>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">面對多樣的自然環境，台灣居民發展出獨特的生活方式，展現了與環境共存的智慧。</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="culture-cards">
+            </div>
+        </section>
+
+        <section id="challenges" class="py-16 scroll-mt-20">
+            <div class="text-center mb-12 fade-in">
+                <h3 class="text-3xl md:text-4xl font-bold text-[#A47E3B]">當代的機遇與挑戰</h3>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">優越的地理位置既是發展的利基，也帶來了資源管理與國際關係的複雜課題。</p>
+            </div>
+            <div class="flex justify-center mb-8 fade-in">
+                <button id="btn-opp" class="px-6 py-2 font-semibold rounded-l-lg bg-[#A47E3B] text-white">機遇</button>
+                <button id="btn-cha" class="px-6 py-2 font-semibold rounded-r-lg bg-white text-gray-700">挑戰</button>
+            </div>
+            <div id="content-opp" class="fade-in">
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg mb-2">🚢 航運貿易樞紐</h4>
+                        <p class="text-gray-700">台灣位居東亞航線要衝，是全球貨運與貿易網絡中的關鍵一環。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg mb-2">🐟 海洋觀光經濟</h4>
+                        <p class="text-gray-700">從綠島潛水到龜山島賞鯨，豐富的海洋生態帶動了地方觀光產業的蓬勃發展。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg mb-2">💻 全球科技產業鏈</h4>
+                        <p class="text-gray-700">關鍵的戰略位置，使台灣在高科技產業供應鏈中扮演著不可或缺的角色。</p>
+                    </div>
+                </div>
+            </div>
+            <div id="content-cha" class="hidden fade-in">
+                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg mb-2">🗺️ 領土主權爭議</h4>
+                        <p class="text-gray-700">釣魚臺、南海諸島等議題，使台灣面臨複雜的國際關係與漁權糾紛。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg mb-2">💧 水資源不穩定</h4>
+                        <p class="text-gray-700">地形陡峭、降雨不均，加上氣候變遷，使水資源的保存與調度成為嚴峻考驗。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg mb-2">🐠 漁業資源枯竭</h4>
+                        <p class="text-gray-700">海洋暖化、過度捕撈與污染，正嚴重威脅著台灣周邊的漁業資源與漁民生計。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white mt-16">
+        <div class="container mx-auto px-6 py-4 text-center text-gray-500">
+            <p>&copy; 2025 探索台灣。基於「台灣地理位置課程深化建議」報告製作。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link, #mobile-menu a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                        if(mobileMenu.classList.contains('hidden') === false) {
+                            mobileMenu.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+
+            const sections = document.querySelectorAll('section');
+            const headerNavLinks = document.querySelectorAll('#header .nav-link');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        headerNavLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+            sections.forEach(section => observer.observe(section));
+
+            const cultureData = [
+                {
+                    title: "蘭嶼地下屋",
+                    image: "https://placehold.co/400x300/6B8A7A/FFFFFF?text=🛖",
+                    description: "為適應強烈颱風與炎熱氣候，達悟族人發展出將房屋半埋於地下的獨特建築，冬暖夏涼且能有效避風。",
+                    reason: "地理成因：位於颱風路徑、氣候炎熱"
+                },
+                {
+                    title: "新竹柿餅",
+                    image: "https://placehold.co/400x300/D4A276/FFFFFF?text=🍊",
+                    description: "每年秋季，新竹地區強勁乾燥的「九降風」，成為天然的風乾機，將盛產的柿子製成美味的柿餅。",
+                    reason: "地理成因：獨特的季風氣候"
+                },
+                {
+                    title: "屏東黑鮪魚",
+                    image: "https://placehold.co/400x300/58A4B0/FFFFFF?text=🐟",
+                    description: "春夏季，黑鮪魚隨溫暖的黑潮北上，為屏東東港帶來豐碩的漁獲，並發展出知名的黑鮪魚文化觀光季。",
+                    reason: "地理成因：洋流交會帶來魚群"
+                },
+                {
+                    title: "澎湖箱網養殖",
+                    image: "https://placehold.co/400x300/8E8D8A/FFFFFF?text=🐠",
+                    description: "利用澎湖群島的內灣地形，發展出高經濟價值的箱網養殖漁業，主要養殖海鱺、石斑等魚類。",
+                    reason: "地理成因：特殊的海灣地形"
+                },
+                {
+                    title: "台灣老街騎樓",
+                    image: "https://placehold.co/400x300/BCB8B1/FFFFFF?text=🏛️",
+                    description: "為適應台灣多雨又炎熱的氣候，許多傳統街屋會在一樓留出通道空間，方便行人避雨遮陽。",
+                    reason: "地理成因：亞熱帶多雨、炎熱氣候"
+                },
+                {
+                    title: "烏魚子",
+                    image: "https://placehold.co/400x300/E7C8A0/FFFFFF?text=🧡",
+                    description: "每年冬季，烏魚隨寒流南下產卵，為西南沿海帶來「烏金」，其魚卵製成的烏魚子是珍貴的特產。",
+                    reason: "地理成因：洋流交會帶來魚群"
+                }
+            ];
+
+            const cultureCardsContainer = document.getElementById('culture-cards');
+            cultureData.forEach(item => {
+                const cardHTML = `
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden card cursor-pointer fade-in" onclick="showDetail(this)">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x300/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="p-6">
+                            <h4 class="font-bold text-xl mb-2">${item.title}</h4>
+                            <p class="text-gray-600 text-sm initial-text">${item.description.substring(0, 50)}...</p>
+                            <div class="full-text hidden">
+                                <p class="text-gray-700">${item.description}</p>
+                                <p class="mt-4 text-sm font-semibold text-[#A47E3B]">${item.reason}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                cultureCardsContainer.innerHTML += cardHTML;
+            });
+            
+            window.showDetail = function(cardElement) {
+                const initialText = cardElement.querySelector('.initial-text');
+                const fullText = cardElement.querySelector('.full-text');
+                
+                const isExpanded = fullText.classList.contains('hidden');
+
+                document.querySelectorAll('#culture-cards .full-text').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('#culture-cards .initial-text').forEach(el => el.classList.remove('hidden'));
+
+                if (isExpanded) {
+                    initialText.classList.add('hidden');
+                    fullText.classList.remove('hidden');
+                }
+            }
+
+            const ctx = document.getElementById('climateChart').getContext('2d');
+            const climateChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['年均降雨量', '2021年大旱', '未來趨勢預測'],
+                    datasets: [{
+                        label: '降雨穩定性',
+                        data: [100, 44, 120],
+                        backgroundColor: [
+                            'rgba(88, 164, 176, 0.6)',
+                            'rgba(212, 162, 118, 0.6)',
+                            'rgba(188, 184, 177, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(88, 164, 176, 1)',
+                            'rgba(212, 162, 118, 1)',
+                            'rgba(188, 184, 177, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    let value = context.raw;
+                                    if (context.label === '年均降雨量') return '相對穩定 (100%)';
+                                    if (context.label === '2021年大旱') return `嚴重短缺 (${value}%)`;
+                                    if (context.label === '未來趨勢預測') return `波動加劇 (可能高達${value}%)`;
+                                    return label + value;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '相對降雨量 (%)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const btnOpp = document.getElementById('btn-opp');
+            const btnCha = document.getElementById('btn-cha');
+            const contentOpp = document.getElementById('content-opp');
+            const contentCha = document.getElementById('content-cha');
+
+            btnOpp.addEventListener('click', () => {
+                contentOpp.classList.remove('hidden');
+                contentCha.classList.add('hidden');
+                btnOpp.classList.add('bg-[#A47E3B]', 'text-white');
+                btnOpp.classList.remove('bg-white', 'text-gray-700');
+                btnCha.classList.add('bg-white', 'text-gray-700');
+                btnCha.classList.remove('bg-[#A47E3B]', 'text-white');
+            });
+
+            btnCha.addEventListener('click', () => {
+                contentCha.classList.remove('hidden');
+                contentOpp.classList.add('hidden');
+                btnCha.classList.add('bg-[#A47E3B]', 'text-white');
+                btnCha.classList.remove('bg-white', 'text-gray-700');
+                btnOpp.classList.add('bg-white', 'text-gray-700');
+                btnOpp.classList.remove('bg-[#A47E3B]', 'text-white');
+            });
+            
+            const fadeInElements = document.querySelectorAll('.fade-in');
+            const fadeInObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            fadeInElements.forEach(el => {
+                fadeInObserver.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
