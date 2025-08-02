@@ -9,9 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Earthy Harmony -->
-    <!-- Application Structure Plan: This document provides visual templates for "Changbin Survival Challenge" event and role cards. It's organized into two main sections: Challenge Event Cards and Player Role Cards. Each section uses a responsive grid layout to display multiple card examples. This structure allows for easy comparison and understanding of the card designs, directly translating the textual game components into a visual, interactive format. -->
+    <!-- Application Structure Plan: This document provides visual templates for "Changbin Survival Challenge" event and role cards. It's organized into two main sections: Challenge Event Cards and Player Role Cards. Each section uses a responsive grid layout to display multiple card examples. This structure allows for easy comparison and understanding of the card designs, directly translating the textual game components into a visual, interactive format. A new "Group Round Record Board" section has been added to provide a visual template for tracking per-round changes and cumulative totals of tribe stats (Energy, Warmth, Morale), intended for group use. -->
     <!-- Visualization & Content Choices: 
-        - Report Info: Event and Role details. Goal: Visualize/Inform. Viz: HTML/CSS styled divs acting as cards, using Unicode icons for visual cues. Interaction: Subtle hover effects. Justification: Provides clear, self-contained visual representations of game components, adhering to the "no SVG" rule and leveraging Tailwind for consistent styling. Library: Tailwind CSS.
+        - Report Info: Event and Role details. Goal: Visualize/Inform. Viz: HTML/CSS styled divs acting as cards, using Unicode icons for visual cues. Interaction: Subtle hover effects. Justification: Provides clear, self-contained visual representations of game components, adhering to the "no SVG" rule and leveraging Tailwind for consistent styling.
+        - Report Info: Group Round Record Board. Goal: Track/Record. Viz: HTML/CSS styled div with internal sections for numerical tracking. Interaction: Designed for manual input/token placement (simulated via empty divs). Justification: Provides a clear, dedicated visual space for groups to manage their current round's stat changes and cumulative totals, enhancing game clarity and group accountability. Library: Tailwind CSS.
         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
@@ -104,14 +105,48 @@
         .role-card .card-list {
             color: #0f766e; /* teal-700 */
         }
+        .impact-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        .impact-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        .impact-list .icon {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+        .impact-list .positive {
+            color: #10b981; /* green-500 */
+        }
+        .impact-list .negative {
+            color: #ef4444; /* red-500 */
+        }
+        .record-box {
+            border: 1px dashed #a8a29e; /* stone-400 */
+            background-color: #fcfcfb; /* lighter stone */
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #44403c;
+            min-height: 40px; /* Ensure visible area for writing */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body class="bg-stone-100 p-8">
 
     <header class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-amber-800 mb-4">「長濱生存挑戰」：事件與角色圖卡範本</h1>
+        <h1 class="text-4xl font-bold text-amber-800 mb-4">「長濱生存挑戰」：事件與角色圖卡範本 (更新版)</h1>
         <p class="text-lg text-stone-600 max-w-3xl mx-auto">
-            這些圖卡範本將遊戲中的挑戰事件和玩家角色視覺化。它們旨在提供設計靈感，可根據實際印刷或數位需求進行調整。
+            這些圖卡範本將遊戲中的挑戰事件和玩家角色視覺化，並明確標示對部落「能量、溫暖、士氣」數值的影響。
         </p>
     </header>
 
@@ -119,7 +154,7 @@
 
         <!-- 挑戰事件卡範本 -->
         <section>
-            <h2 class="text-3xl font-bold text-stone-900 mb-8 pb-3 border-b-2 border-stone-300">⚠️ 挑戰事件卡</h2>
+            <h2 class="text-3xl font-bold text-stone-900 mb-8 pb-3 border-b-2 border-stone-300">⚠️ 挑戰事件卡 (會扣除數值)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
                 <!-- 寒流來襲！ -->
@@ -132,14 +167,14 @@
                         <p class="card-description">一股突如其來的寒流席捲而來，部落的溫暖急速流失。</p>
                         
                         <h4 class="card-section-title">效果</h4>
-                        <ul class="card-list">
-                            <li>部落「溫暖」點數立即減少 2 點。</li>
-                            <li>本回合所有玩家在野外行動，額外消耗 1 點「能量」。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon negative">▼</span> 部落「溫暖」點數立即減少 2 點。</li>
+                            <li><span class="icon negative">▼</span> 本回合所有玩家在野外行動，額外消耗 1 點「能量」。</li>
                         </ul>
 
                         <h4 class="card-section-title">「無火」情境</h4>
-                        <ul class="card-list">
-                            <li>額外減少 1 點「溫暖」。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon negative">▼</span> 額外減少 1 點「溫暖」。</li>
                         </ul>
                     </div>
                     <p class="card-footer-note">氣候與環境類</p>
@@ -155,14 +190,14 @@
                         <p class="card-description">一隻大型掠食者在附近徘徊，威脅部落安全。</p>
                         
                         <h4 class="card-section-title">效果</h4>
-                        <ul class="card-list">
-                            <li>部落「安全」點數立即減少 1 點。</li>
-                            <li>玩家在有掠食者的板塊進行「採集」或「狩獵」行動時，有 25% 機率觸發「遭遇戰」。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon negative">▼</span> 部落「士氣」點數立即減少 1 點。</li>
+                            <li><span class="icon negative">▼</span> 玩家在有掠食者的板塊行動時，有 25% 機率觸發「遭遇戰」（可能導致「能量」損失）。</li>
                         </ul>
 
                         <h4 class="card-section-title">「無利器」情境</h4>
-                        <ul class="card-list">
-                            <li>「遭遇戰」風險增加至 50%，且戰鬥難度提高。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon negative">▼</span> 「遭遇戰」風險增加至 50%，且戰鬥難度提高（更高「能量」損失風險）。</li>
                         </ul>
                     </div>
                     <p class="card-footer-note">生物與威脅類</p>
@@ -178,14 +213,14 @@
                         <p class="card-description">部落中有人生病，可能傳染給其他人。</p>
                         
                         <h4 class="card-section-title">效果</h4>
-                        <ul class="card-list">
-                            <li>隨機一名玩家「生病」（行動點數減少）。</li>
-                            <li>若不治療，可能傳染給其他玩家或導致「能量」持續流失。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon negative">▼</span> 隨機一名玩家「生病」（該玩家行動點數減少，部落「士氣」減少 1 點）。</li>
+                            <li><span class="icon negative">▼</span> 若不治療，可能傳染給其他玩家或導致部落「能量」持續流失。</li>
                         </ul>
 
                         <h4 class="card-section-title">「無火」情境</h4>
-                        <ul class="card-list">
-                            <li>煮沸水的能力缺失，治療難度增加，疾病傳播速度加快。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon negative">▼</span> 治療難度增加，疾病傳播速度加快，部落「能量」損失加劇。</li>
                         </ul>
                     </div>
                     <p class="card-footer-note">內部與社會類</p>
@@ -196,7 +231,7 @@
 
         <!-- 玩家角色卡範本 -->
         <section>
-            <h2 class="text-3xl font-bold text-stone-900 mb-8 pb-3 border-b-2 border-stone-300">👤 玩家角色卡</h2>
+            <h2 class="text-3xl font-bold text-stone-900 mb-8 pb-3 border-b-2 border-stone-300">👤 玩家角色卡 (會增加數值)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
                 <!-- 獵人 -->
@@ -215,9 +250,9 @@
                         </ul>
 
                         <h4 class="card-section-title">特殊能力</h4>
-                        <ul class="card-list">
-                            <li>**精準狩獵：** 進行「狩獵」行動時，可額外擲一枚骰子並選擇較好的結果。</li>
-                            <li>**威懾：** 在有掠食者的板塊，其他玩家的「安全」點數損失減少 1 點。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon positive">▲</span> **精準狩獵：** 進行「狩獵」行動時，可額外擲一枚骰子並選擇較好的結果，**增加部落「能量」獲取**。</li>
+                            <li><span class="icon positive">▲</span> **威懾：** 在有掠食者的板塊，其他玩家的「安全」點數損失減少 1 點，**間接增加部落「士氣」**。</li>
                         </ul>
 
                         <h4 class="card-section-title">「無利器」情境下的適應</h4>
@@ -243,9 +278,9 @@
                         </ul>
 
                         <h4 class="card-section-title">特殊能力</h4>
-                        <ul class="card-list">
-                            <li>**豐收：** 進行「採集」植物性食物行動時，額外獲得 1 份資源。</li>
-                            <li>**辨識：** 在「森林」或「河流」板塊，有機會發現稀有植物（例如：治療疾病的藥草）。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon positive">▲</span> **豐收：** 進行「採集」植物性食物行動時，額外獲得 1 份資源，**增加部落「能量」**。</li>
+                            <li><span class="icon positive">▲</span> **辨識：** 在「森林」或「河流」板塊，有機會發現稀有植物（例如：治療疾病的藥草），**有助於恢復「能量」或「士氣」**。</li>
                         </ul>
 
                         <h4 class="card-section-title">「無火」情境下的適應</h4>
@@ -271,9 +306,9 @@
                         </ul>
 
                         <h4 class="card-section-title">特殊能力</h4>
-                        <ul class="card-list">
-                            <li>**快速製作：** 製作或修復工具時，所需行動點數減少 1 點。</li>
-                            <li>**創新：** 可嘗試製作一些基礎模式下無法製作的特殊工具（例如：更堅固的繩索、簡易陷阱）。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon positive">▲</span> **快速製作：** 製作或修復工具時，所需行動點數減少 1 點，**提高部落「能量」效率**。</li>
+                            <li><span class="icon positive">▲</span> **創新：** 可嘗試製作一些特殊工具（例如：更堅固的繩索、陷阱），**直接或間接增加「安全」和「溫暖」**。</li>
                         </ul>
 
                         <h4 class="card-section-title">「無利器」情境下的適應</h4>
@@ -299,9 +334,9 @@
                         </ul>
 
                         <h4 class="card-section-title">特殊能力</h4>
-                        <ul class="card-list">
-                            <li>**鼓舞士氣：** 每回合可花費 1 點行動點數，使部落「士氣」點數增加 1 點。</li>
-                            <li>**協調者：** 在其他玩家執行「協助他人」行動時，可額外提供 1 點支援。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon positive">▲</span> **鼓舞士氣：** 每回合可花費 1 點行動點數，使部落「士氣」點數增加 1 點。</li>
+                            <li><span class="icon positive">▲</span> **協調者：** 在其他玩家執行「協助他人」行動時，可額外提供 1 點支援，**間接提升部落「能量」和「士氣」**。</li>
                         </ul>
 
                         <h4 class="card-section-title">「無火」或「無利器」情境下的適應</h4>
@@ -327,9 +362,9 @@
                         </ul>
 
                         <h4 class="card-section-title">特殊能力</h4>
-                        <ul class="card-list">
-                            <li>**快速移動：** 移動到相鄰板塊時，消耗的行動點數減少 0.5 點（向下取整）。</li>
-                            <li>**發現：** 進入新的「未知」板塊時，有機會額外發現 1 份資源或揭示一個隱藏的庇護所。</li>
+                        <ul class="impact-list">
+                            <li><span class="icon positive">▲</span> **快速移動：** 移動到相鄰板塊時，消耗的行動點數減少 0.5 點，**節省部落「能量」消耗**。</li>
+                            <li><span class="icon positive">▲</span> **發現：** 進入新的「未知」板塊時，有機會額外發現 1 份資源或隱藏庇護所，**直接增加「能量」或「溫暖」資源**。</li>
                         </ul>
 
                         <h4 class="card-section-title">所有情境下的適應</h4>
@@ -339,6 +374,56 @@
                     </div>
                 </div>
 
+            </div>
+        </section>
+
+        <!-- 行動點數計分板 -->
+        <section>
+            <h2 class="text-3xl font-bold text-stone-900 mb-8 pb-3 border-b-2 border-stone-300">🔢 行動點數計分板</h2>
+            <p class="text-stone-700 mb-6">主持人將使用此板塊來追蹤每個季節可用的總行動點數，或分發給每個玩家的行動點數。</p>
+            <div class="flex justify-center">
+                <div class="card-base p-8 w-64 text-center border-2 border-amber-500 bg-amber-50 text-amber-900">
+                    <h3 class="text-2xl font-bold mb-4">本季節總行動點數</h3>
+                    <div class="text-7xl font-extrabold text-amber-700">
+                        <span id="current-action-points">12</span>
+                    </div>
+                    <p class="text-sm mt-4 text-amber-800">（由主持人分配給玩家）</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 小組回合記錄板 -->
+        <section>
+            <h2 class="text-3xl font-bold text-stone-900 mb-8 pb-3 border-b-2 border-stone-300">📝 小組回合記錄板</h2>
+            <p class="text-stone-700 mb-6">每個小組將使用此板塊來記錄本回合「能量、溫暖、士氣」的變化，並更新其累計總值。</p>
+            <div class="flex justify-center">
+                <div class="card-base p-6 w-full max-w-lg border-2 border-teal-500 bg-teal-50 text-teal-900">
+                    <h3 class="text-2xl font-bold text-center mb-4">部落狀態記錄</h3>
+                    <div class="grid grid-cols-3 gap-4 text-center mb-4">
+                        <div class="font-semibold text-stone-700">能量⚡</div>
+                        <div class="font-semibold text-stone-700">溫暖🔥</div>
+                        <div class="font-semibold text-stone-700">士氣😊</div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <p class="font-bold text-teal-800 mb-2">本回合變化</p>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="record-box text-green-700">+X / <span class="text-red-700">-Y</span></div>
+                                <div class="record-box text-green-700">+X / <span class="text-red-700">-Y</span></div>
+                                <div class="record-box text-green-700">+X / <span class="text-red-700">-Y</span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-bold text-teal-800 mb-2 mt-4">累計總值</p>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="record-box text-3xl">10</div>
+                                <div class="record-box text-3xl">8</div>
+                                <div class="record-box text-3xl">12</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-center text-teal-700 mt-6">（請在此處手寫或放置代幣）</p>
+                </div>
             </div>
         </section>
 
