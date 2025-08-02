@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>永續居所建造師：卡牌模擬</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF5;
+            color: #3D405B;
+        }
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+            justify-items: center;
+        }
+        .game-card {
+            width: 200px;
+            min-height: 280px; /* Ensure consistent height for cards */
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            padding: 0.75rem 1rem;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .card-body {
+            padding: 1rem;
+            flex-grow: 1;
+        }
+        .card-footer {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            text-align: center;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            color: #555;
+        }
+
+        /* Specific Card Styles */
+        .building-card {
+            background-color: #FFFFFF;
+            border: 2px solid #8D5B4C;
+        }
+        .building-card .card-header {
+            background-color: #8D5B4C;
+            color: #FFFFFF;
+        }
+        .building-card .card-footer {
+            background-color: #FDFBF5;
+        }
+
+        .material-token {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FFFFFF;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .material-token:hover {
+            transform: scale(1.05);
+        }
+        .material-token.earth { background-color: #A0522D; }
+        .material-token.wood { background-color: #8B4513; }
+        .material-token.bamboo { background-color: #6B8E23; }
+        .material-token.concrete { background-color: #778899; }
+        .material-token.steel { background-color: #4682B4; }
+        .material-token.glass { background-color: #ADD8E6; color: #3D405B; }
+
+        .challenge-card {
+            background-color: #FEE2E2;
+            border: 2px solid #EF4444;
+            color: #EF4444;
+        }
+        .challenge-card .card-header {
+            background-color: #EF4444;
+            color: #FFFFFF;
+        }
+        .challenge-card .card-body {
+            color: #DC2626;
+        }
+        .challenge-card .card-footer {
+            background-color: #FEF2F2;
+            color: #DC2626;
+        }
+
+        .innovation-card {
+            background-color: #EEF2FF;
+            border: 2px solid #6366F1;
+            color: #6366F1;
+        }
+        .innovation-card .card-header {
+            background-color: #6366F1;
+            color: #FFFFFF;
+        }
+        .innovation-card .card-body {
+            color: #4F46E5;
+        }
+        .innovation-card .card-footer {
+            background-color: #EEF2FF;
+            color: #4F46E5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-6 py-8">
+        <h1 class="text-4xl font-bold text-center mb-12">永續居所建造師：卡牌模擬</h1>
+
+        <h2 class="text-3xl font-bold mb-6 text-center">建築卡牌</h2>
+        <div id="building-cards-container" class="card-container"></div>
+
+        <h2 class="text-3xl font-bold mb-6 mt-12 text-center">材料代幣</h2>
+        <div id="material-tokens-container" class="flex flex-wrap justify-center gap-6 py-4"></div>
+
+        <h2 class="text-3xl font-bold mb-6 mt-12 text-center">氣候挑戰卡牌</h2>
+        <div id="challenge-cards-container" class="card-container"></div>
+
+        <h2 class="text-3xl font-bold mb-6 mt-12 text-center">智慧/創新卡牌</h2>
+        <div id="innovation-cards-container" class="card-container"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buildingData = [
+                {
+                    type: '傳統建築',
+                    name: '高腳屋',
+                    icon: '🛖',
+                    benefits: ['優異通風', '防潮防洪', '防蟲害'],
+                    materials: ['木材', '竹材', '茅草'],
+                    footer: '適應濕度、洪水與蟲害的智慧'
+                },
+                {
+                    type: '傳統建築',
+                    name: '土角厝',
+                    icon: '🧱',
+                    benefits: ['冬暖夏涼', '濕度調節', '低蘊含碳'],
+                    materials: ['土', '稻草'],
+                    footer: '天然熱調節與材料科學的結晶'
+                },
+                {
+                    type: '傳統建築',
+                    name: '竹管厝',
+                    icon: '🎍',
+                    benefits: ['輕量高韌性', '自然通風', '快速再生'],
+                    materials: ['竹材'],
+                    footer: '輕量、可再生與靈活應變的建築'
+                },
+                {
+                    type: '傳統建築',
+                    name: '閩南古厝',
+                    icon: '🏮',
+                    benefits: ['聚落微氣候', '防颱結構', '被動式設計'],
+                    materials: ['紅磚', '石材', '木材'],
+                    footer: '整合式被動設計與聚落規劃'
+                },
+                {
+                    type: '現代建築',
+                    name: '鋼筋混凝土 (RC)',
+                    icon: '🏢',
+                    benefits: ['抗震穩定', '防火隔音', '成本效益'],
+                    materials: ['混凝土', '鋼材'],
+                    footer: '現代建築的中流砥柱'
+                },
+                {
+                    type: '現代建築',
+                    name: '鋼骨 (SC)',
+                    icon: '🏙️',
+                    benefits: ['輕量高韌性', '施工快速', '空間彈性大'],
+                    materials: ['鋼材'],
+                    footer: '超高層的輕盈選擇'
+                },
+                {
+                    type: '現代建築',
+                    name: '鋼骨鋼筋混凝土 (SRC)',
+                    icon: '🏗️',
+                    benefits: ['優異抗震性', '防火隔音', '空間彈性'],
+                    materials: ['混凝土', '鋼材'],
+                    footer: '結合RC與SC優點的複合結構'
+                }
+            ];
+
+            const materialData = [
+                { name: '土', color: 'earth', icon: '🌍' },
+                { name: '木材', color: 'wood', icon: '🌳' },
+                { name: '竹材', color: 'bamboo', icon: '🎋' },
+                { name: '混凝土', color: 'concrete', icon: '🧱' },
+                { name: '鋼材', color: 'steel', icon: '🔩' },
+                { name: '玻璃', color: 'glass', icon: '🪟' }
+            ];
+
+            const challengeData = [
+                { name: '颱風季', icon: '🌀', description: '強風暴雨來襲，考驗建築的抗風與防水能力。' },
+                { name: '極端熱浪', icon: '☀️', description: '氣溫飆升，測試建築的隔熱與通風效果。' },
+                { name: '強降雨', icon: '💧', description: '連續豪雨，檢視建築的防潮與排水系統。' },
+                { name: '地震', icon: '🌍', description: '地牛翻身，考驗建築的結構韌性與抗震設計。' }
+            ];
+
+            const innovationData = [
+                { name: '被動式通風井', icon: '🌬️', description: '利用煙囪效應促進自然通風，降低室內溫度。' },
+                { name: 'AI能源管理系統', icon: '💡', description: '智慧化控制建築能耗，提升能源使用效率。' },
+                { name: '綠屋頂', icon: '🌿', description: '種植植被的屋頂，有效隔熱、滯洪與美化。' },
+                { name: '雨水收集系統', icon: '💧', description: '收集雨水再利用，節省水資源。' },
+                { name: '太陽能板', icon: '☀️', description: '將太陽能轉化為電能，提供再生能源。' },
+                { name: '高性能窗戶', icon: '🪟', description: '多層玻璃或特殊塗層，提升隔熱與隔音效果。' },
+                { name: '相變材料', icon: '🌡️', description: '吸收或釋放熱量，調節室內溫度。' },
+                { name: '自修復混凝土', icon: '🩹', description: '能自行修復微小裂縫，延長結構壽命。' },
+                { name: '模組化預製', icon: '🏗️', description: '工廠預製構件，現場快速組裝，減少廢棄物。' }
+            ];
+
+            const buildingCardsContainer = document.getElementById('building-cards-container');
+            const materialTokensContainer = document.getElementById('material-tokens-container');
+            const challengeCardsContainer = document.getElementById('challenge-cards-container');
+            const innovationCardsContainer = document.getElementById('innovation-cards-container');
+
+            // Render Building Cards
+            buildingData.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'game-card building-card flex flex-col justify-between';
+                cardElement.innerHTML = `
+                    <div class="card-header">
+                        ${card.type}
+                    </div>
+                    <div class="card-body">
+                        <div class="text-5xl text-center mb-2">${card.icon}</div>
+                        <h3 class="text-xl font-bold text-center mb-2">${card.name}</h3>
+                        <ul class="list-disc list-inside text-sm text-gray-700 mb-2">
+                            ${card.benefits.map(b => `<li>${b}</li>`).join('')}
+                        </ul>
+                        <div class="text-xs text-gray-500 text-center">
+                            所需材料: ${card.materials.join(', ')}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        ${card.footer}
+                    </div>
+                `;
+                buildingCardsContainer.appendChild(cardElement);
+            });
+
+            // Render Material Tokens
+            materialData.forEach(token => {
+                const tokenElement = document.createElement('div');
+                tokenElement.className = `material-token ${token.color}`;
+                tokenElement.innerHTML = `
+                    ${token.icon} ${token.name}
+                `;
+                materialTokensContainer.appendChild(tokenElement);
+            });
+
+            // Render Challenge Cards
+            challengeData.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'game-card challenge-card flex flex-col justify-between';
+                cardElement.innerHTML = `
+                    <div class="card-header">
+                        氣候挑戰
+                    </div>
+                    <div class="card-body">
+                        <div class="text-5xl text-center mb-2">${card.icon}</div>
+                        <h3 class="text-xl font-bold text-center mb-2">${card.name}</h3>
+                        <p class="text-sm text-center">${card.description}</p>
+                    </div>
+                    <div class="card-footer">
+                        應對策略
+                    </div>
+                `;
+                challengeCardsContainer.appendChild(cardElement);
+            });
+
+            // Render Innovation Cards
+            innovationData.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'game-card innovation-card flex flex-col justify-between';
+                cardElement.innerHTML = `
+                    <div class="card-header">
+                        智慧/創新
+                    </div>
+                    <div class="card-body">
+                        <div class="text-5xl text-center mb-2">${card.icon}</div>
+                        <h3 class="text-xl font-bold text-center mb-2">${card.name}</h3>
+                        <p class="text-sm text-center">${card.description}</p>
+                    </div>
+                    <div class="card-footer">
+                        永續升級
+                    </div>
+                `;
+                innovationCardsContainer.appendChild(cardElement);
+            });
+        });
+    </script>
+</body>
+</html>
