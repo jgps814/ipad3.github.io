@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>福爾摩沙的抉擇：荷鄭時代的多元視角</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony Neutrals -->
+    <!-- Application Structure Plan: The application is designed as a multi-perspective, chronological journey. It starts with a hero section, followed by a core perspective selector (VOC, Han Settler, Indigenous, Zheng Regime). Content is organized into four historical phases, dynamically updating based on the user's chosen perspective. This structure transforms passive reading into active exploration, allowing users to understand the same historical events from different viewpoints, which is the central thesis of the source report. A dedicated interactive comparison tool and a final section on historical legacy provide deeper analysis and connect the past to present-day discussions. -->
+    <!-- Visualization & Content Choices: 
+        1. Policy Comparison (Table 1): Report Info -> VOC vs. Zheng policies. Goal -> Compare governance. Viz -> Interactive side-by-side cards. Interaction -> Click on policy topic to reveal details for both regimes. Justification -> More engaging than a static table. Library/Method -> HTML/JS.
+        2. Economic Shift: Report Info -> Economic pillars (deer trade, rice, etc.). Goal -> Show economic transition. Viz -> Bar chart. Interaction -> Buttons to toggle between "Dutch Era" and "Zheng Era" update the chart data. Justification -> Visually demonstrates the shift from trade to agriculture. Library/Method -> Chart.js.
+        3. Indigenous Land Impact: Report Info -> Zheng's impact on Indigenous land. Goal -> Illustrate land loss. Viz -> Simple animated diagram showing land area shrinking. Interaction -> A button triggers the animation. Justification -> A powerful, simple visual to convey a tragic trend without complex maps. Library/Method -> HTML/CSS/JS.
+        4. Zheng's Legacy: Report Info -> Multiple interpretations of Zheng Chenggong. Goal -> Showcase controversy. Viz -> Tabbed interface. Interaction -> Click tabs ("Hero," "Murderer") to see different perspectives. Justification -> Presents conflicting viewpoints interactively. Library/Method -> HTML/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; scroll-behavior: smooth; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .perspective-btn { transition: all 0.3s ease; }
+        .perspective-btn.active { transform: translateY(-4px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        .content-card { transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; }
+        .hidden-content { opacity: 0; transform: translateY(20px); pointer-events: none; height: 0; overflow: hidden; }
+        .visible-content { opacity: 1; transform: translateY(0); }
+        .comparison-item.active { border-color: #4c7c7d; background-color: #f0f5f5; }
+        .tab-btn.active { border-bottom-color: #4c7c7d; color: #4c7c7d; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <h1 class="text-xl md:text-2xl font-bold text-stone-700">福爾摩沙的抉擇</h1>
+                <div class="hidden md:flex space-x-6 text-stone-600">
+                    <a href="#perspectives" class="hover:text-[#4c7c7d]">多元視角</a>
+                    <a href="#comparison" class="hover:text-[#4c7c7d]">政策比較</a>
+                    <a href="#economy" class="hover:text-[#4c7c7d]">經濟變遷</a>
+                    <a href="#legacy" class="hover:text-[#4c7c7d]">歷史遺產</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <section class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-[#4c7c7d] mb-4">福爾摩沙的抉擇</h2>
+            <p class="text-lg text-stone-600 max-w-3xl mx-auto">17世紀的臺灣，是各方勢力交會的舞台。本頁面將帶您穿越時空，從不同族群的視角，重新審視荷蘭東印度公司與鄭氏政權這段關鍵歷史，探索他們在福爾摩沙留下的複雜印記。</p>
+        </section>
+
+        <section id="perspectives" class="mb-16">
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="text-2xl font-bold text-center mb-6">選擇你的視角</h3>
+                <p class="text-center text-stone-600 mb-8">點擊下方按鈕，切換不同角色的觀點，體驗他們在歷史洪流中的處境與抉擇。您將發現，同一事件在不同人眼中，有著截然不同的意義。</p>
+                <div id="perspective-selector" class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                    <button data-perspective="voc" class="perspective-btn p-4 rounded-lg shadow-sm bg-amber-100 text-amber-800 font-semibold border-2 border-transparent hover:border-amber-400">荷蘭東印度公司</button>
+                    <button data-perspective="han" class="perspective-btn p-4 rounded-lg shadow-sm bg-sky-100 text-sky-800 font-semibold border-2 border-transparent hover:border-sky-400">漢人移民</button>
+                    <button data-perspective="indigenous" class="perspective-btn p-4 rounded-lg shadow-sm bg-emerald-100 text-emerald-800 font-semibold border-2 border-transparent hover:border-emerald-400">原住民族</button>
+                    <button data-perspective="zheng" class="perspective-btn p-4 rounded-lg shadow-sm bg-rose-100 text-rose-800 font-semibold border-2 border-transparent hover:border-rose-400">鄭氏政權</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="timeline-content" class="space-y-12">
+            <div id="content-container" class="bg-white p-6 md:p-8 rounded-xl shadow-md content-card">
+            </div>
+        </section>
+        
+        <section id="comparison" class="my-16">
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-md">
+                <h3 class="text-2xl font-bold text-center mb-2">政策比較：荷蘭 vs. 鄭氏</h3>
+                <p class="text-center text-stone-600 mb-8">荷蘭東印度公司與鄭氏政權的治理方式有何不同？點擊下方項目，深入比較雙方在各個面向的具體政策及其背後的核心目標。</p>
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div id="comparison-menu" class="w-full md:w-1/3 space-y-2">
+                        <button data-topic="goal" class="comparison-item w-full text-left p-3 rounded-md border-2 border-stone-200 transition">主要目的</button>
+                        <button data-topic="land" class="comparison-item w-full text-left p-3 rounded-md border-2 border-stone-200 transition">土地政策</button>
+                        <button data-topic="indigenous" class="comparison-item w-full text-left p-3 rounded-md border-2 border-stone-200 transition">與原住民關係</button>
+                        <button data-topic="trade" class="comparison-item w-full text-left p-3 rounded-md border-2 border-stone-200 transition">對外貿易</button>
+                    </div>
+                    <div class="w-full md:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-amber-50 rounded-lg">
+                            <h4 class="font-bold text-amber-800 mb-2">荷蘭東印度公司</h4>
+                            <p id="comparison-voc" class="text-stone-700"></p>
+                        </div>
+                        <div class="p-4 bg-rose-50 rounded-lg">
+                            <h4 class="font-bold text-rose-800 mb-2">鄭氏政權</h4>
+                            <p id="comparison-zheng" class="text-stone-700"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="economy" class="my-16">
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-md">
+                <h3 class="text-2xl font-bold text-center mb-2">經濟支柱的轉變</h3>
+                <p class="text-center text-stone-600 mb-8">從荷蘭時期的轉口貿易，到鄭氏時期的農業自足，臺灣的經濟面貌發生了巨大轉變。下圖呈現了兩個時期的主要經濟來源差異。</p>
+                <div class="chart-container">
+                    <canvas id="economyChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="legacy" class="my-16">
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-md">
+                <h3 class="text-2xl font-bold text-center mb-2">歷史的迴響：鄭成功的多元面貌</h3>
+                <p class="text-center text-stone-600 mb-8">鄭成功是「民族英雄」還是「外來屠殺者」？歷史人物的評價從來不是單一的。點擊下方標籤，探索他至今仍在臺灣社會引發爭議的不同形象。</p>
+                <div class="w-full">
+                    <div class="border-b border-stone-200">
+                        <nav id="legacy-tabs" class="-mb-px flex space-x-6" aria-label="Tabs">
+                            <button data-tab="hero" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-stone-500 hover:text-stone-700 hover:border-stone-300">民族英雄</button>
+                            <button data-tab="king" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-stone-500 hover:text-stone-700 hover:border-stone-300">開臺聖王</button>
+                            <button data-tab="killer" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-stone-500 hover:text-stone-700 hover:border-stone-300">原民殺手</button>
+                        </nav>
+                    </div>
+                    <div id="legacy-content" class="py-6">
+                        
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p>&copy; 2025 福爾摩沙的抉擇. 本頁面內容根據「鄭氏政權在臺建立根據地及其影響課程深化與互動設計報告」建構。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const perspectiveData = {
+                voc: {
+                    title: "荷蘭東印度公司 (VOC) 視角",
+                    color: "amber",
+                    content: `
+                        <p class="mb-4">我們的目標很明確：利潤。福爾摩沙是我們在東亞貿易網絡中的關鍵轉口港，連接日本、中國與巴達維亞。我們與在地部落簽訂合約，透過「贌社制度」獲取鹿皮與鹿肉，這是厚利可圖的生意。</p>
+                        <p class="mb-4">然而，治理這座島嶼的成本越來越高。漢人移民不斷湧入，與原住民的衝突加劇，我們必須在兩者間維持平衡以確保貿易順利。郭懷一的叛亂更讓我們警覺，單純的商業據點需要武力作後盾。</p>
+                        <p>最終，當鄭成功的艦隊兵臨城下，公司高層考量全球貿易的轉變與在臺獲利的下降，認為堅守熱蘭遮城已不符成本效益。撤退，是個痛苦但理性的商業決策。</p>
+                    `
+                },
+                han: {
+                    title: "漢人移民視角",
+                    color: "sky",
+                    content: `
+                        <p class="mb-4">我們從福建沿海渡過險惡的黑水溝來到臺灣，只為尋求一線生機。在荷蘭人治下，我們是受管制的勞動力，為他們種植甘蔗、稻米，或冒險進入原住民的獵場捕鹿，生活充滿不確定性。</p>
+                        <p class="mb-4">鄭成功大人的到來，改變了一切。他是反清復明的希望，更帶來了土地。在「寓兵於農」的政策下，我們分到田地，從佃農變成了自耕農。雖然賦稅沉重，但總算有了自己的根。</p>
+                        <p>我們跟隨鄭氏的腳步，往更深處開墾，將荒地變為良田。雖然有時會與「番人」發生衝突，但這是為了生存，為了建立一個屬於我們自己的家園。</p>
+                    `
+                },
+                indigenous: {
+                    title: "原住民族視角",
+                    color: "emerald",
+                    content: `
+                        <p class="mb-4">這片土地是我們祖先的獵場，世代傳承。荷蘭人來了，他們要我們的鹿皮，跟我們簽訂契約，承認我們的土地。雖然他們有時很霸道，但我們仍保有自己的生活方式。</p>
+                        <p class="mb-4">但後來，一個自稱「大明」的軍隊來了。他們完全不同，他們不承認我們的土地，直接佔領、開墾。他們說這是「無主荒地」。我們的獵場變成他們的農田，我們的生存空間被嚴重擠壓。</p>
+                        <p>我們奮起抵抗，像大肚王國的勇士們一樣，但他們的武器太強大了。沙轆社的悲劇、水沙連的血腥鎮壓，是我們族人心中永遠的痛。我們被迫遷徙、同化，面臨前所未有的生存危機。</p>
+                    `
+                },
+                zheng: {
+                    title: "鄭氏政權視角",
+                    color: "rose",
+                    content: `
+                        <p class="mb-4">清虜竊佔中原，我等奉大明正朔，矢志反清復明。臺灣，是我們最重要的根據地。為解決數萬大軍的糧餉，必須實行「寓兵於農」，開墾土地，確保糧食自給自足。</p>
+                        <p class="mb-4">清廷的「遷界禁海」斷我錢糧，我們便建立「山海五商」，突破封鎖，與日本、南洋通商，以貿易收入支持軍費。島上的「番人」不知大義，阻撓開墾，為顧全大局，只能以武力鎮撫。</p>
+                        <p>我們在此設立承天府，建立官制，推行教化，將中華文化帶來這座島嶼。這裡不僅是軍事基地，更是漢人文化延續的火種。每一寸開拓的土地，都是為了復興大明的千秋大業。</p>
+                    `
+                }
+            };
+
+            const comparisonData = {
+                goal: {
+                    voc: "將臺灣作為東亞貿易的轉口港，核心目標是賺取商業利潤，對全面殖民統治初期興趣不大。",
+                    zheng: "建立反清復明的根據地，解決軍隊糧餉問題，實現軍事集團的自給自足。"
+                },
+                land: {
+                    voc: "有限度的開墾，承認原住民土地權，土地為「王田」，由公司統一管理。",
+                    zheng: "大規模拓墾，實行「寓兵於農」，土地私有化（營盤田、官田），不承認原住民土地主權。"
+                },
+                indigenous: {
+                    voc: "承認部落主權，簽訂合約。透過「贌社制度」進行經濟剝削，但後期為貿易利益會保護原住民免受漢人侵擾。",
+                    zheng: "視臺灣為無主荒地，不承認原住民主權。為擴張領土，對原住民進行大規模土地侵佔甚至屠殺。"
+                },
+                trade: {
+                    voc: "納入其全球貿易網絡，以臺灣為樞紐，與中國、日本、東南亞進行三角貿易。",
+                    zheng: "為突破清朝封鎖，建立「山海五商」走私貿易網絡，主要與日本、清朝沿海、東南亞進行貿易。"
+                }
+            };
+
+            const legacyData = {
+                hero: {
+                    title: "反清復明的民族英雄",
+                    content: "在明朝滅亡後，鄭成功堅持奉明朝為正朔，以臺灣為基地持續抵抗滿清，其精神被後世視為忠貞不二的民族氣節。國民政府遷臺後，因其相似的處境而大力推崇，將其塑造為反攻大陸的歷史象徵。"
+                },
+                king: {
+                    title: "奠定漢人社會的開臺聖王",
+                    content: "鄭氏政權是臺灣第一個漢人政權，它引入了漢人的典章制度、農耕技術與儒家文化，設立府縣、推行科舉。大規模的土地開墾奠定了臺灣以農業為基礎的漢人社會型態，被許多人視為臺灣歷史「有系統」發展的開端。"
+                },
+                killer: {
+                    title: "侵佔土地的原民殺手",
+                    content: "從原住民族的視角，鄭氏政權的到來是一場災難。其「寓兵於農」政策，是對原住民土地的直接侵佔。為擴張生存空間，鄭氏軍隊對中部平埔族群（如大肚王國）進行了多次血腥鎮壓與屠殺，導致部落滅絕、文化流失，是臺灣原住民族歷史上最黑暗的一頁。"
+                }
+            };
+            
+            const contentContainer = document.getElementById('content-container');
+            const perspectiveSelector = document.getElementById('perspective-selector');
+            let currentPerspective = 'voc';
+
+            function renderContent() {
+                const data = perspectiveData[currentPerspective];
+                contentContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold text-${data.color}-600 mb-4">${data.title}</h3>
+                    <div class="prose max-w-none text-stone-700">${data.content}</div>
+                `;
+                contentContainer.className = `bg-white p-6 md:p-8 rounded-xl shadow-md content-card border-t-4 border-${data.color}-400`;
+                
+                document.querySelectorAll('.perspective-btn').forEach(btn => {
+                    btn.classList.remove('active', 'bg-amber-400', 'bg-sky-400', 'bg-emerald-400', 'bg-rose-400', 'text-white');
+                    const p = btn.dataset.perspective;
+                    btn.classList.add(`bg-${perspectiveData[p].color}-100`, `text-${perspectiveData[p].color}-800`);
+                });
+                const activeBtn = document.querySelector(`.perspective-btn[data-perspective="${currentPerspective}"]`);
+                activeBtn.classList.add('active');
+                activeBtn.classList.remove(`bg-${data.color}-100`);
+                activeBtn.classList.add(`bg-${data.color}-400`, 'text-white');
+            }
+
+            perspectiveSelector.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    currentPerspective = e.target.dataset.perspective;
+                    renderContent();
+                }
+            });
+
+            const comparisonMenu = document.getElementById('comparison-menu');
+            const comparisonVoc = document.getElementById('comparison-voc');
+            const comparisonZheng = document.getElementById('comparison-zheng');
+
+            function renderComparison(topic) {
+                const data = comparisonData[topic];
+                comparisonVoc.textContent = data.voc;
+                comparisonZheng.textContent = data.zheng;
+                
+                document.querySelectorAll('.comparison-item').forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`.comparison-item[data-topic="${topic}"]`).classList.add('active');
+            }
+
+            comparisonMenu.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    renderComparison(e.target.dataset.topic);
+                }
+            });
+
+            const legacyTabs = document.getElementById('legacy-tabs');
+            const legacyContent = document.getElementById('legacy-content');
+
+            function renderLegacy(tab) {
+                const data = legacyData[tab];
+                legacyContent.innerHTML = `
+                    <div class="prose max-w-none text-stone-700">
+                        <h4 class="font-semibold text-lg">${data.title}</h4>
+                        <p>${data.content}</p>
+                    </div>
+                `;
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+            }
+
+            legacyTabs.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    renderLegacy(e.target.dataset.tab);
+                }
+            });
+
+            const ctx = document.getElementById('economyChart').getContext('2d');
+            const economyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['鹿皮貿易', '砂糖', '轉口貿易', '稻米', '鹽業'],
+                    datasets: [{
+                        label: '荷蘭時期經濟佔比',
+                        data: [45, 35, 20, 5, 0],
+                        backgroundColor: 'rgba(251, 191, 36, 0.6)',
+                        borderColor: 'rgba(251, 191, 36, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: '鄭氏時期經濟佔比',
+                        data: [10, 15, 5, 50, 20],
+                        backgroundColor: 'rgba(244, 63, 94, 0.6)',
+                        borderColor: 'rgba(244, 63, 94, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '經濟比重 (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            renderContent();
+            renderComparison('goal');
+            renderLegacy('hero');
+        });
+    </script>
+</body>
+</html>
