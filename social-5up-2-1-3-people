@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>航向歷史：多元視角的臺灣</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF5;
+            color: #36454F;
+        }
+        :root {
+            --color-primary: #5F9EA0; /* Sea Blue/Green */
+            --color-secondary: #E2725B; /* Terracotta */
+            --color-accent: #D2B48C; /* Tan */
+            --color-text: #36454F; /* Charcoal */
+            --color-bg: #FDFBF5; /* Beige */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: var(--color-bg);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            max-width: 90%;
+            width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    
+    <!-- Chosen Palette: Calm Harmony (Beige, Terracotta, Sea Blue, Charcoal) -->
+    <!-- Application Structure Plan: The SPA uses a thematic, four-section scrolling layout (Two Worlds, Conflict & Exchange, Teaching Application, Historical Echoes) with a sticky navigation. This non-linear structure is chosen over a direct report-to-page conversion to encourage user exploration and comparison. The core "Two Worlds" section uses a side-by-side layout to directly contrast Indigenous and European perspectives, which is central to the report's thesis. Interactive elements like click-to-reveal cards and modals are used to chunk complex information (like colonial policies and teaching activities) into digestible pieces, improving usability and reducing cognitive load for educators and students. -->
+    <!-- Visualization & Content Choices: Report Info: Comparing Spanish/Dutch rule -> Goal: Compare -> Viz: Interactive HTML table and a Chart.js bar chart for ruling duration. -> Interaction: Buttons to toggle between Spanish/Dutch details in the table. -> Justification: The table provides detailed comparison, while the chart offers a quick visual takeaway of their relative time in Taiwan. This is more engaging than a static table. Library: Chart.js (Canvas). Report Info: Complex Dutch policies (e.g., 贌社制度) -> Goal: Organize/Inform -> Viz: Simple, structured HTML/CSS diagram. -> Interaction: Displayed within a click-to-reveal modal. -> Justification: Avoids complex, static text blocks and presents the power structure clearly without needing SVG/Mermaid. Method: HTML/Tailwind. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header id="main-header" class="bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="text-xl font-bold text-[var(--color-primary)]">多元視角的臺灣</div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#two-worlds" class="nav-link">兩個世界</a>
+                <a href="#conflict-exchange" class="nav-link">衝突與交流</a>
+                <a href="#teaching-app" class="nav-link">教學應用</a>
+                <a href="#echoes" class="nav-link">歷史迴響</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#two-worlds" class="block py-2 px-4 text-sm hover:bg-gray-200">兩個世界</a>
+            <a href="#conflict-exchange" class="block py-2 px-4 text-sm hover:bg-gray-200">衝突與交流</a>
+            <a href="#teaching-app" class="block py-2 px-4 text-sm hover:bg-gray-200">教學應用</a>
+            <a href="#echoes" class="block py-2 px-4 text-sm hover:bg-gray-200">歷史迴響</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="min-h-[60vh] flex items-center bg-cover bg-center" style="background-image: linear-gradient(rgba(253, 251, 245, 0.6), rgba(253, 251, 245, 1)), url('https://images.unsplash.com/photo-1547942866-924ac29011a5?q=80&w=2070&auto=format&fit=crop');">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-[var(--color-text)] mb-4">航向歷史</h1>
+                <blockquote class="text-xl md:text-3xl text-gray-700 italic">「海，是我們的生命。」</blockquote>
+                <p class="mt-4 text-lg text-gray-600">透過多元視角，重新探尋17世紀的臺灣故事。</p>
+            </div>
+        </section>
+
+        <section id="two-worlds" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)]">兩個世界，不同視野</h2>
+                    <p class="mt-4 text-lg text-gray-600">17世紀的臺灣，是原住民族安身立命的家園，也是歐洲強權眼中全球佈局的棋點。他們對這片土地的認知，有著天壤之別。</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
+                    <div class="space-y-8">
+                        <h3 class="text-2xl font-bold text-center text-[var(--color-primary)]">雅美(達悟)族的世界觀</h3>
+                        <div class="card p-6">
+                            <h4 class="font-bold text-xl mb-2">🌊 與海洋共生</h4>
+                            <p>「海，是我們的生命。我們的飛魚，我們的拼板舟，我們的祖先，都來自這片海。」這句話深刻表達了雅美族人對海洋的依賴與敬畏。他們的世界觀強調與自然和平共處，遵循祖先的智慧，形成一種互惠共生的關係。</p>
+                        </div>
+                        <div class="card p-6">
+                            <h4 class="font-bold text-xl mb-2">🐟 飛魚的智慧</h4>
+                            <p>飛魚不僅是食物，更是文化核心。從招魚祭到終食祭，完整的儀式與禁忌，展現了雅美族人對生態永續的內在理解。這是一種由季節律動、儀式與社群凝聚而成的生活方式。</p>
+                        </div>
+                        <div class="card p-6">
+                            <h4 class="font-bold text-xl mb-2">🛶 拼板舟的靈魂</h4>
+                            <p>不使用一根鐵釘，由20多塊木材拼接而成的拼板舟(Tatala)，是工藝、社群合作與家族榮耀的象徵。它不僅是漁獵工具，更是雅美文化與身份認同的精髓。</p>
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <h3 class="text-2xl font-bold text-center text-[var(--color-secondary)]">歐洲的野心</h3>
+                        <div class="card p-6">
+                            <h4 class="font-bold text-xl mb-2">💰 重商主義的驅動</h4>
+                            <p>17世紀的歐洲，國家財富取決於金銀的累積。這種思想驅使各國積極尋找新航線、資源與殖民地。臺灣因其在東亞的戰略位置，成為連接中國絲綢、日本白銀與東南亞香料貿易的關鍵。</p>
+                        </div>
+                        <div class="card p-6">
+                            <h4 class="font-bold text-xl mb-2">🇪� 西班牙的盤算：信仰與戰略</h4>
+                            <p>西班牙佔領臺灣北部，主要為確保馬尼拉與中國間的貿易航線，並對抗荷蘭。除了貿易，道明會的傳教活動也扮演重要角色，他們深入部落，學習語言，將宗教傳播置於商業之上。</p>
+                        </div>
+                        <div class="card p-6">
+                            <h4 class="font-bold text-xl mb-2">🇳🇱 荷蘭的商機：利潤與控制</h4>
+                            <p>荷蘭東印度公司(VOC)視臺灣為商業樞紐，目標是壟斷貿易、最大化利潤。他們推動鹿皮出口與農業生產，並透過「王田制」、「贌社制度」等方式，從經濟上對原住民社會進行系統性的重組與控制。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conflict-exchange" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)]">衝突與交流</h2>
+                    <p class="mt-4 text-lg text-gray-600">當兩種截然不同的世界觀相遇，帶來的不僅是貿易，更是深刻的文化衝擊、權力鬥爭與社會變革。</p>
+                </div>
+                
+                <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg mb-12">
+                    <h3 class="text-2xl font-bold text-center mb-6">殖民策略比較：西班牙 vs. 荷蘭</h3>
+                    <div class="chart-container mb-8">
+                        <canvas id="durationChart"></canvas>
+                    </div>
+                    <div id="comparison-table" class="overflow-x-auto">
+                    </div>
+                </div>
+
+                <div class="text-center mb-12">
+                    <h3 class="text-2xl font-bold text-[var(--color-text)]">關鍵制度與影響</h3>
+                    <p class="mt-2 text-gray-600">歐洲人帶來了新的統治與經濟模式，永久地改變了臺灣的社會樣貌。</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <button data-modal="modal-wangtian" class="modal-trigger card p-6 text-center">
+                        <h4 class="font-bold text-xl">王田制</h4>
+                        <p class="text-sm mt-2 text-gray-500">土地所有權的變革</p>
+                    </button>
+                    <button data-modal="modal-baoshe" class="modal-trigger card p-6 text-center">
+                        <h4 class="font-bold text-xl">贌社制度</h4>
+                        <p class="text-sm mt-2 text-gray-500">壟斷性的貿易體系</p>
+                    </button>
+                    <button data-modal="modal-landdag" class="modal-trigger card p-6 text-center">
+                        <h4 class="font-bold text-xl">地方會議</h4>
+                        <p class="text-sm mt-2 text-gray-500">政治控制的象徵</p>
+                    </button>
+                    <button data-modal="modal-sinkan" class="modal-trigger card p-6 text-center">
+                        <h4 class="font-bold text-xl">新港文書</h4>
+                        <p class="text-sm mt-2 text-gray-500">文化交融的見證</p>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="teaching-app" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)]">互動教學應用</h2>
+                    <p class="mt-4 text-lg text-gray-600">將歷史帶入課堂，透過多元活動，培養學生的同理心、批判性思維與文化理解。</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card">
+                        <div class="p-6">
+                            <h3 class="font-bold text-xl mb-2">🗣️ 聲音的議會</h3>
+                            <p class="text-gray-600 mb-4">模擬一場17世紀的會議，讓學生扮演不同角色（雅美長老、西班牙傳教士、荷蘭商人、漢人獵戶），從各自的立場發聲。</p>
+                            <button data-modal="modal-activity1" class="modal-trigger text-[var(--color-primary)] font-semibold">查看活動詳情 &rarr;</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="p-6">
+                            <h3 class="font-bold text-xl mb-2">✍️ 他們的一天</h3>
+                            <p class="text-gray-600 mb-4">學生選擇一個歷史角色，透過短文或繪畫，描繪其在17世紀臺灣的典型一天，深入體驗不同群體的生活與挑戰。</p>
+                            <button data-modal="modal-activity2" class="modal-trigger text-[var(--color-primary)] font-semibold">查看活動詳情 &rarr;</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="p-6">
+                            <h3 class="font-bold text-xl mb-2">🗺️ 繪製相遇地圖</h3>
+                            <p class="text-gray-600 mb-4">利用17世紀的古地圖，標示出歐洲人的堡壘、貿易路線與原住民的活動範圍，從空間角度理解歷史。</p>
+                            <button data-modal="modal-activity3" class="modal-trigger text-[var(--color-primary)] font-semibold">查看活動詳情 &rarr;</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="p-6">
+                            <h3 class="font-bold text-xl mb-2">🔄 貿易與交換</h3>
+                            <p class="text-gray-600 mb-4">模擬「以物易物」和「贌社制度」，讓學生親身體驗不同貿易方式對原住民社群的影響與權力不對等。</p>
+                            <button data-modal="modal-activity4" class="modal-trigger text-[var(--color-primary)] font-semibold">查看活動詳情 &rarr;</button>
+                        </div>
+                    </div>
+                     <div class="card">
+                        <div class="p-6">
+                            <h3 class="font-bold text-xl mb-2">🏺 文化文物探索</h3>
+                            <p class="text-gray-600 mb-4">比較拼板舟與歐洲帆船，分析新港文書，從物質文化中解讀技術、價值觀與權力關係的差異。</p>
+                            <button data-modal="modal-activity5" class="modal-trigger text-[var(--color-primary)] font-semibold">查看活動詳情 &rarr;</button>
+                        </div>
+                    </div>
+                     <div class="card">
+                        <div class="p-6">
+                            <h3 class="font-bold text-xl mb-2">🤔 關鍵提問討論</h3>
+                            <p class="text-gray-600 mb-4">圍繞「財富vs.寶藏」、「土地所有權」、「文化韌性」等核心概念進行討論，深化學生的批判性思考。</p>
+                            <button data-modal="modal-activity6" class="modal-trigger text-[var(--color-primary)] font-semibold">查看活動詳情 &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="echoes" class="py-20 md:py-32 bg-cover bg-center text-white" style="background-image: linear-gradient(rgba(49, 63, 73, 0.7), rgba(49, 63, 73, 0.7)), url('https://images.unsplash.com/photo-1613942433236-981394593134?q=80&w=1974&auto=format&fit=crop');">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">歷史的迴響</h2>
+                <blockquote class="text-xl md:text-2xl max-w-3xl mx-auto italic">
+                    「我們會謹慎地觀察他們，但不會加入他們的遊戲。我們的土地，我們的海洋，我們的文化，都是我們的寶藏... 我們會繼續我們的飛魚祭，繼續在海上航行，繼續傳承我們的智慧… 直到海枯石爛。」
+                </blockquote>
+                <p class="mt-8 text-lg text-gray-300">歷史不僅是關於征服與變革，更是關於生存、適應與文化身份的持久力量。</p>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-6 text-center text-sm">
+            <p>&copy; 2025 航向歷史：多元視角的臺灣。此為教學演示專案。</p>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="modal-container">
+        <!-- Policy Modals -->
+        <div id="modal-wangtian" class="modal-overlay">
+            <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-[var(--color-secondary)]">王田制</h3>
+                <p class="mb-4">荷蘭人將臺灣的土地宣告為公司所有，稱為「王田」。原住民的土地被剝奪，而大量引進的漢人移民則成為向荷蘭東印度公司繳納租稅的佃農。這個制度從根本上改變了原住民傳統的土地利用方式與社群主權。</p>
+                <button class="modal-close-btn mt-6 bg-[var(--color-secondary)] text-white px-4 py-2 rounded">關閉</button>
+            </div>
+        </div>
+        <div id="modal-baoshe" class="modal-overlay">
+            <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-[var(--color-secondary)]">贌社制度</h3>
+                <p class="mb-4">這是一種變相的包稅制度。荷蘭東印度公司將特定原住民村社的貿易獨佔權，公開招標給漢人商人（贌商）。贌商壟斷了與該村社的交易，以衣料、鹽、鐵器等交換鹿皮、鹿肉等產品。由於缺乏競爭，贌商常任意定價，導致原住民社群被嚴重剝削，生活陷入困境。</p>
+                <div class="text-center my-4 p-4 border-2 border-dashed border-[var(--color-accent)] rounded-lg">
+                    <span class="font-bold">荷蘭東印度公司</span> &rarr; <span class="font-bold text-[var(--color-secondary)]">漢人贌商 (取得壟斷權)</span> &rarr; <span class="font-bold text-[var(--color-primary)]">原住民村社 (交換鹿皮等)</span>
+                </div>
+                <button class="modal-close-btn mt-6 bg-[var(--color-secondary)] text-white px-4 py-2 rounded">關閉</button>
+            </div>
+        </div>
+        <div id="modal-landdag" class="modal-overlay">
+            <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-[var(--color-secondary)]">地方會議 (Landdag)</h3>
+                <p class="mb-4">荷蘭人為鞏固其統治，每年定期召開地方會議。他們要求被征服的原住民村社長老出席，向荷蘭長官宣誓效忠、領取象徵權力的權杖、聽取荷蘭法令，並報告村社情況。這是荷蘭人進行政治控制，並使其統治合法化的關鍵機制。</p>
+                <button class="modal-close-btn mt-6 bg-[var(--color-secondary)] text-white px-4 py-2 rounded">關閉</button>
+            </div>
+        </div>
+        <div id="modal-sinkan" class="modal-overlay">
+            <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-[var(--color-secondary)]">新港文書 (Sinkan Manuscripts)</h3>
+                <p class="mb-4">荷蘭傳教士為了傳教，學習並用羅馬字母拼寫原住民的語言（特別是西拉雅語），這促成了「新港文書」的誕生。這些文件主要是土地租借、買賣的契約，常以羅馬拼音的西拉雅語和漢字並列書寫。它們不僅是珍貴的語言學材料，也反映了當時原住民、漢人與荷蘭人之間複雜的土地與權力關係。</p>
+                <button class="modal-close-btn mt-6 bg-[var(--color-secondary)] text-white px-4 py-2 rounded">關閉</button>
+            </div>
+        </div>
+
+        <!-- Activity Modals -->
+        <div id="modal-activity1" class="modal-overlay">
+            <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-[var(--color-primary)]">活動：聲音的議會</h3>
+                <p><strong>目標：</strong>理解不同群體的動機，體驗權力動態，培養溝通與換位思考能力。</p>
+                <p class="mt-2"><strong>材料：</strong>角色卡（雅美長老、西班牙傳教士、荷蘭商人、漢人獵戶）。</p>
+                <p class="mt-2"><strong>流程：</strong></p>
+                <ol class="list-decimal list-inside mt-2 space-y-1">
+                    <li>將學生分組，每組分配一個角色。</li>
+                    <li>各組根據角色背景，準備一份簡短的聲明，闡述他們對臺灣的需求與看法。</li>
+                    <li>舉行一場模擬會議，各組派代表發言。</li>
+                    <li>教師引導討論，探討各方觀點的衝突點與可能的誤解。</li>
+                </ol>
+                <button class="modal-close-btn mt-6 bg-[var(--color-primary)] text-white px-4 py-2 rounded">關閉</button>
+            </div>
+        </div>
+        <div id="modal-activity2" class="modal-overlay">
+             <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-[var(--color-primary)]">活動：他們的一天</h3>
+                <p><strong>目標：</strong>深入理解不同群體的日常生活與挑戰，培養同理心與創意表達。</p>
+                <p class="mt-2"><strong>材料：</strong>紙、筆、繪畫工具。</p>
+                <p class="mt-2"><strong>流程：</strong></p>
+                <ol class="list-decimal list-inside mt-2 space-y-1">
+                    <li>學生選擇一個歷史角色（雅美族人、西班牙士兵、荷蘭官員等）。</li>
+                    <li>創作一個短篇故事或一幅畫，描繪該角色在17世紀臺灣的典型一天。</li>
+                    <li>鼓勵學生加入環境、食物、工作、心情等細節。</li>
+                    <li>向全班分享作品，討論不同角色的生活有何異同。</li>
+                </ol>
+                <button class="modal-close-btn mt-6 bg-[var(--color-primary)] text-white px-4 py-2 rounded">關閉</button>
+            </div>
+        </div>
+        <div id="modal-activity3" class="modal-overlay">
+             <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-[var(--color-primary)]">活動：繪製相遇地圖</h3>
+                <p><strong>目標：</strong>視覺化歐洲人的殖民據點與活動範圍，進行空間分析。</p>
+                <p class="mt-2"><strong>材料：</strong>17世紀臺灣古地圖影本、現代地圖、彩色筆、便利貼。</p>
+                <p class="mt-2"><strong>流程：</strong></p>
+                <ol class="list-decimal list-inside mt-2 space-y-1">
+                    <li>在地圖上標示西班牙與荷蘭的主要堡壘（如聖薩爾瓦多城、熱蘭遮城）。</li>
+                    <li>描繪出可能的貿易航線（如馬尼拉-中國）。</li>
+                    <li>標示出已知的原住民族群分佈區域。</li>
+                    <li>討論地圖如何反映歐洲人對臺灣的認知，以及他們對控制和資源的渴望。</li>
+                </ol>
+                <button class="modal-close-btn mt-6 bg-[var(--color-primary)] text-white px-4 py-2 rounded">關閉</button>
+            </div>
+        </div>
+        <div id="modal-activity4" class="modal-overlay">
+             <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-[var(--color-primary)]">活動：貿易與交換</h3>
+                <p><strong>目標：</strong>理解傳統貿易與殖民經濟制度的差異與影響。</p>
+                <p class="mt-2"><strong>材料：</strong>代表各種貿易商品的卡片（鹿皮、硫磺、絲綢、鹽、鐵器等）、代幣。</p>
+                <p class="mt-2"><strong>流程：</strong></p>
+                <ol class="list-decimal list-inside mt-2 space-y-1">
+                    <li>第一階段：模擬原住民與漢人商人之間的「以物易物」交易。</li>
+                    <li>第二階段：引入「贌社制度」，指定一位學生擔任擁有壟斷權的「贌商」。</li>
+                    <li>比較兩種制度下，原住民（學生）的交易感受與結果。</li>
+                    <li>討論壟斷如何造成權力不對等與剝削。</li>
+                </ol>
+                <button class="modal-close-btn mt-6 bg-[var(--color-primary)] text-white px-4 py-2 rounded">關閉</button>
+            </div>
+        </div>
+        <div id="modal-activity5" class="modal-overlay">
+             <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-[var(--color-primary)]">活動：文化文物探索</h3>
+                <p><strong>目標：</strong>從物質文化分析背後的技術、價值觀與社會意涵。</p>
+                <p class="mt-2"><strong>材料：</strong>拼板舟、歐洲帆船、雅美陶器、新港文書等圖片資料。</p>
+                <p class="mt-2"><strong>流程：</strong></p>
+                <ol class="list-decimal list-inside mt-2 space-y-1">
+                    <li>分組檢視不同的文物圖片。</li>
+                    <li>討論：這件文物告訴我們什麼？製作者是誰？用途是什麼？反映了什麼樣的文化？</li>
+                    <li>比較拼板舟和歐洲帆船，思考工藝、材料和用途的差異。</li>
+                    <li>分析新港文書，討論它如何展現文化互動與權力關係。</li>
+                </ol>
+                <button class="modal-close-btn mt-6 bg-[var(--color-primary)] text-white px-4 py-2 rounded">關閉</button>
+            </div>
+        </div>
+        <div id="modal-activity6" class="modal-overlay">
+             <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-[var(--color-primary)]">活動：關鍵提問討論</h3>
+                <p><strong>目標：</strong>深化批判性思考，連結歷史與當代議題。</p>
+                <p class="mt-2"><strong>討論問題範例：</strong></p>
+                <ul class="list-disc list-inside mt-2 space-y-2">
+                    <li>歐洲人對「財富」的理解，與雅美族長老對「寶藏」的理解有何不同？</li>
+                    <li>為什麼在歐洲人與原住民族的互動中，權力是不平等的？</li>
+                    <li>雅美族人與海洋的關係，和荷蘭人對待鹿群的方式，哪種更有利於永續發展？</li>
+                    <li>為什麼我們需要聽取不同族群的聲音，才能完整地理解歷史？</li>
+                </ul>
+                <button class="modal-close-btn mt-6 bg-[var(--color-primary)] text-white px-4 py-2 rounded">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link, #mobile-menu a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            const sections = document.querySelectorAll('section');
+            const headerNavLinks = document.querySelectorAll('#main-header .nav-link');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        headerNavLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+            sections.forEach(section => observer.observe(section));
+
+            const comparisonData = {
+                spain: {
+                    '主要區域': '北部 (基隆、淡水)',
+                    '主要動機': '確保貿易航線、傳教',
+                    '主要經濟活動': '硫磺、鹿皮貿易',
+                    '主要政策/制度': '傳教、羅馬化語言',
+                    '主要互動族群': '凱達格蘭族、巴賽人',
+                    '結果': '被荷蘭擊敗'
+                },
+                netherlands: {
+                    '主要區域': '南部 (臺南)',
+                    '主要動機': '建立貿易樞紐、獲利',
+                    '主要經濟活動': '鹿皮、蔗糖、稻米轉運',
+                    '主要政策/制度': '王田制、贌社制度、地方會議',
+                    '主要互動族群': '西拉雅族、其他平埔族',
+                    '結果': '被鄭成功擊敗'
+                }
+            };
+
+            function createTableHTML(data) {
+                let table = '<table class="w-full text-sm text-left text-gray-500">';
+                table += '<thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr>';
+                table += '<th scope="col" class="px-6 py-3">特徵</th>';
+                table += '<th scope="col" class="px-6 py-3">西班牙</th>';
+                table += '<th scope="col" class="px-6 py-3">荷蘭</th>';
+                table += '</tr></thead><tbody>';
+
+                const keys = Object.keys(data.spain);
+                keys.forEach(key => {
+                    table += '<tr class="bg-white border-b">';
+                    table += `<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${key}</th>`;
+                    table += `<td class="px-6 py-4">${data.spain[key]}</td>`;
+                    table += `<td class="px-6 py-4">${data.netherlands[key]}</td>`;
+                    table += '</tr>';
+                });
+                
+                table += '</tbody></table>';
+                return table;
+            }
+            document.getElementById('comparison-table').innerHTML = createTableHTML(comparisonData);
+
+            const ctx = document.getElementById('durationChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['西班牙', '荷蘭'],
+                    datasets: [{
+                        label: '在臺統治時間 (年)',
+                        data: [16, 38],
+                        backgroundColor: [
+                            'rgba(226, 114, 91, 0.6)', // Terracotta
+                            'rgba(95, 158, 160, 0.6)'  // Sea Blue/Green
+                        ],
+                        borderColor: [
+                            'rgba(226, 114, 91, 1)',
+                            'rgba(95, 158, 160, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '17世紀歐洲強權在臺統治時間比較',
+                            font: { size: 16 }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '年份'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const modalTriggers = document.querySelectorAll('.modal-trigger');
+            const modalCloseBtns = document.querySelectorAll('.modal-close-btn');
+            const modalOverlays = document.querySelectorAll('.modal-overlay');
+
+            modalTriggers.forEach(trigger => {
+                trigger.addEventListener('click', () => {
+                    const modalId = trigger.getAttribute('data-modal');
+                    document.getElementById(modalId).classList.add('visible');
+                });
+            });
+
+            function closeModal() {
+                modalOverlays.forEach(overlay => {
+                    overlay.classList.remove('visible');
+                });
+            }
+
+            modalCloseBtns.forEach(btn => {
+                btn.addEventListener('click', closeModal);
+            });
+            
+            modalOverlays.forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        closeModal();
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
+�
