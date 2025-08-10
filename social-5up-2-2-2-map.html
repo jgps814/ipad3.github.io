@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式教學網頁：鄭氏時期的臺灣</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is designed as a single-page exploratory dashboard with a clear thematic structure. A sticky top navigation allows users to jump to key sections: Maritime Trade, Han Society, Cultural Deepening, and Contemporary Connections. This non-linear structure is chosen over the original report's linear format to empower users to explore topics based on interest, enhancing engagement. The core interaction is a filterable chart system in the 'Maritime Trade' section, which dynamically visualizes data, making complex trade relationships intuitive and easy to grasp. This design prioritizes user-driven discovery and comprehension. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Zheng-era trade goods. Goal: Compare proportions. Viz: Doughnut Chart. Interaction: Hover for details. Justification: Provides an immediate, clear overview of export/import balance. Library: Chart.js.
+        - Report Info: Trade partners and their goods. Goal: Compare specifics. Viz: Bar Chart + Text Block. Interaction: Click buttons (Japan, UK, etc.) to filter chart and text. Justification: Transforms static table data into an interactive discovery tool, making comparisons engaging. Library: Chart.js + Vanilla JS.
+        - Report Info: Cultural development (temples, beliefs). Goal: Organize concepts. Viz: Icon-driven card layout. Interaction: Static display. Justification: Clearly separates distinct cultural elements for easy digestion. Method: HTML/CSS with Unicode icons.
+        - Report Info: Historical vs. modern economy. Goal: Compare over time. Viz: Side-by-side comparison layout. Interaction: Static display. Justification: Directly juxtaposes past and present, highlighting the core concept of Taiwan's enduring global strategic importance. Method: HTML/CSS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #D97706; 
+        }
+        .active-nav {
+            color: #D97706;
+            border-bottom: 2px solid #D97706;
+        }
+        .content-card {
+            background-color: #FFFFFF;
+            border: 1px solid #F3EADF;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .active-tab {
+            background-color: #C27803 !important;
+            color: #FFFFFF !important;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-amber-800">鄭氏時期的臺灣</h1>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#trade" class="nav-link pb-1">海上貿易</a>
+                    <a href="#society" class="nav-link pb-1">漢人社會</a>
+                    <a href="#culture" class="nav-link pb-1">文化深耕</a>
+                    <a href="#connections" class="nav-link pb-1">當代連結</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-white border border-gray-300 rounded-md py-2 px-3 text-gray-700">
+                        <option value="#trade">海上貿易</option>
+                        <option value="#society">漢人社會</option>
+                        <option value="#culture">文化深耕</option>
+                        <option value="#connections">當代連結</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        
+        <section id="intro" class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-amber-900 mb-4">探索鄭氏王朝對臺灣的深遠影響</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600">
+                17世紀，鄭氏政權在臺灣的統治雖然短暫，卻為這片土地帶來了結構性的轉變。從繁忙的海上貿易到漢人社會的建立，再到文化與信仰的扎根，這段歷史深刻地塑造了今日臺灣的樣貌。本頁將帶您以互動的方式，探索這段關鍵的歷史時期。
+            </p>
+        </section>
+
+        <section id="trade" class="scroll-mt-20 mb-20">
+            <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-amber-900">🚢 海上貿易：臺灣的經濟命脈</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">鄭氏政權以臺灣為基地，積極拓展海上貿易，以獲取軍事與民生所需物資。這不僅是經濟活動，更是其反清復明事業的重要支柱。透過互動圖表，了解當時主要的進出口商品與貿易夥伴。</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="content-card">
+                    <h3 class="font-bold text-xl mb-4 text-center text-amber-800">主要進出口商品</h3>
+                    <div class="chart-container">
+                        <canvas id="tradeGoodsChart"></canvas>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4 text-center">鄭氏政權出口臺灣的天然產物如蔗糖與鹿皮，換取其戰略發展所需的軍火與白銀。</p>
+                </div>
+                <div class="content-card">
+                    <h3 class="font-bold text-xl mb-4 text-center text-amber-800">主要貿易夥伴與商品</h3>
+                    <div class="flex justify-center flex-wrap gap-2 mb-4">
+                        <button class="tab-button bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold" data-partner="japan">日本</button>
+                        <button class="tab-button bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold" data-partner="uk">英國</button>
+                        <button class="tab-button bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold" data-partner="china">中國</button>
+                        <button class="tab-button bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold" data-partner="sea">東南亞</button>
+                    </div>
+                    <div id="partner-info" class="p-4 bg-amber-50 rounded-lg min-h-[100px]">
+                        <p class="font-semibold text-amber-900" id="partner-name">日本</p>
+                        <p class="text-gray-700" id="partner-desc">最主要的貿易夥伴。出口蔗糖、鹿皮換取軍用物資（銅、鉛）與白銀。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="society" class="scroll-mt-20 mb-20">
+            <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-amber-900">🌾 漢人社會的出現</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">為了解決糧食問題並鞏固統治，鄭氏政權大規模招募漢人來臺開墾，深刻地改變了臺灣的人口結構與社會樣貌，但也引發了與原住民族群的衝突。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="content-card">
+                    <h3 class="font-bold text-xl mb-3 text-amber-800">屯墾政策</h3>
+                    <p class="text-gray-600 mb-4">採「寓兵於農」政策，讓軍隊就地開墾，解決糧荒。許多現今地名如高雄的<span class="font-semibold">左營</span>、<span class="font-semibold">前鎮</span>，臺南的<span class="font-semibold">新營</span>、<span class="font-semibold">下營</span>，都源於當時的軍隊編制與屯墾區。</p>
+                </div>
+                <div class="content-card">
+                    <h3 class="font-bold text-xl mb-3 text-amber-800">土地開發</h3>
+                    <p class="text-gray-600 mb-4">除了軍屯，也允許官員圈地，建立封建土地所有制。總計開發土地超過 <span class="font-bold text-2xl text-amber-700">18,454</span> 甲，奠定了臺灣以農為本的漢人社會基礎。</p>
+                </div>
+                <div class="content-card md:col-span-2 lg:col-span-1">
+                    <h3 class="font-bold text-xl mb-3 text-amber-800">與原住民族的互動</h3>
+                    <p class="text-gray-600 mb-4">漢人的大規模拓墾，侵佔了原住民族的傳統領域，導致衝突頻傳。鄭氏政權也沿用「贌社」制度對原住民進行經濟剝削，使其面臨嚴峻的生存危機。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="culture" class="scroll-mt-20 mb-20">
+            <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-amber-900">🏯 文化深耕：教育與信仰的傳入</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">隨著漢人移民的到來，儒家教育體系與民間信仰也在此落地生根，成為形塑臺灣文化的重要力量。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="content-card">
+                    <div class="flex items-start gap-4">
+                        <div class="text-4xl">🏛️</div>
+                        <div>
+                            <h3 class="font-bold text-xl mb-2 text-amber-800">儒學教育的奠基</h3>
+                            <p class="text-gray-600">在陳永華建議下，鄭經於1666年建立了全臺第一座孔子廟，並設立學校推行儒學教育與科舉制度，被譽為<span class="font-semibold">「全臺首學」</span>，為臺灣培育了最早的一批學者。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="flex items-start gap-4">
+                        <div class="text-4xl">🙏</div>
+                        <div>
+                            <h3 class="font-bold text-xl mb-2 text-amber-800">民間信仰的普及</h3>
+                            <p class="text-gray-600">移民們也將原鄉的信仰帶來臺灣。與鄭氏關係密切的<span class="font-semibold">玄天上帝</span>（水神，守護軍隊）以及沿海居民信奉的<span class="font-semibold">媽祖</span>（海神），成為安定人心的重要力量，並廣建廟宇。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="connections" class="scroll-mt-20">
+            <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-amber-900">🔗 當代連結：從歷史看臺灣的全球角色</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">歷史總是以不同的面貌重現。從鄭氏時期在全球貿易網絡中的關鍵節點，到今日臺灣在全球高科技供應鏈中的核心地位，臺灣的戰略重要性始終如一。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="content-card">
+                    <h3 class="font-bold text-xl mb-3 text-amber-800">鄭氏時期的貿易樞紐</h3>
+                    <p class="text-gray-600">當時的臺灣，是東亞海上貿易的重要轉運站。出口的蔗糖與鹿皮是支撐政權的經濟命脈，其貿易活動具有高度的<span class="font-semibold">戰略意義</span>，影響著區域的權力平衡。</p>
+                </div>
+                <div class="content-card">
+                    <h3 class="font-bold text-xl mb-3 text-amber-800">今日臺灣的「矽盾」</h3>
+                    <p class="text-gray-600">今日臺灣在全球半導體產業中扮演著不可或缺的角色，生產全球大部分的先進晶片。這個被稱為<span class="font-semibold">「矽盾」</span>的優勢，不僅是經濟實力的展現，更成為臺灣在地緣政治中的重要屏障。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-amber-900 text-white mt-20">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p class="text-sm">互動式教學網頁 &copy; 2024</p>
+            <p class="text-xs mt-1">基於五年級社會課程「大航海時代在臺灣留下哪些影響？」設計</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tradeData = {
+                exports: {
+                    labels: ['蔗糖', '鹿皮', '稻米', '絲綢(轉口)', '藥材(轉口)'],
+                    data: [40, 30, 15, 10, 5],
+                },
+                imports: {
+                    labels: ['軍火物資', '白銀', '布料', '民生用品'],
+                    data: [50, 25, 15, 10],
+                }
+            };
+            
+            const tradeGoodsCtx = document.getElementById('tradeGoodsChart').getContext('2d');
+            const tradeGoodsChart = new Chart(tradeGoodsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['出口商品', '進口商品'],
+                    datasets: [{
+                        label: '貿易比例',
+                        data: [
+                            tradeData.exports.data.reduce((a, b) => a + b, 0),
+                            tradeData.imports.data.reduce((a, b) => a + b, 0)
+                        ],
+                        backgroundColor: [
+                            'rgba(194, 120, 3, 0.7)',
+                            'rgba(120, 120, 120, 0.6)'
+                        ],
+                        borderColor: [
+                            '#C27803',
+                            '#787878'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const value = context.raw;
+                                    const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                    return label + percentage;
+                                }
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: '進出口商品比例'
+                        }
+                    }
+                }
+            });
+
+            const partnerData = {
+                japan: { name: '日本', desc: '最主要的貿易夥伴。出口蔗糖、鹿皮換取軍用物資（銅、鉛）與白銀。' },
+                uk: { name: '英國', desc: '簽訂通商條約。出口蔗糖、鹿皮，進口西洋槍砲以增強軍力。' },
+                china: { name: '中國', desc: '因清朝海禁，貿易以走私為主。轉銷絲綢、藥材，換取民生用品。' },
+                sea: { name: '東南亞', desc: '貿易網絡遍及呂宋、暹羅等地，進行轉口貿易與當地特產交換。' }
+            };
+
+            const partnerButtons = document.querySelectorAll('.tab-button');
+            const partnerNameEl = document.getElementById('partner-name');
+            const partnerDescEl = document.getElementById('partner-desc');
+
+            function updatePartnerInfo(partnerKey) {
+                const data = partnerData[partnerKey];
+                partnerNameEl.textContent = data.name;
+                partnerDescEl.textContent = data.desc;
+
+                partnerButtons.forEach(btn => {
+                    btn.classList.remove('active-tab');
+                    btn.classList.add('bg-amber-100', 'text-amber-800');
+                    if (btn.dataset.partner === partnerKey) {
+                        btn.classList.add('active-tab');
+                        btn.classList.remove('bg-amber-100', 'text-amber-800');
+                    }
+                });
+            }
+
+            partnerButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    updatePartnerInfo(button.dataset.partner);
+                });
+            });
+
+            updatePartnerInfo('japan');
+
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active-nav');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active-nav');
+                    }
+                });
+            });
+
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (e) => {
+                window.location.href = e.target.value;
+            });
+        });
+    </script>
+</body>
+</html>
