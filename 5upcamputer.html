@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canva 課後活動策略資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Energetic & Playful -->
+    <!-- Application Structure Plan: The infographic tells a linear story to guide a teacher through implementing a new classroom management system. It starts with the problem (early finishers), introduces the two-part solution ('Waiting Tasks' vs. 'Skills Playground'), visualizes the student's journey through a process flow, dives deep into the 'Playground' levels with a comparative data visualization (Radar Chart), and concludes by showing the overall composition of activities. This narrative structure makes the information digestible and actionable for the target audience (teachers). -->
+    <!-- Visualization & Content Choices: 1. Student Process Flow -> Goal: Organize -> Viz: HTML/CSS Flowchart -> Justification: Clearly illustrates the decision-making process for teachers and students, which is central to the system. Method: Tailwind CSS. CONFIRMS NO SVG/Mermaid. 2. Comparison of Playground Levels -> Goal: Compare -> Viz: Radar Chart -> Justification: Effectively compares the qualitative attributes (complexity, creativity, time) of the three distinct levels in a single, easy-to-understand data visualization. Method: Chart.js (Canvas). CONFIRMS NO SVG. 3. Distribution of Activity Types -> Goal: Inform/Compare -> Viz: Donut Chart -> Justification: Provides a quick, high-level summary of the kinds of activities offered, showing the balance between skill drills and larger projects. Method: Chart.js (Canvas). CONFIRMS NO SVG. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F7F9FC;
+            color: #333;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #FF6B6B, #4D96FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 py-12 max-w-5xl">
+
+        <header class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-black gradient-text mb-4">解鎖學生潛能</h1>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-700">Canva 課後活動的系統化策略</h2>
+            <p class="mt-4 max-w-2xl mx-auto text-gray-600">將學生的「空閒時間」轉化為「黃金學習時間」。本指南提供一個雙軌系統，有效管理提早完成作業的學生，將混亂轉為有序的學習探索。</p>
+        </header>
+
+        <section class="mb-20">
+            <div class="text-center mb-10">
+                <h3 class="text-3xl font-bold text-gray-800">雙軌系統：銜接與獎勵</h3>
+                <p class="mt-2 text-gray-600">了解兩個核心策略的使用時機與目的，打造無縫的課堂管理流程。</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-l-8 border-[#FFD93D]">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-3">🎯 等待任務清單</h4>
+                    <p class="font-semibold text-amber-600 mb-4">短期銜接活動</p>
+                    <p class="text-gray-600"><strong>目的：</strong>在學生完成作業、等待老師檢查前的短暫空檔，提供與課堂相關的練習，以鞏固技能並<strong class="text-[#FF6B6B]">防止分心</strong>。</p>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-l-8 border-[#6BCB77]">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-3">🌟 技能遊樂場</h4>
+                    <p class="font-semibold text-green-600 mb-4">長期獎勵系統</p>
+                    <p class="text-gray-600"><strong>目的：</strong>當學生作業品質達標後，給予的<strong class="text-[#4D96FF]">正式獎勵</strong>。提供結構化的延伸挑戰，取代不受控的自由時間。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800">學生的學習旅程</h3>
+                <p class="mt-2 text-gray-600">從完成作業到進入技能遊樂場的完整流程圖。</p>
+            </div>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0">
+                <div class="text-center p-4">
+                    <div class="w-24 h-24 bg-[#4D96FF] text-white flex items-center justify-center rounded-full text-sm font-bold shadow-md mx-auto">主要作業完成</div>
+                </div>
+                <div class="w-1 h-10 md:w-20 md:h-1 bg-gray-300"></div>
+                <div class="text-center p-4">
+                     <div class="w-24 h-24 bg-[#FFD93D] text-gray-800 flex items-center justify-center rounded-full text-sm font-bold shadow-md mx-auto">進行等待任務</div>
+                </div>
+                <div class="w-1 h-10 md:w-20 md:h-1 bg-gray-300"></div>
+                <div class="text-center p-4">
+                     <div class="w-24 h-24 bg-[#FF6B6B] text-white flex items-center justify-center rounded-full text-sm font-bold shadow-md mx-auto">老師品質檢查</div>
+                </div>
+                <div class="w-1 h-10 md:w-20 md:h-1 bg-gray-300"></div>
+                <div class="text-center p-4">
+                     <div class="w-24 h-24 bg-[#6BCB77] text-white flex items-center justify-center rounded-full text-sm font-bold shadow-md mx-auto">進入技能遊樂場</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="mb-20">
+            <div class="text-center mb-10">
+                <h3 class="text-3xl font-bold text-gray-800">技能遊樂場：三階挑戰深度解析</h3>
+                <p class="mt-2 text-gray-600">「技能遊樂場」分為三個等級，每個等級的目標和挑戰都不同。下方的雷達圖清晰地比較了各等級在五個維度上的差異，幫助您為學生選擇最合適的挑戰。</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-lg">
+                <div class="chart-container">
+                    <canvas id="levelsRadarChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20">
+             <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="order-2 md:order-1">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-4">遊樂場活動類型分佈</h3>
+                    <p class="text-gray-600 mb-6">整個「技能遊樂場」的活動設計旨在平衡基礎技能訓練與創意專案探索。從圖表中可見，超過一半的活動是鼓勵學生進行創意發想和專案執行的挑戰，旨在培養超越工具操作的核心素養。</p>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 rounded-full mr-3 bg-[#FF6B6B]"></div>
+                            <span class="font-semibold text-gray-700">專案探索 (40%):</span>
+                            <span class="text-gray-600 ml-2">長期、深入的綜合性任務。</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 rounded-full mr-3 bg-[#4D96FF]"></div>
+                             <span class="font-semibold text-gray-700">創意挑戰 (35%):</span>
+                            <span class="text-gray-600 ml-2">中等難度，應用技能進行創作。</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 rounded-full mr-3 bg-[#FFD93D]"></div>
+                             <span class="font-semibold text-gray-700">技能演練 (25%):</span>
+                            <span class="text-gray-600 ml-2">短期、專注於特定設計技巧的遊戲。</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 md:order-2 bg-white p-6 rounded-2xl shadow-lg">
+                     <div class="chart-container" style="max-width: 400px; height: 300px; max-height: 350px;">
+                        <canvas id="activityTypeDonutChart"></canvas>
+                    </div>
+                </div>
+             </div>
+        </section>
+        
+    </div>
+
+    <footer class="text-center p-6 mt-8 bg-gray-800 text-white">
+        <p>這份資訊圖表將「Canva技能遊樂場」的核心概念轉化為視覺化的行動指南。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const radarCtx = document.getElementById('levelsRadarChart').getContext('2d');
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['時間投入', '技能專注度', '創意自由度', '複雜度', '專案導向'],
+                    datasets: [
+                        {
+                            label: '第一級：技能演練',
+                            data: [2, 9, 3, 2, 1],
+                            backgroundColor: 'rgba(255, 217, 61, 0.2)',
+                            borderColor: '#FFD93D',
+                            pointBackgroundColor: '#FFD93D',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#FFD93D'
+                        },
+                        {
+                            label: '第二級：創意挑戰',
+                            data: [5, 6, 8, 5, 4],
+                            backgroundColor: 'rgba(77, 150, 255, 0.2)',
+                            borderColor: '#4D96FF',
+                            pointBackgroundColor: '#4D96FF',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#4D96FF'
+                        },
+                        {
+                            label: '第三級：專案探索',
+                            data: [9, 7, 9, 8, 9],
+                             backgroundColor: 'rgba(255, 107, 107, 0.2)',
+                            borderColor: '#FF6B6B',
+                            pointBackgroundColor: '#FF6B6B',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#FF6B6B'
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { font: { size: 12, family: "'Noto Sans TC', sans-serif" } },
+                            ticks: {
+                                backdropColor: 'rgba(255, 255, 255, 0)',
+                                stepSize: 2
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { font: { size: 14, family: "'Noto Sans TC', sans-serif" } } },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                      return label.join(' ');
+                                    } else {
+                                      return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const donutCtx = document.getElementById('activityTypeDonutChart').getContext('2d');
+            new Chart(donutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['技能演練', '創意挑戰', '專案探索'],
+                    datasets: [{
+                        data: [25, 35, 40],
+                        backgroundColor: ['#FFD93D', '#4D96FF', '#FF6B6B'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                             callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                      return label.join(' ');
+                                    } else {
+                                      return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
