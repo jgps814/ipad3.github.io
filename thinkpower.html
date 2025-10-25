@@ -42,7 +42,7 @@
             <br><br>
             <button class="active" onclick="showChart('category')">類別分佈</button>
             <button onclick="showChart('stage')">適用階段</button>
-            <button onclick="showChart('group')">分組統計</button>
+            <button onclick="showChart('group')">分組統計（可點）</button>
         </div>
 
         <!-- 類別圓環圖 -->
@@ -59,7 +59,7 @@
             </div>
         </div>
 
-        <!-- 分組統計圖 -->
+        <!-- 分組統計圖（可點擊） -->
         <div id="group" class="chart-container">
             <div class="chart-wrapper">
                 <canvas id="groupCanvas"></canvas>
@@ -165,34 +165,53 @@
             }
         });
 
-        // === 3. 分組統計圖 ===
+        // === 3. 分組統計圖（可點擊！）===
         const groupCtx = document.getElementById('groupCanvas').getContext('2d');
-        const groupStats = { "一個人": 0, "小組合作": 0, "需要換到其它人": 0 };
+        const groupLabels = ["一個人", "小組合作", "需要換到其它人"];
+        const groupColors = ["#a8e6cf", "#ffd3b6", "#ffaaa5"];
+        const groupData = [0, 0, 0];
+        
+        // 統計次數
         routines.forEach(r => {
-            r.group.forEach(g => groupStats[g] = (groupStats[g] || 0) + 1);
+            r.group.forEach((g, i) => {
+                const idx = groupLabels.indexOf(g);
+                if (idx !== -1) groupData[idx]++;
+            });
         });
+
         const groupChart = new Chart(groupCtx, {
             type: 'pie',
             data: {
-                labels: ["一個人", "小組合作", "需要換到其它人"],
-                datasets: [{ data: Object.values(groupStats), backgroundColor: ["#a8e6cf", "#ffd3b6", "#ffaaa5"], borderWidth: 2 }]
+                labels: groupLabels,
+                datasets: [{
+                    data: groupData,
+                    backgroundColor: groupColors,
+                    borderWidth: 3,
+                    borderColor: '#fff'
+                }]
             },
             options: {
                 responsive: true,
-                plugins: { title: { display: true, text: '分組方式統計（多選累計）' } }
+                plugins: {
+                    legend: { position: 'bottom' },
+                    title: { display: true, text: '點擊區塊 → 查看對應例程' }
+                },
+                onClick: (e, els) => {
+                    if (!els[0]) return;
+                    const idx = els[0].index;
+                    const type = groupLabels[idx];
+                    showRoutinesByGroupType(type);
+                }
             }
         });
 
-        // === 切換圖表 ===
-        function showChart(type) {
-            document.querySelectorAll('.chart-container').forEach(c => c.classList.remove('active'));
-            document.getElementById(type).classList.add('active');
-            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('searchResults').style.display = 'none';
+        // === 顯示按分組類型 ===
+        function showRoutinesByGroupType(type) {
+            const list = routines.filter(r => r.group.includes(type));
+            showModal(`適合「${type}」的例程（共 ${list.length} 個）`, list);
         }
 
-        // === 顯示例程 ===
+        // === 其他顯示函數 ===
         function showRoutinesByCategory(cat) {
             const list = routines.filter(r => r.category === cat);
             showModal(`${cat}（共 ${list.length} 個）`, list);
@@ -208,9 +227,9 @@
             document.getElementById('modalBody').innerHTML = list.map(r => `
                 <div class="routine-item">
                     <strong>${r.name}</strong>
-                    <div class="info">問句數：${r.questions} ｜ 階段：${r.stage}</div>
+                    <div class="info">類別：${r.category} ｜ 階段：${r.stage} ｜ 問句數：${r.questions}</div>
                     <div>
-                        ${r.group.map(g => `<span class="tag ${g.includes('人')?'person':g.includes('組')?'group':'swap'}">${g}</span>`).join('')}
+                        ${r.group.map(g => `<span class="tag ${g.includes('人') && !g.includes('換') ? 'person' : g.includes('組') ? 'group' : 'swap'}">${g}</span>`).join('')}
                     </div>
                 </div>
             `).join('');
@@ -219,10 +238,22 @@
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
+        // === 切換圖表 ===
+        function showChart(type) {
+            document.querySelectorAll('.chart-container').forEach(c => c.classList.remove('active'));
+            document.getElementById(type).classList.add('active');
+            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('searchResults').style.display = 'none';
+        }
+
         // === 搜尋 ===
         function filterRoutines() {
             const q = document.getElementById('searchInput').value.trim().toLowerCase();
-            const results = routines.filter(r => r.name.toLowerCase().includes(q) || r.group.some(g => g.toLowerCase().includes(q)));
+            const results = routines.filter(r => 
+                r.name.toLowerCase().includes(q) || 
+                r.group.some(g => g.toLowerCase().includes(q))
+            );
             const container = document.getElementById('searchResults');
             const list = document.getElementById('resultsList');
 
@@ -234,7 +265,7 @@
                     <div class="routine-item">
                         <strong>${r.name}</strong>（${r.category}）<br>
                         <small>問句：${r.questions} ｜ 階段：${r.stage}</small><br>
-                        ${r.group.map(g => `<span class="tag ${g.includes('人')?'person':g.includes('組')?'group':'swap'}">${g}</span>`).join('')}
+                        ${r.group.map(g => `<span class="tag ${g.includes('人') && !g.includes('換') ? 'person' : g.includes('組') ? 'group' : 'swap'}">${g}</span>`).join('')}
                     </div>
                 `).join('');
         }
