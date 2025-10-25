@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>思考例程圖表</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 使用 Inter 字體 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        /* Modal 淡入淡出效果 */
+        #modal {
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        #modal.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        #modal:not(.hidden) {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container max-w-7xl mx-auto p-4 sm:p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">看見思考的力量：經典例程圖表</h1>
+
+        <!-- 搜尋欄 -->
+        <div class="mb-8">
+            <input type="text" id="searchBar" placeholder="搜尋名稱、方法或用途..." class="w-full p-4 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <!-- 卡片內容區域 -->
+        <div id="routines-container" class="space-y-10">
+            <!-- JavaScript 將會在這裡動態生成內容 -->
+        </div>
+    </div>
+
+    <!-- Modal 彈出視窗 (預設隱藏) -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div id="modal-content" class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 relative">
+            <!-- 關閉按鈕 -->
+            <button id="modal-close" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl font-bold">&times;</button>
+            
+            <!-- Modal 內容 -->
+            <h2 id="modal-name" class="text-2xl font-bold text-blue-700 mb-4"></h2>
+            
+            <h3 class="text-lg font-semibold text-gray-700 mt-4 mb-2 border-b pb-1">用途 (Purpose)</h3>
+            <p id="modal-purpose" class="text-gray-600"></p>
+            
+            <h3 class="text-lg font-semibold text-gray-700 mt-6 mb-2 border-b pb-1">方法 (Method)</h3>
+            <!-- whitespace-pre-line 會保留換行符號 -->
+            <p id="modal-method" class="text-gray-600 whitespace-pre-line"></p>
+        </div>
+    </div>
+
+    <script>
+        // 從 CSV 檔案中提取的數據
+        // 注意：由於 CSV 包含類別標題，我們將其轉換為結構化的 JSON
+        const data = [
+            {
+                "category": "投入與人互動的思考例程 (Routines for Engaging with Others)",
+                "routines": [
+                    { "name": "給一個拿一個 (Give One, Get One)", "method": "1. 教師提出問題或主題，學生各自產生數個回應 。\n2. 學生找夥伴分享想法，互相在對方的清單上「給」一個新想法並闡釋其重要性 。\n3. 重複此過程數次或在指定時間內進行 。\n4. 學生回到小組分享擴增後的想法清單 。", "purpose": "鼓勵學生仔細傾聽、促成他人想法，並了解多元觀點 。促使學生尋求不同觀點、進行擴散性思考，並闡釋主題的核心想法 。" },
+                    { "name": "回饋梯 (Ladder of Feedback)", "method": "給予口頭或書面回饋的結構，師生皆可使用 。", "purpose": "提供一個架構來給予和接收回饋，可用於同儕之間或師生之間 。" },
+                    { "name": "無領袖討論 (Leaderless Discussion)", "method": "結合文本使用，幫助學生擁有討論的主導權和學習問好問題 。", "purpose": "幫助學生主導討論並學習如何提出好的問題 。" },
+                    { "name": "SAIL：分享—提問—想法—學習 (SAIL: Share, Ask, Ideas, Learn)", "method": "用來分享初步的原型、計畫或草稿，以進一步澄清計畫並產生新想法 。", "purpose": "分享初步的原型、計畫或草稿，以澄清並產生新想法 。" },
+                    { "name": "創造意義 (Creating Meaning)", "method": "用來定義一個主題/概念，產出定義 。", "purpose": "定義一個主題或概念並產生一個共同的理解 。" },
+                    { "name": "加一 (Plus One)", "method": "替代性的筆記方法，聚焦於運用記憶和改善彼此的筆記 。", "purpose": "一種替代性的筆記方法，著重於利用記憶和改善彼此的筆記 。" }
+                ]
+            },
+            {
+                "category": "探索觀點的例程 (Routines for Exploring Viewpoints)", // 假設 "Explanation Game" 屬於此類別
+                "routines": [
+                    { "name": "解釋遊戲 (The Explanation Game)", "method": "學生針對一個他們感興趣的物件或主題，提出一個解釋，然後找出支持或反對這個解釋的證據 。", "purpose": "鼓勵學生建立並測試他們對事物運作方式的解釋 。" }
+                ]
+            },
+            {
+                "category": "統整想法的例程 (Routines for Synthesizing and Organizing Ideas)",
+                "routines": [
+                    { "name": "頭條標題 (Headlines)", "method": "學生為一個主題或學習單元創造一個能抓住核心思想的頭條標題 。", "purpose": "幫助學生捕捉一個主題的核心思想和精髓 。" },
+                    { "name": "CSI：顏色、符號、圖像 (CSI: Color, Symbol, Image)", "method": "學生選擇一個顏色、一個符號和一個圖像來代表他們對一個主題或閱讀材料的理解 。", "purpose": "一種非語言的方式來綜合和捕捉對一個主題的理解 。" },
+                    { "name": "列舉—排序—連結—闡述：概念圖 (Generate-Sort-Connect-Elaborate: Concept Maps)", "method": "學生先列舉出與主題相關的想法，然後將它們排序分類，接著用線條連結起來，最後闡述這些連結的意義，以建立一個概念圖 。", "purpose": "幫助學生組織他們對一個主題的理解，並看到想法之間的關聯 。" },
+                    { "name": "連結—延伸—挑戰 (Connect-Extend-Challenge)", "method": "學生將新的資訊與他們已知的知識做連結，延伸他們現有的想法，並挑戰他們原有的觀點 。", "purpose": "幫助學生將新資訊與既有知識整合，並深化他們的理解 。" },
+                    { "name": "4C 例程 (The 4C's: Connections, Challenge, Concepts, Changes)", "method": "學生從文本中找出讓他們產生連結、感到挑戰、學到重要概念以及讓他們想法改變的部分 。", "purpose": "一個引導深度閱讀和反思的架構 。" },
+                    { "name": "微型實驗室架構 (Microlab Protocol)", "method": "一個有結構的小組討論...", "purpose": "（資料不完整）" }
+                ]
+            }
+        ];
+
+        // 獲取 DOM 元素
+        const searchBar = document.getElementById('searchBar');
+        const routinesContainer = document.getElementById('routines-container');
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalClose = document.getElementById('modal-close');
+        const modalName = document.getElementById('modal-name');
+        const modalPurpose = document.getElementById('modal-purpose');
+        const modalMethod = document.getElementById('modal-method');
+
+        // 渲染卡片
+        function renderRoutines(filter = '') {
+            routinesContainer.innerHTML = ''; // 清空現有內容
+            const filterText = filter.toLowerCase();
+
+            data.forEach(category => {
+                // 過濾符合條件的例程
+                const matchingRoutines = category.routines.filter(routine => 
+                    routine.name.toLowerCase().includes(filterText) ||
+                    routine.purpose.toLowerCase().includes(filterText) ||
+                    routine.method.toLowerCase().includes(filterText)
+                );
+
+                // 如果這個類別中有符合的例程，才顯示
+                if (matchingRoutines.length > 0) {
+                    // 創建類別標題
+                    const categoryTitle = document.createElement('h2');
+                    categoryTitle.className = 'text-2xl font-semibold text-gray-700 mb-4 border-b-2 border-blue-200 pb-2';
+                    categoryTitle.textContent = category.category;
+                    routinesContainer.appendChild(categoryTitle);
+
+                    // 創建卡片網格
+                    const grid = document.createElement('div');
+                    grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+                    
+                    matchingRoutines.forEach(routine => {
+                        const card = document.createElement('div');
+                        card.className = 'bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg hover:border-blue-500 border-2 border-transparent transition-all duration-300 flex flex-col justify-between';
+                        
+                        card.innerHTML = `
+                            <div>
+                                <h3 class="text-xl font-bold text-blue-700 mb-2">${routine.name}</h3>
+                                <p class="text-gray-600 text-sm">${routine.purpose}</p>
+                            </div>
+                            <div class="text-right mt-4">
+                                <span class="text-sm text-blue-600 font-medium">查看詳情 &rarr;</span>
+                            </div>
+                        `;
+                        
+                        // 綁定點擊事件
+                        card.addEventListener('click', () => openModal(routine));
+                        grid.appendChild(card);
+                    });
+                    
+                    routinesContainer.appendChild(grid);
+                }
+            });
+
+            // 如果沒有任何結果
+            if (routinesContainer.innerHTML === '') {
+                routinesContainer.innerHTML = `<p class="text-center text-gray-500">找不到符合條件的例程。</p>`;
+            }
+        }
+
+        // 打開 Modal
+        function openModal(routine) {
+            modalName.textContent = routine.name;
+            modalPurpose.textContent = routine.purpose;
+            modalMethod.textContent = routine.method;
+            modal.classList.remove('hidden');
+        }
+
+        // 關閉 Modal
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        // 事件監聽
+        document.addEventListener('DOMContentLoaded', () => {
+            renderRoutines(); // 初始渲染
+        });
+
+        searchBar.addEventListener('input', (e) => {
+            renderRoutines(e.target.value);
+        });
+
+        modalClose.addEventListener('click', closeModal);
+
+        // 點擊 Modal 外部區域也可關閉
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    </script>
+
+</body>
+</html>
