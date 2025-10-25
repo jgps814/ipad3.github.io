@@ -3,192 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>思考例程圖表</title>
-    <!-- 引入 Tailwind CSS -->
+    <title>讓思考變得可見：思考例程圖表</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* 使用 Inter 字體 */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
         body {
-            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        /* Modal 淡入淡出效果 */
-        #modal {
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 300px;
         }
-        #modal.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-        #modal:not(.hidden) {
-            opacity: 1;
-            visibility: visible;
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 350px;
+            }
         }
     </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00A0B0',
+                        secondary: '#EB6841',
+                        accent: '#EDC951',
+                        danger: '#CC333F',
+                        dark: '#333333',
+                        light: '#F8F9FA'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '"Noto Sans TC"', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-light text-dark font-sans leading-relaxed">
 
-    <div class="container max-w-7xl mx-auto p-4 sm:p-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">看見思考的力量：經典例程圖表</h1>
+    <div class="container mx-auto p-4 md:p-8">
 
-        <!-- 搜尋欄 -->
-        <div class="mb-8">
-            <input type="text" id="searchBar" placeholder="搜尋名稱、方法或用途..." class="w-full p-4 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
+        <header class="text-center mb-10 md:mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-primary mb-4">讓思考變得可見</h1>
+            <p class="text-xl md:text-2xl text-gray-700">13 個經典思考例程 互動圖表</p>
+        </header>
 
-        <!-- 卡片內容區域 -->
-        <div id="routines-container" class="space-y-10">
-            <!-- JavaScript 將會在這裡動態生成內容 -->
-        </div>
-    </div>
+        <section class="mb-12">
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8 max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold text-primary mb-4 text-center">例程類別分佈</h2>
+                <p class="text-gray-600 text-center mb-6">這 13 個思考例程主要分為三大類，此圖表顯示了各類別所佔的比例。「投入與人互動」和「統整想法」的例程數量最多，提供了豐富的協作與歸納工具。</p>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </section>
 
-    <!-- Modal 彈出視窗 (預設隱藏) -->
-    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-        <div id="modal-content" class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 relative">
-            <!-- 關閉按鈕 -->
-            <button id="modal-close" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl font-bold">&times;</button>
-            
-            <!-- Modal 內容 -->
-            <h2 id="modal-name" class="text-2xl font-bold text-blue-700 mb-4"></h2>
-            
-            <h3 class="text-lg font-semibold text-gray-700 mt-4 mb-2 border-b pb-1">用途 (Purpose)</h3>
-            <p id="modal-purpose" class="text-gray-600"></p>
-            
-            <h3 class="text-lg font-semibold text-gray-700 mt-6 mb-2 border-b pb-1">方法 (Method)</h3>
-            <!-- whitespace-pre-line 會保留換行符號 -->
-            <p id="modal-method" class="text-gray-600 whitespace-pre-line"></p>
-        </div>
+        <section id="engaging" class="mb-12">
+            <h2 class="text-3xl font-bold text-secondary mb-3 border-b-4 border-secondary pb-2">投入與人互動的思考例程</h2>
+            <p class="text-gray-700 mb-8">這些例程專注於促進學生之間的協作、傾聽與觀點交流，透過結構化的互動來加深理解。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">給一個拿一個 (Give One, Get One)</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>關於 [主題]，你有哪些想法？</li>
+                        <li>你可以跟我分享一個我沒有想到的點子嗎？</li>
+                        <li>聽完夥伴的分享，我學到的一個新觀點是...</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">鼓勵學生仔細傾聽、促成他人想法，並了解多元觀點。促使學生尋求不同觀點、進行擴散性思考，並闡釋主題的核心想法。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">回饋梯 (Ladder of Feedback)</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句 (結構化步驟)：</h4>
+                    <div class="flex flex-col space-y-3 text-sm">
+                        <div class="flex items-center">
+                            <span class="flex-shrink-0 bg-accent text-white rounded-full h-8 w-8 flex items-center justify-center font-bold mr-3">1</span>
+                            <span class="text-gray-700"><strong>（澄清 Clarify）</strong>你是否能多說明一下...？</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="flex-shrink-0 bg-primary text-white rounded-full h-8 w-8 flex items-center justify-center font-bold mr-3">2</span>
+                            <span class="text-gray-700"><strong>（重視 Value）</strong>我欣賞/重視的部分是...</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="flex-shrink-0 bg-secondary text-white rounded-full h-8 w-8 flex items-center justify-center font-bold mr-3">3</span>
+                            <span class="text-gray-700"><strong>（擔憂 Concerns）</strong>我想知道... / 我有點擔心...</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="flex-shrink-0 bg-danger text-white rounded-full h-8 w-8 flex items-center justify-center font-bold mr-3">4</span>
+                            <span class="text-gray-700"><strong>（建議 Suggest）</strong>我建議... / 或許可以...</span>
+                        </div>
+                    </div>
+                    <h4 class="font-semibold text-dark mb-2 mt-4">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">提供一個架構來給予和接收回饋，可用於同儕之間或師生之間。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">無領袖討論 (Leaderless Discussion)</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>我們對這段文本有什麼問題？</li>
+                        <li>我們該如何深入探討這個觀點？</li>
+                        <li>下一個值得討論的問題是什麼？</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">結合文本使用，幫助學生擁有討論的主導權和學習問好問題。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">SAIL：分享—提問—想法—學習</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>我想**分享** (Share) 的是...</li>
+                        <li>我想**提問** (Ask) 的是...</li>
+                        <li>我有的新**想法** (Ideas) 是...</li>
+                        <li>我**學習** (Learn) 到的是...</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">用來分享初步的原型、計畫或草稿，以進一步澄清計畫並產生新想法。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">創造意義 (Creating Meaning)</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>這個 [概念] 是什麼？</li>
+                        <li>它最重要的特質是什麼？</li>
+                        <li>我們可以如何一起為它下一個定義？</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">用來定義一個主題/概念，產出定義，並產生一個共同的理解。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">加一 (Plus One)</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>關於 [主題]，我記得的重點是什麼？</li>
+                        <li>我可以在 [夥伴的筆記] 上多補充什麼「加一」的內容？</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">一種替代性的筆記方法，聚焦於運用記憶和改善彼此的筆記。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="exploring" class="mb-12">
+            <h2 class="text-3xl font-bold text-accent mb-3 border-b-4 border-accent pb-2">探索想法的例程</h2>
+            <p class="text-gray-700 mb-8">這類例程旨在鼓勵學生深入探究、建立假設，並透過證據來測試自己的理解。</p>
+            <div class="max-w-lg mx-auto">
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">解釋遊戲 (The Explanation Game)</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>關於 [物件或主題]，我的解釋/假設是什麼？</li>
+                        <li>有什麼證據支持我的解釋？</li>
+                        <li>有什麼證據反對/挑戰我的解釋？</li>
+                        <li>根據這些證據，我需要如何修改我的解釋？</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">鼓勵學生建立並測試他們對事物運作方式的解釋。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="synthesizing" class="mb-12">
+            <h2 class="text-3xl font-bold text-danger mb-3 border-b-4 border-danger pb-2">統整想法的例程</h2>
+            <p class="text-gray-700 mb-8">這些例程幫助學生歸納、組織和提煉資訊，將零散的想法轉化為有結構的理解。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">頭條標題 (Headlines)</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>如果我們要為這個 [主題/學習單元] 下一個頭條標題，那會是什麼？</li>
+                        <li>什麼標題最能抓住它的精髓？</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">幫助學生捕捉一個主題的核心思想和精髓。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">CSI：顏色、符號、圖像</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-none text-sm text-gray-700 mb-4 space-y-2">
+                        <li class="flex items-center"><span class="text-2xl mr-3">🎨</span> 如果用一種**顏色**來代表你的理解，會是什麼顏色？為什麼？</li>
+                        <li class="flex items-center"><span class="text-2xl mr-3">🔣</span> 如果用一個**符號**呢？為什麼？</li>
+                        <li class="flex items-center"><span class="text-2xl mr-3">🖼️</span> 如果用一張**圖像**呢？為什麼？</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">一種非語言的方式來綜合和捕捉對一個主題的理解。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">列舉—排序—連結—闡述：概念圖</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>關於 [主題]，我們能**列舉**出哪些點子？</li>
+                        <li>我們該如何將這些點子**排序**分類？</li>
+                        <li>哪些點子之間可以**連結**起來？</li>
+                        <li>這些連結的意義是什麼？請**闡述**。</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">幫助學生組織他們對一個主題的理解，並看到想法之間的關聯。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">連結—延伸—挑戰</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>這個新資訊如何與我已知的知識**連結** (Connect)？</li>
+                        <li>它如何**延伸** (Extend) 了我的想法？</li>
+                        <li>它對我原有的觀點提出了什麼**挑戰** (Challenge)？</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">幫助學生將新資訊與既有知識整合，並深化他們的理解。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">4C 例程 (The 4C's)</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>文本中的哪些內容讓你有**連結** (Connections)？</li>
+                        <li>哪些內容讓你感到**挑戰** (Challenge)？</li>
+                        <li>你學到了哪些重要的**概念** (Concepts)？</li>
+                        <li>你的想法因此產生了什麼**改變** (Changes)？</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">一個引導深度閱讀和反思的架構。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
+                    <h3 class="text-xl font-bold text-primary mb-3">微型實驗室架構 (Microlab Protocol)</h3>
+                    <h4 class="font-semibold text-dark mb-2">核心問句：</h4>
+                    <ul class="list-decimal list-inside text-sm text-gray-700 mb-4 space-y-1">
+                        <li>(依據具體情境設計提問)</li>
+                        <li>針對 [提問]，你的想法是...？</li>
+                        <li>(聆聽夥伴分享時) 我聽到了...</li>
+                    </ul>
+                    <h4 class="font-semibold text-dark mb-2">用途：</h4>
+                    <p class="text-sm text-gray-700 flex-1">一個有結構的小組討論形式，確保每個人都有發言和被傾聽的機會。</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center mt-12 py-6 border-t border-gray-300">
+            <p class="text-sm text-gray-500">基於「看見思考的力量」經典例程製作的訊息圖表。</p>
+        </footer>
+
     </div>
 
     <script>
-        // 從 CSV 檔案中提取的數據
-        // 注意：由於 CSV 包含類別標題，我們將其轉換為結構化的 JSON
-        const data = [
-            {
-                "category": "投入與人互動的思考例程 (Routines for Engaging with Others)",
-                "routines": [
-                    { "name": "給一個拿一個 (Give One, Get One)", "method": "1. 教師提出問題或主題，學生各自產生數個回應 。\n2. 學生找夥伴分享想法，互相在對方的清單上「給」一個新想法並闡釋其重要性 。\n3. 重複此過程數次或在指定時間內進行 。\n4. 學生回到小組分享擴增後的想法清單 。", "purpose": "鼓勵學生仔細傾聽、促成他人想法，並了解多元觀點 。促使學生尋求不同觀點、進行擴散性思考，並闡釋主題的核心想法 。" },
-                    { "name": "回饋梯 (Ladder of Feedback)", "method": "給予口頭或書面回饋的結構，師生皆可使用 。", "purpose": "提供一個架構來給予和接收回饋，可用於同儕之間或師生之間 。" },
-                    { "name": "無領袖討論 (Leaderless Discussion)", "method": "結合文本使用，幫助學生擁有討論的主導權和學習問好問題 。", "purpose": "幫助學生主導討論並學習如何提出好的問題 。" },
-                    { "name": "SAIL：分享—提問—想法—學習 (SAIL: Share, Ask, Ideas, Learn)", "method": "用來分享初步的原型、計畫或草稿，以進一步澄清計畫並產生新想法 。", "purpose": "分享初步的原型、計畫或草稿，以澄清並產生新想法 。" },
-                    { "name": "創造意義 (Creating Meaning)", "method": "用來定義一個主題/概念，產出定義 。", "purpose": "定義一個主題或概念並產生一個共同的理解 。" },
-                    { "name": "加一 (Plus One)", "method": "替代性的筆記方法，聚焦於運用記憶和改善彼此的筆記 。", "purpose": "一種替代性的筆記方法，著重於利用記憶和改善彼此的筆記 。" }
-                ]
-            },
-            {
-                "category": "探索觀點的例程 (Routines for Exploring Viewpoints)", // 假設 "Explanation Game" 屬於此類別
-                "routines": [
-                    { "name": "解釋遊戲 (The Explanation Game)", "method": "學生針對一個他們感興趣的物件或主題，提出一個解釋，然後找出支持或反對這個解釋的證據 。", "purpose": "鼓勵學生建立並測試他們對事物運作方式的解釋 。" }
-                ]
-            },
-            {
-                "category": "統整想法的例程 (Routines for Synthesizing and Organizing Ideas)",
-                "routines": [
-                    { "name": "頭條標題 (Headlines)", "method": "學生為一個主題或學習單元創造一個能抓住核心思想的頭條標題 。", "purpose": "幫助學生捕捉一個主題的核心思想和精髓 。" },
-                    { "name": "CSI：顏色、符號、圖像 (CSI: Color, Symbol, Image)", "method": "學生選擇一個顏色、一個符號和一個圖像來代表他們對一個主題或閱讀材料的理解 。", "purpose": "一種非語言的方式來綜合和捕捉對一個主題的理解 。" },
-                    { "name": "列舉—排序—連結—闡述：概念圖 (Generate-Sort-Connect-Elaborate: Concept Maps)", "method": "學生先列舉出與主題相關的想法，然後將它們排序分類，接著用線條連結起來，最後闡述這些連結的意義，以建立一個概念圖 。", "purpose": "幫助學生組織他們對一個主題的理解，並看到想法之間的關聯 。" },
-                    { "name": "連結—延伸—挑戰 (Connect-Extend-Challenge)", "method": "學生將新的資訊與他們已知的知識做連結，延伸他們現有的想法，並挑戰他們原有的觀點 。", "purpose": "幫助學生將新資訊與既有知識整合，並深化他們的理解 。" },
-                    { "name": "4C 例程 (The 4C's: Connections, Challenge, Concepts, Changes)", "method": "學生從文本中找出讓他們產生連結、感到挑戰、學到重要概念以及讓他們想法改變的部分 。", "purpose": "一個引導深度閱讀和反思的架構 。" },
-                    { "name": "微型實驗室架構 (Microlab Protocol)", "method": "一個有結構的小組討論...", "purpose": "（資料不完整）" }
-                ]
-            }
-        ];
-
-        // 獲取 DOM 元素
-        const searchBar = document.getElementById('searchBar');
-        const routinesContainer = document.getElementById('routines-container');
-        const modal = document.getElementById('modal');
-        const modalContent = document.getElementById('modal-content');
-        const modalClose = document.getElementById('modal-close');
-        const modalName = document.getElementById('modal-name');
-        const modalPurpose = document.getElementById('modal-purpose');
-        const modalMethod = document.getElementById('modal-method');
-
-        // 渲染卡片
-        function renderRoutines(filter = '') {
-            routinesContainer.innerHTML = ''; // 清空現有內容
-            const filterText = filter.toLowerCase();
-
-            data.forEach(category => {
-                // 過濾符合條件的例程
-                const matchingRoutines = category.routines.filter(routine => 
-                    routine.name.toLowerCase().includes(filterText) ||
-                    routine.purpose.toLowerCase().includes(filterText) ||
-                    routine.method.toLowerCase().includes(filterText)
-                );
-
-                // 如果這個類別中有符合的例程，才顯示
-                if (matchingRoutines.length > 0) {
-                    // 創建類別標題
-                    const categoryTitle = document.createElement('h2');
-                    categoryTitle.className = 'text-2xl font-semibold text-gray-700 mb-4 border-b-2 border-blue-200 pb-2';
-                    categoryTitle.textContent = category.category;
-                    routinesContainer.appendChild(categoryTitle);
-
-                    // 創建卡片網格
-                    const grid = document.createElement('div');
-                    grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
-                    
-                    matchingRoutines.forEach(routine => {
-                        const card = document.createElement('div');
-                        card.className = 'bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg hover:border-blue-500 border-2 border-transparent transition-all duration-300 flex flex-col justify-between';
-                        
-                        card.innerHTML = `
-                            <div>
-                                <h3 class="text-xl font-bold text-blue-700 mb-2">${routine.name}</h3>
-                                <p class="text-gray-600 text-sm">${routine.purpose}</p>
-                            </div>
-                            <div class="text-right mt-4">
-                                <span class="text-sm text-blue-600 font-medium">查看詳情 &rarr;</span>
-                            </div>
-                        `;
-                        
-                        // 綁定點擊事件
-                        card.addEventListener('click', () => openModal(routine));
-                        grid.appendChild(card);
-                    });
-                    
-                    routinesContainer.appendChild(grid);
-                }
-            });
-
-            // 如果沒有任何結果
-            if (routinesContainer.innerHTML === '') {
-                routinesContainer.innerHTML = `<p class="text-center text-gray-500">找不到符合條件的例程。</p>`;
-            }
-        }
-
-        // 打開 Modal
-        function openModal(routine) {
-            modalName.textContent = routine.name;
-            modalPurpose.textContent = routine.purpose;
-            modalMethod.textContent = routine.method;
-            modal.classList.remove('hidden');
-        }
-
-        // 關閉 Modal
-        function closeModal() {
-            modal.classList.add('hidden');
-        }
-
-        // 事件監聽
         document.addEventListener('DOMContentLoaded', () => {
-            renderRoutines(); // 初始渲染
-        });
+            const createCategoryChart = () => {
+                const ctx = document.getElementById('categoryChart')?.getContext('2d');
+                if (!ctx) {
+                    return;
+                }
 
-        searchBar.addEventListener('input', (e) => {
-            renderRoutines(e.target.value);
-        });
+                const colors = tailwind.config.theme.extend.colors;
 
-        modalClose.addEventListener('click', closeModal);
+                const data = {
+                    labels: ['投入與人互動 (6)', '探索想法 (1)', '統整想法 (6)'],
+                    datasets: [{
+                        data: [6, 1, 6],
+                        backgroundColor: [
+                            colors.primary,
+                            colors.secondary,
+                            colors.accent
+                        ],
+                        hoverBackgroundColor: [
+                            colors.primary,
+                            colors.secondary,
+                            colors.accent
+                        ],
+                        borderColor: colors.light,
+                        borderWidth: 4
+                    }]
+                };
 
-        // 點擊 Modal 外部區域也可關閉
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
+                const options = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    family: '"Noto Sans TC", sans-serif',
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                      return label.join(' ');
+                                    } else {
+                                      return label;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                };
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: data,
+                    options: options
+                });
+            };
+
+            createCategoryChart();
         });
     </script>
-
 </body>
 </html>
