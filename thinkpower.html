@@ -3,53 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>思考例程點擊探索儀表板</title>
+    <title>思考例程點擊探索 + 分組分析</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 0; background: #f5f7fa; }
-        .container { max-width: 1100px; margin: 20px auto; padding: 20px; background: white; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
+        body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 0; background: #f0f4f8; }
+        .container { max-width: 1150px; margin: 20px auto; padding: 20px; background: white; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 8px; }
         .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 20px; }
         .controls { text-align: center; margin: 20px 0; }
-        input { padding: 12px; width: 320px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
-        button { margin: 8px; padding: 12px 20px; background: #4ECDC4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        input { padding: 12px; width: 340px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
+        button { margin: 8px; padding: 12px 22px; background: #4ECDC4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         button:hover { background: #45B7D1; }
         button.active { background: #2c3e50; }
-        .chart-wrapper { position: relative; height: 420px; margin: 20px 0; }
+        .chart-wrapper { position: relative; height: 420px; margin: 25px 0; }
         .chart-container { display: none; }
         .chart-container.active { display: block; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 28px; border-radius: 14px; max-width: 680px; width: 92%; max-height: 82vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.25); }
+        .close { color: #aaa; float: right; font-size: 30px; font-weight: bold; cursor: pointer; }
         .close:hover { color: #e74c3c; }
-        .routine-item { padding: 12px; margin: 8px 0; background: #f8f9fa; border-left: 5px solid #4ECDC4; border-radius: 6px; }
-        .routine-item strong { color: #2c3e50; }
-        .no-data { text-align: center; color: #e74c3c; font-weight: bold; padding: 20px; }
+        .routine-item { padding: 14px; margin: 10px 0; background: #f8f9fa; border-left: 6px solid #4ECDC4; border-radius: 8px; }
+        .routine-item strong { color: #2c3e50; font-size: 1.1em; }
+        .tag { display: inline-block; padding: 4px 10px; margin: 4px 6px 0 0; border-radius: 20px; font-size: 0.85em; font-weight: bold; }
+        .tag.person { background: #a8e6cf; color: #1a5d3a; }
+        .tag.group { background: #ffd3b6; color: #d35400; }
+        .tag.swap { background: #ffaaa5; color: #c0392b; }
+        .no-data { text-align: center; color: #e74c3c; font-weight: bold; padding: 25px; font-size: 1.1em; }
+        .info { color: #7f8c8d; font-size: 0.9em; line-height: 1.5; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>思考例程點擊探索儀表板</h1>
-        <p class="subtitle">點擊圖表區塊 → 立刻查看適用例程！</p>
+        <h1>思考例程點擊探索 + 分組分析</h1>
+        <p class="subtitle">點圖表 → 看例程 + 分組方式｜搜尋即顯示合作需求</p>
 
         <div class="controls">
-            <input type="text" id="searchInput" placeholder="搜尋例程名稱（如：回饋梯）" onkeyup="filterRoutines()">
+            <input type="text" id="searchInput" placeholder="搜尋例程名稱（如：回饋梯、分組）" onkeyup="filterRoutines()">
             <br><br>
-            <button class="active" onclick="showChart('doughnut')">類別分佈</button>
+            <button class="active" onclick="showChart('category')">類別分佈</button>
             <button onclick="showChart('stage')">適用階段</button>
+            <button onclick="showChart('group')">分組統計</button>
         </div>
 
-        <!-- 圓環圖：點擊類別 -->
-        <div id="doughnut" class="chart-container active">
+        <!-- 類別圓環圖 -->
+        <div id="category" class="chart-container active">
             <div class="chart-wrapper">
-                <canvas id="doughnutCanvas"></canvas>
+                <canvas id="categoryCanvas"></canvas>
             </div>
         </div>
 
-        <!-- 堆疊圖：點擊階段 -->
+        <!-- 階段堆疊圖 -->
         <div id="stage" class="chart-container">
             <div class="chart-wrapper">
                 <canvas id="stageCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- 分組統計圖 -->
+        <div id="group" class="chart-container">
+            <div class="chart-wrapper">
+                <canvas id="groupCanvas"></canvas>
             </div>
         </div>
 
@@ -60,114 +73,117 @@
         </div>
     </div>
 
-    <!-- 彈跳視窗 -->
+    <!-- 彈出視窗 -->
     <div id="modal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle">例程清單</h2>
+            <span class="close" onclick="closeModal()">×</span>
+            <h2 id="modalTitle">例程詳情</h2>
             <div id="modalBody"></div>
         </div>
     </div>
 
     <script>
-        // 完整資料庫
+        // 完整資料（含分組）
         const routines = [
-            { name: "給一個拿一個", category: "投入與人互動", stage: "課中", questions: 5 },
-            { name: "回饋梯", category: "投入與人互動", stage: "課中", questions: 4 },
-            { name: "無領袖討論", category: "投入與人互動", stage: "課中", questions: 3 },
-            { name: "SAIL：分享—提問—想法—學習", category: "投入與人互動", stage: "課中", questions: 4 },
-            { name: "創造意義", category: "投入與人互動", stage: "課中", questions: 4 },
-            { name: "加一", category: "投入與人互動", stage: "課中", questions: 3 },
-            { name: "看—想—疑", category: "介紹及探索想法", stage: "課前", questions: 3 },
-            { name: "放大", category: "介紹及探索想法", stage: "課前", questions: 3 },
-            { name: "想想—疑惑—探案", category: "介紹及探索想法", stage: "課前", questions: 3 },
-            { name: "筆談", category: "介紹及探索想法", stage: "課中", questions: 1 },
-            { name: "3-2-1 橋接", category: "介紹及探索想法", stage: "課前後", questions: 6 },
-            { name: "羅梳方位點", category: "介紹及探索想法", stage: "課中", questions: 4 },
-            { name: "解釋遊戲", category: "介紹及探索想法", stage: "課中", questions: 4 },
-            { name: "頭條標題", category: "統整想法", stage: "課後", questions: 1 },
-            { name: "CSI：顏色、符號、圖像", category: "統整想法", stage: "課後", questions: 3 },
-            { name: "列舉—排序—連結—闡述：概念圖", category: "統整想法", stage: "課後", questions: 4 },
-            { name: "連結—延伸—挑戰", category: "統整想法", stage: "課後", questions: 3 },
-            { name: "4C 例程", category: "統整想法", stage: "課後", questions: 4 },
-            { name: "微型實驗室架構", category: "統整想法", stage: "課中", questions: 1 },
-            { name: "以前我認為……現在我認為", category: "統整想法", stage: "課後", questions: 2 },
-            { name: "是什麼讓你這麼說？", category: "深究想法", stage: "課中", questions: 1 },
-            { name: "觀點圈", category: "深究想法", stage: "課中", questions: 1 },
-            { name: "進入角色", category: "深究想法", stage: "課中", questions: 1 },
-            { name: "紅燈、黃燈", category: "深究想法", stage: "課中", questions: 2 },
-            { name: "主張—支持—提問", category: "深究想法", stage: "課中", questions: 3 },
-            { name: "拔河", category: "深究想法", stage: "課中", questions: 3 },
-            { name: "句—詞—字", category: "深究想法", stage: "課後", questions: 3 },
-            { name: "問題排序", category: "投入想法探索", stage: "課中", questions: 3 },
-            { name: "剝水果", category: "投入想法探索", stage: "課中", questions: 3 },
-            { name: "主線一支線—隱藏故事", category: "投入想法探索", stage: "課中", questions: 3 },
-            { name: "美好與真相", category: "投入想法探索", stage: "課中", questions: 2 },
-            { name: "NDA: 指名—描述—行動", category: "投入想法探索", stage: "課前", questions: 3 },
-            { name: "作筆記", category: "投入想法探索", stage: "課中", questions: 3 },
-            { name: "預測一收集一解釋", category: "投入行動", stage: "課前", questions: 3 },
-            { name: "經驗一困難一困惑+領悟", category: "投入行動", stage: "課後", questions: 3 },
-            { name: "一定要", category: "投入行動", stage: "課中", questions: 2 },
-            { name: "什麼?所以呢?現在要怎樣?", category: "投入行動", stage: "課後", questions: 3 },
-            { name: "三個為什麼", category: "投入行動", stage: "課後", questions: 3 },
-            { name: "四個如果", category: "投入行動", stage: "課中", questions: 4 }
+            { name: "給一個拿一個", category: "投入與人互動", stage: "課中", questions: 5, group: ["需要換到其它人"] },
+            { name: "回饋梯", category: "投入與人互動", stage: "課中", questions: 4, group: ["需要換到其它人"] },
+            { name: "無領袖討論", category: "投入與人互動", stage: "課中", questions: 3, group: ["小組合作"] },
+            { name: "SAIL：分享—提問—想法—學習", category: "投入與人互動", stage: "課中", questions: 4, group: ["小組合作"] },
+            { name: "創造意義", category: "投入與人互動", stage: "課中", questions: 4, group: ["小組合作"] },
+            { name: "加一", category: "投入與人互動", stage: "課中", questions: 3, group: ["需要換到其它人"] },
+            { name: "看—想—疑", category: "介紹及探索想法", stage: "課前", questions: 3, group: ["一個人", "需要換到其它人", "小組合作"] },
+            { name: "放大", category: "介紹及探索想法", stage: "課前", questions: 3, group: ["一個人"] },
+            { name: "想想—疑惑—探案", category: "介紹及探索想法", stage: "課前", questions: 3, group: ["一個人", "小組合作"] },
+            { name: "筆談", category: "介紹及探索想法", stage: "課中", questions: 1, group: ["小組合作"] },
+            { name: "3-2-1 橋接", category: "介紹及探索想法", stage: "課前後", questions: 6, group: ["一個人", "需要換到其它人"] },
+            { name: "羅盤方位點", category: "介紹及探索想法", stage: "課中", questions: 4, group: ["一個人"] },
+            { name: "解釋遊戲", category: "介紹及探索想法", stage: "課中", questions: 4, group: ["小組合作"] },
+            { name: "頭條標題", category: "統整想法", stage: "課後", questions: 1, group: ["一個人", "小組合作"] },
+            { name: "CSI：顏色、符號、圖像", category: "統整想法", stage: "課後", questions: 3, group: ["一個人", "小組合作"] },
+            { name: "列舉—排序—連結—闡述：概念圖", category: "統整想法", stage: "課後", questions: 4, group: ["一個人", "小組合作"] },
+            { name: "連結—延伸—挑戰", category: "統整想法", stage: "課後", questions: 3, group: ["一個人", "需要換到其它人"] },
+            { name: "4C 例程", category: "統整想法", stage: "課後", questions: 4, group: ["小組合作"] },
+            { name: "微型實驗室架構", category: "統整想法", stage: "課中", questions: 1, group: ["小組合作"] },
+            { name: "以前我認為……現在我認為", category: "統整想法", stage: "課後", questions: 2, group: ["一個人", "需要換到其它人"] },
+            { name: "是什麼讓你這麼說？", category: "深究想法", stage: "課中", questions: 1, group: ["需要換到其它人"] },
+            { name: "觀點圈", category: "深究想法", stage: "課中", questions: 1, group: ["小組合作"] },
+            { name: "進入角色", category: "深究想法", stage: "課中", questions: 1, group: ["一個人", "小組合作"] },
+            { name: "紅燈、黃燈", category: "深究想法", stage: "課中", questions: 2, group: ["一個人", "小組合作"] },
+            { name: "主張—支持—提問", category: "深究想法", stage: "課中", questions: 3, group: ["小組合作"] },
+            { name: "拔河", category: "深究想法", stage: "課中", questions: 3, group: ["小組合作"] },
+            { name: "句—詞—字", category: "深究想法", stage: "課後", questions: 3, group: ["一個人", "需要換到其它人"] },
+            { name: "問題排序", category: "投入想法探索", stage: "課中", questions: 3, group: ["一個人", "小組合作"] },
+            { name: "剝水果", category: "投入想法探索", stage: "課中", questions: 3, group: ["一個人", "小組合作"] },
+            { name: "主線一支線—隱藏故事", category: "投入想法探索", stage: "課中", questions: 3, group: ["一個人", "小組合作"] },
+            { name: "美好與真相", category: "投入想法探索", stage: "課中", questions: 2, group: ["一個人", "小組合作"] },
+            { name: "NDA: 指名—描述—行動", category: "投入想法探索", stage: "課前", questions: 3, group: ["一個人", "小組合作"] },
+            { name: "作筆記", category: "投入想法探索", stage: "課中", questions: 3, group: ["一個人"] },
+            { name: "預測一收集一解釋", category: "投入行動", stage: "課前", questions: 3, group: ["一個人", "小組合作"] },
+            { name: "經驗一困難一困惑+領悟", category: "投入行動", stage: "課後", questions: 3, group: ["一個人", "需要換到其它人"] },
+            { name: "一定要", category: "投入行動", stage: "課中", questions: 2, group: ["一個人", "小組合作"] },
+            { name: "什麼?所以呢?現在要怎樣?", category: "投入行動", stage: "課後", questions: 3, group: ["一個人", "小組合作"] },
+            { name: "三個為什麼", category: "投入行動", stage: "課後", questions: 3, group: ["小組合作"] },
+            { name: "四個如果", category: "投入行動", stage: "課中", questions: 4, group: ["一個人", "小組合作"] }
         ];
 
-        // 圓環圖：類別分佈
-        const doughnutCtx = document.getElementById('doughnutCanvas').getContext('2d');
-        const doughnutChart = new Chart(doughnutCtx, {
+        // === 1. 類別圓環圖 ===
+        const categoryCtx = document.getElementById('categoryCanvas').getContext('2d');
+        const categoryChart = new Chart(categoryCtx, {
             type: 'doughnut',
             data: {
                 labels: ["投入與人互動", "介紹及探索想法", "統整想法", "深究想法", "投入想法探索", "投入行動"],
-                datasets: [{
-                    data: [6, 7, 7, 8, 6, 6],
-                    backgroundColor: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FECA57", "#DDA0DD"],
-                    borderWidth: 3, borderColor: '#fff'
-                }]
+                datasets: [{ data: [6,7,7,8,6,6], backgroundColor: ["#FF6B6B","#4ECDC4","#45B7D1","#96CEB4","#FECA57","#DDA0DD"], borderWidth: 3, borderColor: '#fff' }]
             },
             options: {
                 responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    title: { display: true, text: '點擊任一類別 → 查看例程' }
-                },
-                onClick: (e, elements) => {
-                    if (elements[0]) {
-                        const index = elements[0].index;
-                        const label = doughnutChart.data.labels[index];
-                        showRoutinesByCategory(label);
-                    }
-                }
+                plugins: { legend: { position: 'bottom' }, title: { display: true, text: '點擊類別 → 查看例程詳情' } },
+                onClick: (e, els) => els[0] && showRoutinesByCategory(categoryChart.data.labels[els[0].index])
             }
         });
 
-        // 堆疊圖：適用階段
+        // === 2. 階段堆疊圖 ===
         const stageCtx = document.getElementById('stageCanvas').getContext('2d');
         const stageChart = new Chart(stageCtx, {
             type: 'bar',
             data: {
                 labels: ["投入與人互動", "介紹及探索想法", "統整想法", "深究想法", "投入想法探索", "投入行動"],
                 datasets: [
-                    { label: '課前', data: [0, 4, 0, 1, 1, 1], backgroundColor: '#FF6B6B' },
-                    { label: '課中', data: [6, 2, 1, 6, 5, 3], backgroundColor: '#4ECDC4' },
-                    { label: '課後', data: [0, 1, 6, 1, 0, 2], backgroundColor: '#96CEB4' }
+                    { label: '課前', data: [0,4,0,1,1,1], backgroundColor: '#FF6B6B' },
+                    { label: '課中', data: [6,2,1,6,5,3], backgroundColor: '#4ECDC4' },
+                    { label: '課後', data: [0,1,6,1,0,2], backgroundColor: '#96CEB4' }
                 ]
             },
             options: {
-                plugins: { title: { display: true, text: '點擊任一色塊 → 查看適用例程' } },
+                plugins: { title: { display: true, text: '點擊色塊 → 查看適用例程' } },
                 scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
-                onClick: (e, elements) => {
-                    if (elements[0]) {
-                        const datasetIndex = elements[0].datasetIndex;
-                        const stageLabels = ['課前', '課中', '課後'];
-                        const stage = stageLabels[datasetIndex];
-                        showRoutinesByStage(stage);
-                    }
+                onClick: (e, els) => {
+                    if (!els[0]) return;
+                    const ds = els[0].datasetIndex;
+                    const stage = ['課前','課中','課後'][ds];
+                    showRoutinesByStage(stage);
                 }
             }
         });
 
-        // 切換圖表
+        // === 3. 分組統計圖 ===
+        const groupCtx = document.getElementById('groupCanvas').getContext('2d');
+        const groupStats = { "一個人": 0, "小組合作": 0, "需要換到其它人": 0 };
+        routines.forEach(r => {
+            r.group.forEach(g => groupStats[g] = (groupStats[g] || 0) + 1);
+        });
+        const groupChart = new Chart(groupCtx, {
+            type: 'pie',
+            data: {
+                labels: ["一個人", "小組合作", "需要換到其它人"],
+                datasets: [{ data: Object.values(groupStats), backgroundColor: ["#a8e6cf", "#ffd3b6", "#ffaaa5"], borderWidth: 2 }]
+            },
+            options: {
+                responsive: true,
+                plugins: { title: { display: true, text: '分組方式統計（多選累計）' } }
+            }
+        });
+
+        // === 切換圖表 ===
         function showChart(type) {
             document.querySelectorAll('.chart-container').forEach(c => c.classList.remove('active'));
             document.getElementById(type).classList.add('active');
@@ -176,65 +192,54 @@
             document.getElementById('searchResults').style.display = 'none';
         }
 
-        // 顯示按類別
-        function showRoutinesByCategory(category) {
-            const list = routines.filter(r => r.category === category);
-            showModal(`${category}（共 ${list.length} 個）`, list);
+        // === 顯示例程 ===
+        function showRoutinesByCategory(cat) {
+            const list = routines.filter(r => r.category === cat);
+            showModal(`${cat}（共 ${list.length} 個）`, list);
         }
 
-        // 顯示按階段
         function showRoutinesByStage(stage) {
             const list = routines.filter(r => r.stage.includes(stage));
-            showModal(`${stage}適用例程（共 ${list.length} 個）`, list);
+            showModal(`${stage}適用（共 ${list.length} 個）`, list);
         }
 
-        // 彈出視窗
         function showModal(title, list) {
             document.getElementById('modalTitle').textContent = title;
-            const body = document.getElementById('modalBody');
-            body.innerHTML = list.map(r => `
+            document.getElementById('modalBody').innerHTML = list.map(r => `
                 <div class="routine-item">
-                    <strong>${r.name}</strong><br>
-                    <small>問句數：${r.questions} ｜ 階段：${r.stage}</small>
+                    <strong>${r.name}</strong>
+                    <div class="info">問句數：${r.questions} ｜ 階段：${r.stage}</div>
+                    <div>
+                        ${r.group.map(g => `<span class="tag ${g.includes('人')?'person':g.includes('組')?'group':'swap'}">${g}</span>`).join('')}
+                    </div>
                 </div>
             `).join('');
             document.getElementById('modal').style.display = 'flex';
         }
 
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
-        // 搜尋功能
+        // === 搜尋 ===
         function filterRoutines() {
-            const query = document.getElementById('searchInput').value.trim().toLowerCase();
-            const results = routines.filter(r => r.name.toLowerCase().includes(query));
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            const results = routines.filter(r => r.name.toLowerCase().includes(q) || r.group.some(g => g.toLowerCase().includes(q)));
             const container = document.getElementById('searchResults');
             const list = document.getElementById('resultsList');
 
-            if (query === '') {
-                container.style.display = 'none';
-                return;
-            }
-
+            if (q === '') { container.style.display = 'none'; return; }
             container.style.display = 'block';
-            if (results.length === 0) {
-                list.innerHTML = '<div class="no-data">無匹配結果</div>';
-            } else {
-                list.innerHTML = `<p>找到 ${results.length} 個結果：</p>` + results.map(r => `
+            list.innerHTML = results.length === 0 
+                ? '<div class="no-data">無匹配結果</div>'
+                : `<p>找到 ${results.length} 個：</p>` + results.map(r => `
                     <div class="routine-item">
                         <strong>${r.name}</strong>（${r.category}）<br>
-                        <small>問句數：${r.questions} ｜ 階段：${r.stage}</small>
+                        <small>問句：${r.questions} ｜ 階段：${r.stage}</small><br>
+                        ${r.group.map(g => `<span class="tag ${g.includes('人')?'person':g.includes('組')?'group':'swap'}">${g}</span>`).join('')}
                     </div>
                 `).join('');
-            }
         }
 
-        // 點擊外部關閉
-        window.onclick = function(e) {
-            const modal = document.getElementById('modal');
-            if (e.target === modal) closeModal();
-        }
+        window.onclick = e => e.target === document.getElementById('modal') && closeModal();
     </script>
 </body>
 </html>
