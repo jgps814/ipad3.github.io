@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>清代臺灣族群互動與漢化政策</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+/* 1. SETUP & RESET */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    font-family: 'Noto Serif TC', serif;
+}
+
+/* 2. SLIDE CONTAINER */
+.slide-container {
+    width: 1280px;
+    height: 720px;
+    background-color: #fdfbf7; /* Parchment/Paper color */
+    border-radius: 4px;
+    box-shadow: 0 15px 30px rgba(44, 24, 16, 0.15);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 60px;
+    color: #2c1810; /* Dark Brown Ink */
+    margin-bottom: 40px; /* Space between slides when scrolling */
+    cursor: pointer; /* Indicate clickable */
+    transition: transform 0.2s ease;
+}
+
+.slide-container:active {
+    transform: scale(0.995);
+}
+
+/* Background Texture Effect */
+.slide-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Border Decoration */
+.slide-container::after {
+    content: "";
+    position: absolute;
+    top: 15px;
+    bottom: 15px;
+    left: 15px;
+    right: 15px;
+    border: 2px solid #c04000; /* Terracotta Red border */
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.slide-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Click hint */
+.click-hint {
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    font-size: 14px;
+    color: #c04000;
+    opacity: 0.6;
+    z-index: 20;
+    font-family: sans-serif;
+    pointer-events: none;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.3; }
+}
+
+/* 3. TYPOGRAPHY */
+h1, h2, h3 {
+    font-family: 'Noto Serif TC', serif;
+    margin: 0;
+    font-weight: 900;
+}
+
+h1 {
+    font-size: 72px;
+    color: #2c1810;
+    line-height: 1.2;
+}
+
+.slide-title {
+    font-size: 42px;
+    color: #8b0000; /* Deep Red for Titles */
+    margin-bottom: 40px;
+    border-bottom: 3px double #c04000;
+    padding-bottom: 10px;
+    display: inline-block;
+    width: 100%;
+}
+
+p, li {
+    font-size: 24px;
+    line-height: 1.6;
+    color: #3e2723;
+}
+
+/* REVEAL LOGIC STYLES */
+/* Text Blanks */
+.reveal-text {
+    color: transparent; /* Hide text initially */
+    background-color: transparent;
+    border-bottom: 2px solid #c04000; /* Keep the line */
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: all 0.5s ease;
+    cursor: default;
+    user-select: none; /* Prevent peeking by selecting */
+}
+
+.reveal-text.revealed {
+    color: #c04000;
+    background-color: rgba(192, 64, 0, 0.1);
+    font-weight: 700;
+    user-select: text;
+}
+
+/* Content Boxes (Explanations) */
+.reveal-box {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.reveal-box.revealed {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.answer-box {
+    background-color: #fff;
+    border-left: 5px solid #556b2f; /* Olive Green */
+    padding: 20px 30px;
+    margin-top: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.answer-label {
+    font-size: 18px;
+    color: #556b2f;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* MCQ Logic */
+.quiz-options {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+.quiz-options li {
+    background-color: #fff;
+    border: 1px solid #d7ccc8;
+    margin-bottom: 15px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: flex-start;
+}
+
+/* Initially Hidden Correct Option */
+.quiz-options li.reveal-mcq {
+    /* Looks like normal option initially */
+}
+.quiz-options li.reveal-mcq.revealed {
+    border-color: #556b2f;
+    background-color: rgba(85, 107, 47, 0.1);
+}
+
+/* Checkmark */
+.mcq-check {
+    color: #556b2f; 
+    margin-left: auto;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.reveal-mcq.revealed .mcq-check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.option-marker {
+    font-weight: 700;
+    margin-right: 15px;
+    min-width: 25px;
+}
+
+/* 4. LAYOUTS */
+.content-area {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+    width: 100%;
+}
+
+.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    width: 100%;
+    align-items: center;
+    height: 100%;
+}
+
+.image-wrapper {
+    width: 100%;
+    height: 100%;
+    max-height: 450px;
+    border-radius: 2px;
+    overflow: hidden;
+    border: 5px solid #fff;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.image-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 20px rgba(44, 24, 16, 0.3);
+    pointer-events: none;
+}
+
+.image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: sepia(0.2) contrast(1.1); /* Historical feel */
+}
+
+/* Full Background Layout */
+.full-bg-image {
+    padding: 0;
+}
+.full-bg-image::after { border: none; } /* Remove border for full bg */
+.full-bg-image .overlay {
+    background: linear-gradient(rgba(44, 24, 16, 0.7), rgba(44, 24, 16, 0.8));
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 100px;
+    color: #fdfbf7;
+}
+.full-bg-image h1 { color: #fdfbf7; margin-bottom: 20px; }
+.full-bg-image p { color: #e6e6e6; font-size: 28px; }
+
+/* Bleed Layout Specifics */
+.slide-container.bleed-image-layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0;
+    align-items: start;
+}
+.slide-container.bleed-image-layout::after { border: none; }
+.bleed-text-side {
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+.bleed-image-side {
+    height: 100%;
+    max-height: 720px;
+    width: 100%;
+    object-fit: cover;
+    filter: sepia(0.25);
+}
+
+    </style>
+</head>
+<body>
+
+<!-- Slide 1: Title Slide -->
+<div class="slide-container full-bg-image" id="slide1" style="background-image: url('http://googleusercontent.com/image_collection/image_retrieval/5697995796189003037'); background-size: cover; background-position: center;">
+    <div class="overlay">
+        <h1>清代臺灣歷史<br>族群互動與政策</h1>
+        <hr style="width: 100px; border: 2px solid #c04000; margin: 30px auto;">
+        <p>漢人移民、平埔族群與清廷政策的影響與變遷</p>
+    </div>
+</div>
+
+<!-- Slide 2: Fill in the Blank 1 (Education) -->
+<div class="slide-container" id="slide2">
+    <div class="click-hint"><i class="fa-solid fa-hand-pointer"></i> 點擊顯示答案</div>
+    <h2 class="slide-title">重點回顧：漢化政策的影響</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <p style="font-weight: 600; margin-bottom: 20px;">問題一：</p>
+                <p>清帝國推行漢文教育、鼓勵平埔族群改用漢姓，結果造成 <span class="reveal-text">平埔族群的語言與文化快速流失</span>。</p>
+                
+                <div class="answer-box reveal-box">
+                    <span class="answer-label">解析</span>
+                    <p style="color: #c04000; font-weight: 700; margin-bottom: 10px;">平埔族群的語言與文化快速流失</p>
+                    <p style="font-size: 18px;">清廷透過教育與賜姓政策，加速了平埔族群的漢化，導致傳統語言與文化逐漸式微。</p>
+                </div>
+            </div>
+            <div class="image-wrapper">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/7336482392714166807" alt="平埔族群歷史繪像">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: Fill in the Blank 2 (Assimilation) -->
+<div class="slide-container" id="slide3">
+     <div class="click-hint"><i class="fa-solid fa-hand-pointer"></i> 點擊顯示答案</div>
+    <h2 class="slide-title">重點回顧：生活方式的融合</h2>
+    <div class="content-area">
+        <div class="two-column">
+             <div class="image-wrapper">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/5419115719921229259" alt="清代臺灣土地契約">
+            </div>
+            <div>
+                <p style="font-weight: 600; margin-bottom: 20px;">問題二：</p>
+                <p>漢人與平埔族群通婚、租地種作與購買土地，結果 <span class="reveal-text">平埔族群逐漸融入漢人的生活方式</span>。</p>
+                
+                <div class="answer-box reveal-box">
+                    <span class="answer-label">解析</span>
+                    <p style="color: #c04000; font-weight: 700; margin-bottom: 10px;">平埔族群逐漸融入漢人的生活方式</p>
+                    <p style="font-size: 18px;">透過經濟活動（土地租買）與社會互動（通婚），原本的界線模糊，生活習慣也趨向漢化。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 4: Fill in the Blank 3 (Mainstream Culture) -->
+<div class="slide-container bleed-image-layout" id="slide4">
+     <div class="click-hint" style="right: auto; left: 30px;"><i class="fa-solid fa-hand-pointer"></i> 點擊顯示答案</div>
+    <div class="bleed-text-side">
+        <h2 class="slide-title" style="margin-bottom: 20px;">主流文化的形成</h2>
+        <p style="font-weight: 600; margin-bottom: 20px;">問題三：</p>
+        <p>隨著漢人移民在人口與經濟上佔有優勢，其語言、信仰和生活習慣逐漸成為臺灣社會的 <span class="reveal-text">主流文化</span>。</p>
+        <div class="answer-box reveal-box" style="background-color: #fdfbf7; border-color: #c04000;">
+             <span class="answer-label">解析</span>
+            <p style="font-size: 18px;">漢人移民數量的優勢加上經濟主導權，使得漢文化從強勢文化逐漸轉變為當時社會的主流。</p>
+        </div>
+    </div>
+    <img class="bleed-image-side" src="http://googleusercontent.com/image_collection/image_retrieval/8934112715609178531" alt="漢人市集與移民生活">
+</div>
+
+<!-- Slide 5: Fill in the Blank 4 (Great Migration) -->
+<div class="slide-container" id="slide5">
+     <div class="click-hint"><i class="fa-solid fa-hand-pointer"></i> 點擊顯示答案</div>
+    <h2 class="slide-title">重點回顧：族群的移動</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <p style="font-weight: 600; margin-bottom: 20px;">問題四：</p>
+                <p>部分平埔族群因土地流失、生活空間受擠壓，為保有傳統文化而進行的集體移動稱為 <span class="reveal-text">大遷徙</span>。</p>
+                
+                <div class="answer-box reveal-box">
+                    <span class="answer-label">解析</span>
+                    <p>面對漢人的墾殖壓力，許多平埔族群選擇遷往埔里盆地、宜蘭或東部地區，史稱「大遷徙」。</p>
+                </div>
+            </div>
+            <div class="image-wrapper">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/5697995796189003037" alt="19世紀臺灣地圖顯示山脈與地形">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 6: MCQ 1 (Gender Structure) -->
+<div class="slide-container" id="slide6">
+     <div class="click-hint"><i class="fa-solid fa-hand-pointer"></i> 點擊顯示答案</div>
+    <h2 class="slide-title">隨堂測驗：性別結構與社會</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <p style="margin-bottom: 20px;"><strong>題目：</strong>臺灣俗諺「有唐山公，無唐山媽」反映了早期漢人移民的性別結構，此現象對當時社會最主要的影響是？</p>
+                <ul class="quiz-options">
+                    <li class="reveal-mcq"><span class="option-marker">A</span> 加速了漢人與平埔族群的血緣及文化融合 <i class="fa-solid fa-check mcq-check"></i></li>
+                    <li><span class="option-marker">B</span> 顯示了平埔族群的母系社會特質</li>
+                    <li><span class="option-marker">C</span> 代表漢人女性社會地位低下</li>
+                    <li><span class="option-marker">D</span> 反映了清廷禁止漢人女性來臺的政策</li>
+                </ul>
+            </div>
+            <div class="reveal-box" style="background: #f4f0e6; padding: 30px; border-radius: 8px; border: 1px dashed #c04000;">
+                <h3 style="color: #c04000; margin-bottom: 15px;">💡 解題關鍵</h3>
+                <p style="font-size: 20px;">早期漢人移民多為單身男性（唐山公），因缺乏漢人女性（無唐山媽），多與平埔族女性通婚，促進了血緣與文化的融合。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 7: MCQ 2 (Land Issues) -->
+<div class="slide-container" id="slide7">
+     <div class="click-hint"><i class="fa-solid fa-hand-pointer"></i> 點擊顯示答案</div>
+    <h2 class="slide-title">隨堂測驗：土地與經濟</h2>
+    <div class="content-area">
+        <div class="two-column">
+             <div class="image-wrapper">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/5419115719921229259" alt="古地契展示">
+            </div>
+            <div>
+                <p style="margin-bottom: 20px;"><strong>題目：</strong>清代漢人透過簽訂契約、通婚等方式逐漸取得平埔族群的土地，對平埔族群造成的主要影響為何？</p>
+                <ul class="quiz-options">
+                    <li><span class="option-marker">A</span> 提升了平埔族群的經濟實力</li>
+                    <li class="reveal-mcq"><span class="option-marker">B</span> 迫使部分平埔族群為保留文化而遷徙 <i class="fa-solid fa-check mcq-check"></i></li>
+                    <li><span class="option-marker">C</span> 促使平埔族群全面改採狩獵生活</li>
+                    <li><span class="option-marker">D</span> 讓平埔族群成為社會的統治階層</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 8: MCQ 3 (Policy) -->
+<div class="slide-container" id="slide8">
+     <div class="click-hint"><i class="fa-solid fa-hand-pointer"></i> 點擊顯示答案</div>
+    <h2 class="slide-title">隨堂測驗：政策目的</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <p style="margin-bottom: 20px;"><strong>題目：</strong>清廷對平埔族群實施賜漢姓、鼓勵其學習漢文等「漢化」政策，其主要目的是為了？</p>
+                <ul class="quiz-options">
+                    <li><span class="option-marker">A</span> 提升平埔族群的教育水準</li>
+                    <li><span class="option-marker">B</span> 保存臺灣的多元文化樣貌</li>
+                    <li><span class="option-marker">C</span> 促進族群間的平等交流</li>
+                    <li class="reveal-mcq"><span class="option-marker">D</span> 便於管理、徵稅，鞏固統治 <i class="fa-solid fa-check mcq-check"></i></li>
+                </ul>
+                 <div class="answer-box reveal-box" style="margin-top: 20px;">
+                    <p style="font-size: 18px;"><strong>解析：</strong> 統治者推動同化政策，核心目的通常是為了納入編戶齊民，以便於徵收賦稅和維持社會秩序。</p>
+                </div>
+            </div>
+             <div class="image-wrapper">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/1633158885741944323" alt="清代官員繪像">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 9: Conclusion -->
+<div class="slide-container" id="slide9">
+    <div style="text-align: center; width: 100%;">
+        <h2 style="font-size: 60px; color: #2c1810; margin-bottom: 30px;">課程總結</h2>
+        <hr style="width: 150px; border: 2px solid #c04000; margin: 0 auto 40px;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; text-align: left;">
+            <div style="background: #fff; padding: 30px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <i class="fa-solid fa-book-open" style="font-size: 40px; color: #556b2f; margin-bottom: 20px;"></i>
+                <h3 style="font-size: 24px; margin-bottom: 10px;">文化流失</h3>
+                <p style="font-size: 18px;">漢化政策導致語言與傳統文化快速消失。</p>
+            </div>
+            <div style="background: #fff; padding: 30px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <i class="fa-solid fa-users-rays" style="font-size: 40px; color: #c04000; margin-bottom: 20px;"></i>
+                <h3 style="font-size: 24px; margin-bottom: 10px;">族群融合</h3>
+                <p style="font-size: 18px;">通婚與經濟互動促使平埔族群融入漢人社會。</p>
+            </div>
+            <div style="background: #fff; padding: 30px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <i class="fa-solid fa-route" style="font-size: 40px; color: #2c1810; margin-bottom: 20px;"></i>
+                <h3 style="font-size: 24px; margin-bottom: 10px;">大遷徙</h3>
+                <p style="font-size: 18px;">土地流失迫使部分族群遷移至邊陲地帶。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Reveal Logic Script
+    document.addEventListener('DOMContentLoaded', () => {
+        const slides = document.querySelectorAll('.slide-container');
+
+        slides.forEach(slide => {
+            slide.addEventListener('click', () => {
+                // Find all revealable items in this slide that are NOT yet revealed
+                const hiddenItems = slide.querySelectorAll('.reveal-text:not(.revealed), .reveal-box:not(.revealed), .reveal-mcq:not(.revealed)');
+                
+                if (hiddenItems.length > 0) {
+                    // Reveal the next one (or group logic could be applied here)
+                    // Currently reveals items one by one in DOM order
+                    hiddenItems[0].classList.add('revealed');
+                    
+                    // Optional: If you want to reveal the answer AND explanation together for fill-in-the-blanks,
+                    // check if the next item is an explanation box and reveal it too.
+                    // But one-by-one is usually better for pacing.
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
+```
