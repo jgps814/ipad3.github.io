@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>臺灣宣教士傳記短劇</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* 1. RESET & BASE */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #1a1a1a; /* Theater dark background */
+            font-family: 'Noto Sans TC', sans-serif;
+            color: #fff;
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        /* 2. SLIDE CONTAINER COMMON STYLES */
+        .slide {
+            width: 100%;
+            max-width: 1000px;
+            aspect-ratio: 16/9;
+            background-color: #f4f4f4;
+            color: #333;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 3. THEMES */
+        /* Mackay Theme - Brick Red */
+        .theme-mackay .header-bar { background-color: #8B3A3A; color: #fff; }
+        .theme-mackay h2, .theme-mackay h3 { color: #8B3A3A; }
+        .theme-mackay .role-tag { background-color: #ffeaea; border: 1px solid #8B3A3A; color: #500; }
+        
+        /* Maxwell Theme - Medical Blue */
+        .theme-maxwell .header-bar { background-color: #2C5282; color: #fff; }
+        .theme-maxwell h2, .theme-maxwell h3 { color: #2C5282; }
+        .theme-maxwell .role-tag { background-color: #e6f0ff; border: 1px solid #2C5282; color: #003366; }
+
+        /* 4. TYPOGRAPHY */
+        h1 { font-family: 'Noto Serif TC', serif; font-size: 3.5rem; line-height: 1.2; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        h2 { font-family: 'Noto Serif TC', serif; font-size: 2.5rem; margin-bottom: 10px; }
+        h3 { font-size: 1.5rem; margin-bottom: 15px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        p { font-size: 1.2rem; line-height: 1.6; margin-bottom: 15px; }
+        
+        /* Script Text */
+        .script-line { margin-bottom: 12px; font-size: 1.1rem; }
+        .script-line strong { font-weight: 700; margin-right: 5px; }
+        .direction { font-style: italic; color: #666; font-size: 0.95em; }
+
+        /* 5. LAYOUTS */
+        
+        /* Cover Slide */
+        .cover-slide {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('http://googleusercontent.com/image_collection/image_retrieval/13346571594732168390'); /* Old map or generic historical bg */
+            background-size: cover;
+            background-position: center;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+        .cover-slide h1 { margin-bottom: 20px; }
+        .cover-slide .subtitle { font-size: 1.8rem; font-weight: 300; letter-spacing: 2px; }
+
+        /* Title Slides */
+        .section-title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+        }
+        .section-title-slide i { font-size: 80px; margin-bottom: 20px; opacity: 0.8; }
+
+        /* Content Slides */
+        .content-slide { padding: 0; display: grid; grid-template-rows: auto 1fr; }
+        .header-bar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .slide-body { padding: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; height: 100%; overflow: hidden; }
+        
+        /* Components */
+        .character-list { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .role-tag { padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+        
+        .scene-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .visual-side {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .visual-side img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            object-fit: contain;
+        }
+        .visual-caption { margin-top: 15px; font-style: italic; color: #555; text-align: center; }
+
+        /* 6. UTILS */
+        .highlight { color: #d9534f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- Slide 1: Main Cover -->
+    <div class="slide cover-slide">
+        <h1>臺灣宣教士傳記短劇</h1>
+        <p class="subtitle">衝突、誤解與愛的歷史現場</p>
+        <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.5); padding-top: 20px; width: 60%;">
+            <p>劇本一：馬偕的堅定<br>劇本二：馬雅各的仁心</p>
+        </div>
+    </div>
+
+    <!-- MACKAY SECTION -->
+
+    <!-- Slide 2: Mackay Title -->
+    <div class="slide section-title-slide theme-mackay" style="background-color: #fdf5f5;">
+        <i class="fa-solid fa-tooth" style="color: #8B3A3A;"></i>
+        <h2>劇本一：馬偕的堅定</h2>
+        <h1 style="color: #333; font-size: 3rem; text-shadow: none;">《一顆牙與一本書》</h1>
+        <p>核心概念：即使戰火摧毀了教堂，無法摧毀教育與信念。</p>
+    </div>
+
+    <!-- Slide 3: Mackay Characters -->
+    <div class="slide content-slide theme-mackay">
+        <div class="header-bar">
+            <strong><i class="fa-solid fa-users"></i> 登場人物介紹</strong>
+            <span>1884 清法戰爭時期</span>
+        </div>
+        <div class="slide-body">
+            <div class="visual-side">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/12484138900235398327" alt="馬偕博士">
+                <p class="visual-caption">馬偕博士 (George Leslie Mackay)</p>
+            </div>
+            <div class="scene-card">
+                <h3>角色列表</h3>
+                <div class="script-line">
+                    <span class="role-tag">馬偕 (40歲)</span><br>
+                    <span class="direction">大鬍子，手拿拔牙鉗，講台語帶外國腔。</span>
+                </div>
+                <div class="script-line">
+                    <span class="role-tag">嚴清華 (20歲)</span><br>
+                    <span class="direction">馬偕的大學生徒，神情緊張。</span>
+                </div>
+                <div class="script-line">
+                    <span class="role-tag">阿土伯 (50歲)</span><br>
+                    <span class="direction">在地居民，性格純樸但容易受煽動。</span>
+                </div>
+                <div class="script-line">
+                    <span class="role-tag">群眾</span><br>
+                    <span class="direction">背景聲音，負責製造混亂氣氛。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Mackay Scene 1 -->
+    <div class="slide content-slide theme-mackay">
+        <div class="header-bar">
+            <strong>第一幕：榕樹下的信任</strong>
+            <span>地點：淡水大榕樹下</span>
+        </div>
+        <div class="slide-body">
+            <div class="scene-card">
+                <h3><i class="fa-solid fa-tree"></i> 劇情摘要</h3>
+                <p>馬偕在街頭幫阿土伯拔牙，透過醫療行為建立初步的信任。</p>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+                <div class="script-line">
+                    <strong>阿土伯：</strong>(痛苦) 哎唷喂呀！牧師，你那個鉗子有沒有洗乾淨啊？
+                </div>
+                <div class="script-line">
+                    <strong>馬偕：</strong>(親切) 上帝的法術就是愛啦。一、二、三！
+                </div>
+                <div class="script-line">
+                    <span class="direction">★ 動作提示：馬偕迅速拔牙，阿土伯表情從痛苦轉為驚喜。</span>
+                </div>
+                <div class="script-line">
+                    <strong>馬偕：</strong>牙齒拔掉就不痛，心裡的壞東西拔掉，人就會快樂。
+                </div>
+            </div>
+            <div class="visual-side">
+                <i class="fa-solid fa-face-smile-beam" style="font-size: 100px; color: #8B3A3A; opacity: 0.5;"></i>
+                <p class="visual-caption">「嘴巴張開，忍耐一下！」</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Mackay Scene 2 -->
+    <div class="slide content-slide theme-mackay">
+        <div class="header-bar">
+            <strong>第二幕：清法戰爭的陰影</strong>
+            <span>事件：民眾燒毀教堂</span>
+        </div>
+        <div class="slide-body">
+            <div class="visual-side">
+                <i class="fa-solid fa-fire" style="font-size: 100px; color: #d9534f;"></i>
+                <p class="visual-caption">衝突爆發：信任的崩塌</p>
+            </div>
+            <div class="scene-card">
+                <h3><i class="fa-solid fa-person-burst"></i> 劇情摘要</h3>
+                <p>清法戰爭爆發，民眾誤以為馬偕是法國間諜，憤而翻臉。</p>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+                <div class="script-line">
+                    <strong>嚴清華：</strong>(慌張) 老師！法國人打來了！
+                </div>
+                <div class="script-line">
+                    <strong>阿土伯：</strong>(變臉) 什麼？法國番仔！你們紅毛番都是一夥的！
+                </div>
+                <div class="script-line">
+                    <strong>馬偕：</strong>我是加拿大人，我愛台灣...
+                </div>
+                <div class="script-line">
+                    <strong>阿土伯：</strong>(舉鋤頭) 少來！剛剛拔牙是要偷我的魂魄！大家快燒掉教堂！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Mackay Scene 3 -->
+    <div class="slide content-slide theme-mackay">
+        <div class="header-bar">
+            <strong>第三幕：廢墟中的書院</strong>
+            <span>地點：牛津學堂 (理學堂大書院)</span>
+        </div>
+        <div class="slide-body">
+            <div class="scene-card">
+                <h3><i class="fa-solid fa-book-bible"></i> 劇情摘要</h3>
+                <p>面對教堂被燒，馬偕堅持在書院繼續授課，傳遞知識與愛。</p>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+                <div class="script-line">
+                    <strong>嚴清華：</strong>教堂都被燒了...我們要不要逃？
+                </div>
+                <div class="script-line">
+                    <strong>馬偕：</strong>(堅定) 教堂是木頭做的，火一燒就沒了。但我們教的知識，是種在心裡的種子。
+                </div>
+                <div class="script-line">
+                    <strong>馬偕：</strong>誤解是一時的，愛是長久的。來，坐好，今日的課程是...
+                </div>
+                <div class="script-line">
+                    <span class="direction">★ 結尾畫面：外面戰火聲 vs. 書院讀書聲。</span>
+                </div>
+            </div>
+            <div class="visual-side">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/13936938953158434771" alt="牛津學堂">
+                <p class="visual-caption">理學堂大書院 (Oxford College)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAXWELL SECTION -->
+
+    <!-- Slide 7: Maxwell Title -->
+    <div class="slide section-title-slide theme-maxwell" style="background-color: #f0f7ff;">
+        <i class="fa-solid fa-user-doctor" style="color: #2C5282;"></i>
+        <h2>劇本二：馬雅各的仁心</h2>
+        <h1 style="color: #333; font-size: 3rem; text-shadow: none;">《聽說醫生會吃人？》</h1>
+        <p>核心概念：謠言止於智者，更止於仁者。用專業證明一切。</p>
+    </div>
+
+    <!-- Slide 8: Maxwell Characters -->
+    <div class="slide content-slide theme-maxwell">
+        <div class="header-bar">
+            <strong><i class="fa-solid fa-users"></i> 登場人物介紹</strong>
+            <span>1865 台南看西街 / 旗後</span>
+        </div>
+        <div class="slide-body">
+            <div class="visual-side">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/14299882299863836854" alt="馬雅各醫生">
+                <p class="visual-caption">馬雅各醫生 (James Laidlaw Maxwell)</p>
+            </div>
+            <div class="scene-card">
+                <h3>角色列表</h3>
+                <div class="script-line">
+                    <span class="role-tag">馬雅各 (30歲)</span><br>
+                    <span class="direction">英國醫生，穿白袍，溫柔冷靜。</span>
+                </div>
+                <div class="script-line">
+                    <span class="role-tag">李大娘 (40歲)</span><br>
+                    <span class="direction">著急的母親，抱著生病的孩子。</span>
+                </div>
+                <div class="script-line">
+                    <span class="role-tag">王二麻子 (30歲)</span><br>
+                    <span class="direction">在地流氓，負責煽動謠言。</span>
+                </div>
+                <div class="script-line">
+                    <span class="role-tag">必麒麟 (30歲)</span><br>
+                    <span class="direction">馬雅各的助手，個性火爆，負責保護醫生。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Maxwell Scene 1 -->
+    <div class="slide content-slide theme-maxwell">
+        <div class="header-bar">
+            <strong>第一幕：台南街頭的耳語</strong>
+            <span>衝突點：恐怖的謠言</span>
+        </div>
+        <div class="slide-body">
+            <div class="scene-card">
+                <h3><i class="fa-solid fa-ear-listen"></i> 劇情摘要</h3>
+                <p>王二麻子散播謠言，指控醫生挖人眼、取人心釀酒。</p>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+                <div class="script-line">
+                    <strong>王二麻子：</strong>鄉親啊！千萬別去那「紅毛樓」！
+                </div>
+                <div class="script-line">
+                    <strong>王二麻子：</strong>馬雅各專門挖死人眼睛做藥水！不然他的藥為什麼那麼有效？
+                </div>
+                <div class="script-line">
+                    <strong>群眾：</strong>(驚恐) 真的假的？太可怕了！
+                </div>
+                <div class="script-line">
+                    <strong>王二麻子：</strong>走！去砸了他的店！
+                </div>
+            </div>
+            <div class="visual-side">
+                <i class="fa-solid fa-bullhorn" style="font-size: 100px; color: #2C5282; opacity: 0.5;"></i>
+                <p class="visual-caption">「聽說醫生會吃人？」</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Maxwell Scene 2 -->
+    <div class="slide content-slide theme-maxwell">
+        <div class="header-bar">
+            <strong>第二幕：衝突與無助</strong>
+            <span>關鍵時刻：母愛的勇氣</span>
+        </div>
+        <div class="slide-body">
+            <div class="visual-side">
+                <i class="fa-solid fa-hand-holding-medical" style="font-size: 100px; color: #2C5282;"></i>
+                <p class="visual-caption">醫治與信任</p>
+            </div>
+            <div class="scene-card">
+                <h3><i class="fa-solid fa-heart-pulse"></i> 劇情摘要</h3>
+                <p>李大娘的孩子病重，不顧謠言跪求醫生救治。</p>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+                <div class="script-line">
+                    <strong>必麒麟：</strong>(擋門口) 誰敢過來！醫生是在救人！
+                </div>
+                <div class="script-line">
+                    <strong>李大娘：</strong>(跪下哭喊) 醫生！救救我的孩子！就算要挖眼睛也沒關係，拜託救活他就好！
+                </div>
+                <div class="script-line">
+                    <strong>馬雅各：</strong>(溫柔蹲下) 大娘，我不需要眼睛。這孩子只是得了熱病(瘧疾)，吃這個奎寧就會好。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Maxwell Scene 3 -->
+    <div class="slide content-slide theme-maxwell">
+        <div class="header-bar">
+            <strong>第三幕：轉進與重生</strong>
+            <span>地點：高雄旗後 (旗津)</span>
+        </div>
+        <div class="slide-body">
+            <div class="scene-card">
+                <h3><i class="fa-solid fa-sailboat"></i> 劇情摘要</h3>
+                <p>雖然被趕出台南，馬雅各在旗後繼續行醫，誓言重返台南。</p>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+                <div class="script-line">
+                    <strong>必麒麟：</strong>醫館被砸了，我們還要繼續嗎？
+                </div>
+                <div class="script-line">
+                    <strong>馬雅各：</strong>你看李大娘的孩子不是好了嗎？只要有一個病人康復，謠言就會少一點。
+                </div>
+                <div class="script-line">
+                    <strong>馬雅各：</strong>上帝沒有承諾天色常藍，但承諾與我們同在。我們會在旗後重新開始，總有一天再回台南。
+                </div>
+            </div>
+            <div class="visual-side">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/13346571594732168390" alt="旗後與舊台南">
+                <p class="visual-caption">從旗後眺望府城</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 12: Reflection -->
+    <div class="slide content-slide" style="background-color: #333; color: white;">
+        <div class="header-bar" style="background-color: #111;">
+            <strong><i class="fa-solid fa-scale-balanced"></i> 歷史省思</strong>
+        </div>
+        <div class="slide-body" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <h2>兩位宣教士的共同點</h2>
+            <div style="display: flex; gap: 40px; margin-top: 30px; text-align: left;">
+                <div style="background: #444; padding: 30px; border-radius: 8px; width: 45%;">
+                    <h3 style="color: #d9534f; border-color: #666;">面對誤解</h3>
+                    <p>無論是被當作間諜（馬偕）或被當作巫師（馬雅各），他們都選擇不辯解，而是用行動證明。</p>
+                </div>
+                <div style="background: #444; padding: 30px; border-radius: 8px; width: 45%;">
+                    <h3 style="color: #5bc0de; border-color: #666;">專業的愛</h3>
+                    <p>馬偕透過拔牙與教育，馬雅各透過西醫手術，用「專業」化解了文化的隔閡。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
